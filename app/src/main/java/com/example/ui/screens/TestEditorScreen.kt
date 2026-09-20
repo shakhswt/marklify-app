@@ -1,5 +1,6 @@
 package com.example.ui.screens
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -10,6 +11,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -26,12 +28,7 @@ import androidx.compose.ui.unit.sp
 import com.example.R
 import com.example.data.entity.Question
 import com.example.data.entity.TestEntity
-import com.example.ui.components.GlassButtonVariant
-import com.example.ui.components.LiquidGlassBackdrop
-import com.example.ui.components.LiquidGlassButton
-import com.example.ui.components.LiquidGlassCard
-import com.example.ui.components.LiquidGlassTextField
-import com.example.ui.components.LiquidGlassTopAppBar
+import com.example.ui.components.*
 import com.example.ui.theme.*
 import com.example.ui.viewmodel.MarklifyViewModel
 import com.example.util.HapticManager
@@ -48,7 +45,9 @@ fun TestEditorScreen(
     var test by remember { mutableStateOf<TestEntity?>(null) }
     val initialQuestions by viewModel.getQuestionsForTest(testId).collectAsState(initial = emptyList())
     var editableQuestions by remember { mutableStateOf<List<Question>>(emptyList()) }
-    var hasInitialized by remember { mutableStateOf(false) }
+
+    var selectedTab by remember { mutableIntStateOf(1) } // 0: Sections, 1: Answer Key (Screenshot #7)
+    var selectedExamSet by remember { mutableStateOf("A") }
     var showSavedSnackbar by remember { mutableStateOf(false) }
 
     LaunchedEffect(testId) {
@@ -56,136 +55,139 @@ fun TestEditorScreen(
     }
 
     LaunchedEffect(initialQuestions) {
-        if (!hasInitialized && initialQuestions.isNotEmpty()) {
+        if (initialQuestions.isNotEmpty()) {
             editableQuestions = initialQuestions
-            hasInitialized = true
         }
     }
 
-    LiquidGlassBackdrop(animated = false) {
-        Scaffold(
-            topBar = {
-                LiquidGlassTopAppBar(
-                    title = {
-                        Column {
-                            Text(test?.name ?: stringResource(R.string.edit_questions_title), fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                            Text(stringResource(R.string.questions_count_range, editableQuestions.size), fontSize = 11.sp, color = TextSecondary)
-                        }
-                    },
-                    navigationIcon = {
-                        IconButton(onClick = onNavigateBack) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = stringResource(R.string.back),
-                                tint = TextPrimary
-                            )
-                        }
-                    },
-                    actions = {
-                        LiquidGlassButton(
-                            onClick = {
-                                viewModel.updateQuestionsBatch(editableQuestions)
-                                HapticManager.performSubmissionSuccess(context, appSettings.hapticsEnabled)
-                                showSavedSnackbar = true
-                            },
-                            modifier = Modifier.testTag("save_questions_button"),
-                            variant = GlassButtonVariant.Neutral,
-                            icon = Icons.Default.Save,
-                            text = stringResource(R.string.save)
+    Scaffold(
+        topBar = {
+            MarklifyTopAppBar(
+                title = {
+                    Column {
+                        Text(if (selectedTab == 1) "Answer Key" else "Configure Sections", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                        Text(test?.name ?: "", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                },
+                navigationIcon = {
+                    IconButton(onClick = onNavigateBack) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.back),
+                            tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
-                )
-            },
-            snackbarHost = {
-                if (showSavedSnackbar) {
-                    Snackbar(
-                        modifier = Modifier.padding(16.dp),
-                        containerColor = FrostedBarBackground,
-                        contentColor = TextPrimary,
-                        action = {
-                            TextButton(onClick = { showSavedSnackbar = false }) {
-                                Text(stringResource(R.string.done), color = TextPrimary, fontWeight = FontWeight.Bold)
-                            }
-                        }
+                },
+                actions = {
+                    TabRow(
+                        selectedTabIndex = selectedTab,
+                        modifier = Modifier.width(180.dp),
+                        containerColor = Color.Transparent
                     ) {
-                        Text(stringResource(R.string.questions_saved_toast))
+                        Tab(
+                            selected = selectedTab == 0,
+                            onClick = { selectedTab = 0 },
+                            text = { Text("Sections", fontSize = 11.sp, fontWeight = FontWeight.Bold) }
+                        )
+                        Tab(
+                            selected = selectedTab == 1,
+                            onClick = { selectedTab = 1 },
+                            text = { Text("Key", fontSize = 11.sp, fontWeight = FontWeight.Bold) }
+                        )
                     }
                 }
-            },
-            containerColor = Color.Transparent
-        ) { padding ->
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-                    .padding(horizontal = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(14.dp)
+            )
+        },
+        bottomBar = {
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                color = MaterialTheme.colorScheme.surface,
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
             ) {
-                // Adjust question count row
-                item {
-                    Spacer(modifier = Modifier.height(4.dp))
-                    LiquidGlassCard(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(20.dp),
-                        fillColor = GlassFill,
-                        showSpecular = true
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Column {
-                                Text(stringResource(R.string.question_count_label), fontWeight = FontWeight.SemiBold, fontSize = 14.sp, color = TextPrimary)
-                                Text(stringResource(R.string.quick_adjust_items), fontSize = 11.sp, color = TextSecondary)
-                            }
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    MarklifyButton(
+                        text = "Clear",
+                        onClick = {
+                            editableQuestions = editableQuestions.map { it.copy(correctAnswer = "") }
+                        },
+                        modifier = Modifier.weight(1f),
+                        variant = MarklifyButtonVariant.Outlined
+                    )
 
-                            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                                listOf(10, 20, 50, 100).forEach { count ->
-                                    val isSelected = editableQuestions.size == count
-                                    Box(
-                                        modifier = Modifier
-                                            .clip(RoundedCornerShape(12.dp))
-                                            .background(if (isSelected) GlassFillElevated else GlassFillSubtle)
-                                            .border(
-                                                1.dp,
-                                                if (isSelected) GlassBorderBright else GlassBorderSubtle,
-                                                RoundedCornerShape(12.dp)
-                                            )
-                                            .clickable {
-                                                viewModel.setTestQuestionCount(testId, count)
-                                                hasInitialized = false
-                                            }
-                                            .padding(horizontal = 10.dp, vertical = 6.dp)
-                                    ) {
-                                        Text(
-                                            text = "$count",
-                                            fontSize = 12.sp,
-                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                                            color = if (isSelected) TextPrimary else TextSecondary
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
-                itemsIndexed(editableQuestions, key = { _, q -> q.id }) { index, q ->
-                    QuestionEditorCard(
-                        question = q,
-                        onUpdate = { updated ->
-                            val updatedList = editableQuestions.toMutableList()
-                            updatedList[index] = updated
-                            editableQuestions = updatedList
-                        }
+                    MarklifyButton(
+                        text = "Save",
+                        onClick = {
+                            viewModel.updateQuestionsBatch(editableQuestions)
+                            HapticManager.performSubmissionSuccess(context, appSettings.hapticsEnabled)
+                            showSavedSnackbar = true
+                        },
+                        modifier = Modifier
+                            .weight(1f)
+                            .testTag("save_answer_key_button"),
+                        variant = MarklifyButtonVariant.Primary,
+                        icon = Icons.Default.Save
                     )
                 }
+            }
+        },
+        containerColor = MaterialTheme.colorScheme.background
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            // Select Set Header (EvalBee Screenshot #7 Style)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Select Set",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 15.sp,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
 
-                item {
-                    Spacer(modifier = Modifier.height(24.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    listOf("A", "B", "C", "D").forEach { setLetter ->
+                        MarklifyChip(
+                            selected = selectedExamSet == setLetter,
+                            onClick = { selectedExamSet = setLetter },
+                            label = setLetter
+                        )
+                    }
+                }
+            }
+
+            Divider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
+
+            // Answer Key Questions List (Screenshot #7 Style)
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                itemsIndexed(editableQuestions, key = { _, q -> q.id }) { index, q ->
+                    AnswerKeyItemRow(
+                        question = q,
+                        onKeySelected = { newKey ->
+                            val list = editableQuestions.toMutableList()
+                            list[index] = q.copy(correctAnswer = newKey)
+                            editableQuestions = list
+                        }
+                    )
                 }
             }
         }
@@ -193,140 +195,131 @@ fun TestEditorScreen(
 }
 
 @Composable
-private fun QuestionEditorCard(
+private fun AnswerKeyItemRow(
     question: Question,
-    onUpdate: (Question) -> Unit
+    onKeySelected: (String) -> Unit
 ) {
-    LiquidGlassCard(
-        modifier = Modifier
-            .fillMaxWidth()
-            .testTag("question_card_${question.questionNumber}"),
-        shape = RoundedCornerShape(20.dp),
-        fillColor = GlassFill,
-        showSpecular = false,
-        elevation = 3.dp
+    MarklifyCard(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(8.dp)
     ) {
-        Column(
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+                .padding(horizontal = 14.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(
-                        modifier = Modifier
-                            .size(30.dp)
-                            .clip(CircleShape)
-                            .background(GlassFillElevated)
-                            .border(1.dp, GlassBorderBright, CircleShape),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "${question.questionNumber}",
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 12.sp,
-                            color = TextPrimary
-                        )
+            // Question Number on Left
+            Text(
+                text = "${question.questionNumber}",
+                fontWeight = FontWeight.Bold,
+                fontSize = 15.sp,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.width(36.dp)
+            )
+
+            // Key Selection Bubbles (Screenshot #7 Style)
+            when (question.questionType) {
+                "MCQ5" -> {
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        listOf("A", "B", "C", "D", "E").forEach { letter ->
+                            val isSelected = question.correctAnswer.equals(letter, ignoreCase = true)
+                            KeyOptionCircle(
+                                label = letter,
+                                selected = isSelected,
+                                onClick = { onKeySelected(letter) }
+                            )
+                        }
                     }
-                    Spacer(modifier = Modifier.width(10.dp))
-                    Text(
-                        text = stringResource(R.string.question_number, question.questionNumber),
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = 14.sp,
-                        color = TextPrimary
+                }
+                "TRUE_FALSE" -> {
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        listOf("True", "False").forEach { tf ->
+                            val isSelected = question.correctAnswer.equals(tf, ignoreCase = true)
+                            KeyOptionPill(
+                                label = tf,
+                                selected = isSelected,
+                                onClick = { onKeySelected(tf) }
+                            )
+                        }
+                    }
+                }
+                "NUMERICAL" -> {
+                    OutlinedTextField(
+                        value = question.correctAnswer,
+                        onValueChange = onKeySelected,
+                        modifier = Modifier.width(120.dp),
+                        singleLine = true,
+                        placeholder = { Text("42") }
                     )
                 }
-
-                // Correct Answer key selector
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    Text(stringResource(R.string.key_label), fontSize = 12.sp, color = TextSecondary)
-                    listOf("A", "B", "C", "D").forEach { letter ->
-                        val isSelected = question.correctAnswer.equals(letter, ignoreCase = true)
-                        Box(
-                            modifier = Modifier
-                                .size(30.dp)
-                                .clip(CircleShape)
-                                .background(if (isSelected) SuccessGreenBg else GlassFillSubtle)
-                                .border(
-                                    1.dp,
-                                    if (isSelected) SuccessGreenBorder else GlassBorderSubtle,
-                                    CircleShape
-                                )
-                                .clickable {
-                                    onUpdate(question.copy(correctAnswer = letter))
-                                }
-                                .testTag("q_${question.questionNumber}_key_$letter"),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = letter,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 12.sp,
-                                color = if (isSelected) SuccessGreen else TextSecondary
+                else -> { // MCQ4
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        listOf("A", "B", "C", "D").forEach { letter ->
+                            val isSelected = question.correctAnswer.equals(letter, ignoreCase = true)
+                            KeyOptionCircle(
+                                label = letter,
+                                selected = isSelected,
+                                onClick = { onKeySelected(letter) }
                             )
                         }
                     }
                 }
             }
+        }
+    }
+}
 
-            // Question Text Input
-            LiquidGlassTextField(
-                value = question.questionText,
-                onValueChange = { onUpdate(question.copy(questionText = it)) },
-                label = stringResource(R.string.question_text_label),
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true
+@Composable
+private fun KeyOptionCircle(
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit
+) {
+    Surface(
+        modifier = Modifier
+            .size(36.dp)
+            .clip(CircleShape)
+            .clickable(onClick = onClick),
+        shape = CircleShape,
+        color = if (selected) SuccessGreen else MaterialTheme.colorScheme.surfaceVariant,
+        border = BorderStroke(1.dp, if (selected) SuccessGreen else MaterialTheme.colorScheme.outline.copy(alpha = 0.5f))
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            Text(
+                text = label,
+                fontWeight = FontWeight.Bold,
+                fontSize = 13.sp,
+                color = if (selected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
             )
+        }
+    }
+}
 
-            // Options A, B
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                LiquidGlassTextField(
-                    value = question.optionA,
-                    onValueChange = { onUpdate(question.copy(optionA = it)) },
-                    label = stringResource(R.string.option_a_label),
-                    modifier = Modifier.weight(1f),
-                    singleLine = true
-                )
-                LiquidGlassTextField(
-                    value = question.optionB,
-                    onValueChange = { onUpdate(question.copy(optionB = it)) },
-                    label = stringResource(R.string.option_b_label),
-                    modifier = Modifier.weight(1f),
-                    singleLine = true
-                )
-            }
-
-            // Options C, D
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                LiquidGlassTextField(
-                    value = question.optionC,
-                    onValueChange = { onUpdate(question.copy(optionC = it)) },
-                    label = stringResource(R.string.option_c_label),
-                    modifier = Modifier.weight(1f),
-                    singleLine = true
-                )
-                LiquidGlassTextField(
-                    value = question.optionD,
-                    onValueChange = { onUpdate(question.copy(optionD = it)) },
-                    label = stringResource(R.string.option_d_label),
-                    modifier = Modifier.weight(1f),
-                    singleLine = true
-                )
-            }
+@Composable
+private fun KeyOptionPill(
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit
+) {
+    Surface(
+        modifier = Modifier
+            .width(80.dp)
+            .height(34.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(16.dp),
+        color = if (selected) SuccessGreen else MaterialTheme.colorScheme.surfaceVariant,
+        border = BorderStroke(1.dp, if (selected) SuccessGreen else MaterialTheme.colorScheme.outline.copy(alpha = 0.5f))
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            Text(
+                text = label,
+                fontWeight = FontWeight.Bold,
+                fontSize = 13.sp,
+                color = if (selected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }

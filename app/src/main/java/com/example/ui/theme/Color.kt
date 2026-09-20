@@ -3,76 +3,63 @@ package com.example.ui.theme
 import androidx.compose.ui.graphics.Color
 
 // ============================================================================
-// ACHROMATIC LIQUID GLASS DESIGN SYSTEM (iOS 26 / visionOS Inspired)
-// Core Principle:
-// - THE GLASS ITSELF IS PURE ACHROMATIC (pure white/neutral translucency, never tinted)
-// - All visual richness and color comes from the VIVID, SATURATED BACKDROP shining through
-// - Semantic colors (Success, Warning, Error) are the only color accents in content
-// - Text and icons remain pure high-contrast neutral white/slate
+// MARKLIFY CLASSIC LIGHT + CLASSIC DARK DESIGN SYSTEM
+// Professional, modern Material design tokens for examination software
 // ============================================================================
 
-// 1. Rich, Saturated Vivid Backdrop Scene (No saturation cap)
-val VividBackdropBase = Color(0xFF060814)        // Deep rich midnight space
-val VividIndigoPool = Color(0xFF4338CA)          // Vivid saturated deep indigo
-val VividRoyalBluePool = Color(0xFF1D4ED8)       // Vivid saturated royal blue
-val VividVioletPool = Color(0xFF7C3AED)          // Vivid saturated electric violet
-val VividMagentaPool = Color(0xFFC026D3)         // Vivid saturated magenta
-val VividCyanPool = Color(0xFF0284C7)            // Vivid saturated electric cyan
+// Primary Accent
+val MarklifyBlue = Color(0xFF1A73E8)             // Primary solid blue
+val MarklifyBlueDark = Color(0xFF4285F4)         // Primary blue for dark mode
+val MarklifyBlueContainerLight = Color(0xFFE8F0FE)
+val MarklifyBlueContainerDark = Color(0xFF1E3A8A)
 
-// Aliases for compatibility
-val DuskDeepIndigo = VividBackdropBase
-val DuskSlateBlue = VividIndigoPool
-val DuskMutedViolet = VividVioletPool
-val DuskAtmosphere = VividRoyalBluePool
-val MutedMidnightBase = VividBackdropBase
-val SlateIndigoPool = VividIndigoPool
-val MutedVioletPool = VividVioletPool
-val DeepCyanPool = VividCyanPool
+// Light Mode Tokens
+val LightBackground = Color(0xFFF8F9FA)
+val LightSurface = Color(0xFFFFFFFF)
+val LightCard = Color(0xFFFFFFFF)
+val LightBorder = Color(0xFFE0E4EC)
+val LightBorderSubtle = Color(0xFFEEF1F6)
+val LightTextPrimary = Color(0xFF101828)
+val LightTextSecondary = Color(0xFF475467)
+val LightTextMuted = Color(0xFF667085)
 
-// 2. Achromatic Liquid Glass Translucent Surfaces (Pure Neutral White - 0xFFFFFF)
-// Clear, low-opacity white washes allowing the vivid background to shine through cleanly
-val GlassFillSubtle = Color(0x0FFFFFFF)          // ~6% alpha pure white (deep background pane)
-val GlassFill = Color(0x18FFFFFF)                // ~9.5% alpha pure white (back layer cards)
-val GlassFillElevated = Color(0x26FFFFFF)        // ~15% alpha pure white (front layer cards/pills)
-val GlassFillActive = Color(0x36FFFFFF)          // ~21% alpha pure white (pressed/active buttons)
-val GlassFillHero = Color(0x28FFFFFF)            // ~16% alpha pure white (hero actions)
+// Dark Mode Tokens
+val DarkBackground = Color(0xFF121212)
+val DarkSurface = Color(0xFF1E1E1E)
+val DarkCard = Color(0xFF1E1E1E)
+val DarkBorder = Color(0xFF2D2D2D)
+val DarkBorderSubtle = Color(0xFF262626)
+val DarkTextPrimary = Color(0xFFF9FAFB)
+val DarkTextSecondary = Color(0xFFD0D5DD)
+val DarkTextMuted = Color(0xFF98A2B3)
 
-// 3. Crisp Refractive Rim Light and Specular Edges
-val GlassBorderSubtle = Color(0x24FFFFFF)        // ~14% alpha crisp border
-val GlassBorder = Color(0x45FFFFFF)              // ~27% alpha refractive border
-val GlassBorderBright = Color(0x80FFFFFF)        // ~50% alpha specular rim light
-val GlassSpecular = Color(0x59FFFFFF)            // ~35% alpha dynamic highlight sweep
-val GlassDropShadow = Color(0x4D000000)          // Clean ambient shadow beneath floating glass
+// Semantic Colors
+val SuccessGreen = Color(0xFF12B76A)
+val SuccessGreenBg = Color(0xFFE8F5E9)
+val SuccessGreenBorder = Color(0xFFA5D6A7)
+val Success = SuccessGreen
 
-// Frosted Top/Bottom Bar Background (Pure neutral frosted glass)
-val FrostedBarBackground = Color(0x1C0A0E18)     // Subtle neutral dark-wash with pure glass rim
+val WarningAmber = Color(0xFFF79009)
+val WarningAmberBg = Color(0xFFFFF8E1)
+val WarningAmberBorder = Color(0xFFFFE082)
 
-// 4. Semantic Colors (ONLY applied where functional meaning exists)
-val SuccessGreen = Color(0xFF34D399)             // Emerald / Correct / Stable
-val SuccessGreenBg = Color(0x2934D399)           // Translucent green glass
-val SuccessGreenBorder = Color(0x6634D399)       // Specular green edge
+val ErrorRed = Color(0xFFD92D20)
+val ErrorRedBg = Color(0xFFFFEBEE)
+val ErrorRedBorder = Color(0xFFFFCDD2)
 
-val WarningAmber = Color(0xFFFBBF24)             // Warm Amber / Flagged / Review
-val WarningAmberBg = Color(0x29FBBF24)           // Translucent amber glass
-val WarningAmberBorder = Color(0x66FBBF24)       // Specular amber edge
-
-val ErrorRed = Color(0xFFF87171)                 // Bright Rose / Wrong / Delete
-val ErrorRedBg = Color(0x29F87171)               // Translucent red glass
-val ErrorRedBorder = Color(0x66F87171)           // Specular red edge
-
-// 5. High-Contrast Achromatic Text Tones (Pure Crisp White & Neutral Slate)
-val TextPrimary = Color(0xFFFFFFFF)              // 100% brightness crisp white
-val TextSecondary = Color(0xD9FFFFFF)            // 85% brightness clear white
-val TextMuted = Color(0x99FFFFFF)                // 60% brightness neutral white
-
-// 6. Backwards-Compatibility Aliases
-val MidnightDark = VividBackdropBase
-val MidnightSurface = GlassFill
-val MidnightCard = GlassFillSubtle
-val MidnightCardElevated = GlassFillElevated
-val MidnightBorder = GlassBorder
-
-val IndigoAccent = Color(0xFFFFFFFF)             // Pure crisp white highlight
-val ElectricBlue = Color(0xFFFFFFFF)             // Pure crisp white highlight
-val PurpleAccent = Color(0xFFE2E8F0)             // Clean neutral slate
-val DeepIndigo = VividIndigoPool
+// Compatibility Aliases
+val GlassFillSubtle = LightCard
+val GlassFill = LightCard
+val GlassFillElevated = LightSurface
+val GlassFillActive = LightBorder
+val GlassBorderSubtle = LightBorderSubtle
+val GlassBorder = LightBorder
+val GlassBorderBright = LightBorder
+val GlassSpecular = LightBorder
+val TextPrimary = LightTextPrimary
+val TextSecondary = LightTextSecondary
+val TextMuted = LightTextMuted
+val VividBackdropBase = LightBackground
+val PurpleAccent = MarklifyBlue
+val FrostedBarBackground = LightSurface
+val ElectricBlue = MarklifyBlue

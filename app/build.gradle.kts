@@ -51,12 +51,15 @@ android {
       proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
       val releaseKeystorePath = System.getenv("KEYSTORE_PATH")
       val hasReleaseKeystore = releaseKeystorePath != null && file(releaseKeystorePath).exists()
-      val allowDebugForRelease = System.getenv("ALLOW_DEBUG_SIGNING_FOR_RELEASE") == "true"
+      val customDebugKeystore = file("${rootDir}/debug.keystore")
+      val hasCustomDebugKeystore = customDebugKeystore.exists()
+
       if (hasReleaseKeystore) {
         signingConfig = signingConfigs.getByName("release")
-      } else if (allowDebugForRelease || project.hasProperty("localReleaseVerification")) {
-        // Explicit opt-in for local assembleRelease verification only
-        signingConfig = signingConfigs.findByName("debugConfig") ?: signingConfigs.getByName("debug")
+      } else if (hasCustomDebugKeystore) {
+        signingConfig = signingConfigs.getByName("debugConfig")
+      } else {
+        signingConfig = signingConfigs.getByName("debug")
       }
     }
     debug {

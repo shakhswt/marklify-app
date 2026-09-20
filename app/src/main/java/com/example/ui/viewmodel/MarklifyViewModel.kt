@@ -184,6 +184,13 @@ class MarklifyViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
+    fun setThemeMode(themeMode: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val current = settingsDao.getSettings() ?: AppSettings()
+            settingsDao.saveSettings(current.copy(themeMode = themeMode))
+        }
+    }
+
     fun setHapticsEnabled(enabled: Boolean) {
         viewModelScope.launch(Dispatchers.IO) {
             val current = settingsDao.getSettings() ?: AppSettings()
@@ -241,7 +248,7 @@ class MarklifyViewModel(application: Application) : AndroidViewModel(application
         onCreated: (Long) -> Unit
     ) {
         viewModelScope.launch(Dispatchers.IO) {
-            val count = questionCount.coerceIn(1, 100)
+            val count = questionCount.coerceIn(1, 300)
             val testId = testDao.insertTest(
                 TestEntity(
                     topicId = topicId,
@@ -250,7 +257,6 @@ class MarklifyViewModel(application: Application) : AndroidViewModel(application
                     createdAt = System.currentTimeMillis()
                 )
             )
-            // Generate default questions
             val defaultLetters = listOf("A", "B", "C", "D")
             val questions = (1..count).map { q ->
                 Question(
@@ -312,7 +318,7 @@ class MarklifyViewModel(application: Application) : AndroidViewModel(application
     fun setTestQuestionCount(testId: Long, newCount: Int) {
         viewModelScope.launch(Dispatchers.IO) {
             val currentTest = testDao.getTestById(testId) ?: return@launch
-            val validCount = newCount.coerceIn(1, 100)
+            val validCount = newCount.coerceIn(1, 300)
             testDao.updateTest(currentTest.copy(questionCount = validCount))
 
             val existing = questionDao.getQuestionsListByTest(testId)
@@ -362,7 +368,6 @@ class MarklifyViewModel(application: Application) : AndroidViewModel(application
     fun setScanSuccess(warpedBitmap: Bitmap, detectedAnswers: List<DetectedQuestionAnswer>) {
         _scannedBitmap.value = warpedBitmap
         _detectedAnswersList.value = detectedAnswers
-        // Pre-populate review map with detected answers
         val initialReview = detectedAnswers.associate {
             it.questionNumber to it.detectedAnswer
         }
@@ -384,7 +389,6 @@ class MarklifyViewModel(application: Application) : AndroidViewModel(application
 
             val evaluation = scoringEngine.score(answers, questions)
 
-            // Save bitmap to file storage
             var savedImagePath: String? = null
             if (bitmap != null) {
                 try {
@@ -417,7 +421,7 @@ class MarklifyViewModel(application: Application) : AndroidViewModel(application
 
             val detectedEntities = evaluation.evaluatedAnswers.map { item ->
                 DetectedAnswer(
-                    scanResultId = 0, // Assigned inside repository
+                    scanResultId = 0,
                     questionNumber = item.questionNumber,
                     detectedAnswer = item.detectedAnswer,
                     isCorrect = item.isCorrect

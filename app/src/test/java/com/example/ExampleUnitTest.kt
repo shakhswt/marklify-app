@@ -14,13 +14,21 @@ class ExampleUnitTest {
   fun testSheetSpecCalculations() {
     val singleColSpec = SheetSpec(questionCount = 20)
     assertEquals(1, singleColSpec.columnsCount)
-    // 20 questions * 4 options (A, B, C, D) = 80 total bubble coordinates
-    assertEquals(80, singleColSpec.getAllBubbles().size)
+    // 20 questions * 4 options (A, B, C, D) = 80 total question bubble coordinates
+    assertEquals(80, singleColSpec.getAllQuestionBubbles().size)
 
     val dualColSpec = SheetSpec(questionCount = 50)
     assertEquals(2, dualColSpec.columnsCount)
-    // 50 questions * 4 options = 200 total bubbles
-    assertEquals(200, dualColSpec.getAllBubbles().size)
+    // 50 questions * 4 options = 200 total question bubbles
+    assertEquals(200, dualColSpec.getAllQuestionBubbles().size)
+  }
+
+  @Test
+  fun testSheetSpecLargeQuestionCount300() {
+    val largeSpec = SheetSpec(questionCount = 300)
+    assertEquals(2, largeSpec.columnsCount)
+    val questionBubbles = largeSpec.getAllQuestionBubbles()
+    assertEquals(1200, questionBubbles.size) // 300 questions * 4 options = 1200
   }
 
   @Test

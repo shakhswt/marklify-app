@@ -1,6 +1,7 @@
 package com.example.ui.screens
 
 import android.graphics.BitmapFactory
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -13,6 +14,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -29,17 +32,10 @@ import com.example.data.entity.DetectedAnswer
 import com.example.data.entity.Question
 import com.example.data.entity.ScanResult
 import com.example.data.entity.TestEntity
-import com.example.ui.components.GlassButtonVariant
-import com.example.ui.components.LiquidGlassBackdrop
-import com.example.ui.components.LiquidGlassButton
-import com.example.ui.components.LiquidGlassCard
-import com.example.ui.components.LiquidGlassDialog
-import com.example.ui.components.LiquidGlassTopAppBar
+import com.example.ui.components.*
 import com.example.ui.theme.*
 import com.example.ui.viewmodel.MarklifyViewModel
 import java.io.File
-import java.text.SimpleDateFormat
-import java.util.Date
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -65,13 +61,6 @@ fun ResultDetailScreen(
         }
     }
 
-    val dateStr = remember(scanResult?.scanTime) {
-        val time = scanResult?.scanTime ?: 0L
-        if (time > 0) {
-            SimpleDateFormat("MMMM d, yyyy  •  HH:mm", Locale.getDefault()).format(Date(time))
-        } else ""
-    }
-
     val sheetBitmap = remember(scanResult?.imagePath) {
         scanResult?.imagePath?.let { path ->
             val file = File(path)
@@ -81,262 +70,220 @@ fun ResultDetailScreen(
         }
     }
 
-    val scoreColor = when {
-        (scanResult?.percentage ?: 0f) >= 80f -> SuccessGreen
-        (scanResult?.percentage ?: 0f) >= 50f -> WarningAmber
-        else -> ErrorRed
-    }
-
-    val scoreBg = when {
-        (scanResult?.percentage ?: 0f) >= 80f -> SuccessGreenBg
-        (scanResult?.percentage ?: 0f) >= 50f -> WarningAmberBg
-        else -> ErrorRedBg
-    }
-
-    val scoreBorder = when {
-        (scanResult?.percentage ?: 0f) >= 80f -> SuccessGreenBorder
-        (scanResult?.percentage ?: 0f) >= 50f -> WarningAmberBorder
-        else -> ErrorRedBorder
-    }
-
-    LiquidGlassBackdrop(animated = false) {
-        Scaffold(
-            topBar = {
-                LiquidGlassTopAppBar(
-                    title = { Text(stringResource(R.string.grading_report), fontWeight = FontWeight.Bold) },
-                    navigationIcon = {
-                        IconButton(onClick = onNavigateBack) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = stringResource(R.string.back),
-                                tint = TextPrimary
-                            )
-                        }
-                    },
-                    actions = {
-                        scanResult?.let { res ->
-                            IconButton(onClick = {
-                                viewModel.deleteScanResult(res)
-                                onNavigateBack()
-                            }) {
-                                Icon(
-                                    imageVector = Icons.Default.Delete,
-                                    contentDescription = stringResource(R.string.delete),
-                                    tint = ErrorRed
-                                )
-                            }
+    Scaffold(
+        topBar = {
+            MarklifyTopAppBar(
+                title = { Text("Roll No : ${scanResult?.studentId ?: "90"}", fontWeight = FontWeight.Bold) },
+                navigationIcon = {
+                    IconButton(onClick = onNavigateBack) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.back),
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                },
+                actions = {
+                    scanResult?.let { res ->
+                        IconButton(onClick = {
+                            viewModel.deleteScanResult(res)
+                            onNavigateBack()
+                        }) {
+                            Icon(imageVector = Icons.Default.Delete, contentDescription = "Delete", tint = ErrorRed)
                         }
                     }
-                )
-            },
-            containerColor = Color.Transparent
-        ) { padding ->
-            val result = scanResult
-            if (result == null) {
-                Box(modifier = Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator(color = TextPrimary)
+                    IconButton(onClick = {}) {
+                        Icon(imageVector = Icons.Default.Edit, contentDescription = "Edit", tint = MaterialTheme.colorScheme.onSurface)
+                    }
+                    IconButton(onClick = {}) {
+                        Icon(imageVector = Icons.Default.Share, contentDescription = "Share", tint = MaterialTheme.colorScheme.onSurface)
+                    }
                 }
-            } else {
-                LazyColumn(
+            )
+        },
+        bottomBar = {
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                color = MaterialTheme.colorScheme.surface,
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
+            ) {
+                Row(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .padding(padding)
-                        .padding(horizontal = 16.dp),
-                    verticalArrangement = Arrangement.spacedBy(14.dp)
+                        .fillMaxWidth()
+                        .padding(14.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    item {
-                        Spacer(modifier = Modifier.height(4.dp))
-                        // Score Overview Card
-                        LiquidGlassCard(
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(24.dp),
-                            fillColor = GlassFill,
-                            showSpecular = true
-                        ) {
-                            Column(
+                    Text("<", fontWeight = FontWeight.Bold, fontSize = 18.sp, modifier = Modifier.clickable { })
+                    Text("Report 1/15", fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                    Text(">", fontWeight = FontWeight.Bold, fontSize = 18.sp, modifier = Modifier.clickable { })
+                }
+            }
+        },
+        containerColor = MaterialTheme.colorScheme.background
+    ) { padding ->
+        val result = scanResult
+        if (result == null) {
+            Box(modifier = Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(14.dp)
+            ) {
+                item { Spacer(modifier = Modifier.height(4.dp)) }
+
+                // Summary Table Card (EvalBee Screenshot #4 Style)
+                item {
+                    MarklifyCard(modifier = Modifier.fillMaxWidth()) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            // Table Header Row
+                            Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(20.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally
+                                    .padding(bottom = 8.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween
                             ) {
-                                Text(
-                                    text = result.studentName,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 20.sp,
-                                    color = TextPrimary
-                                )
-                                Spacer(modifier = Modifier.height(2.dp))
-                                Text(
-                                    text = "ID: ${result.studentId}  •  ${test?.name ?: ""}",
-                                    fontSize = 13.sp,
-                                    color = TextSecondary
-                                )
-                                Text(text = dateStr, fontSize = 11.sp, color = TextSecondary)
+                                Text("Section", fontWeight = FontWeight.Bold, fontSize = 13.sp, modifier = Modifier.weight(1.5f))
+                                Text("Score", fontWeight = FontWeight.Bold, fontSize = 13.sp, modifier = Modifier.weight(1f))
+                                Text("Percentage", fontWeight = FontWeight.Bold, fontSize = 13.sp, modifier = Modifier.weight(1.2f))
+                                Text("Correct", fontWeight = FontWeight.Bold, fontSize = 13.sp, modifier = Modifier.weight(1f))
+                                Text("Rank", fontWeight = FontWeight.Bold, fontSize = 13.sp, modifier = Modifier.weight(1f))
+                            }
 
-                                Spacer(modifier = Modifier.height(18.dp))
+                            HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
+                            Spacer(modifier = Modifier.height(8.dp))
 
-                                // Large Score Pill
-                                Box(
-                                    modifier = Modifier
-                                        .size(96.dp)
-                                        .clip(CircleShape)
-                                        .background(scoreBg)
-                                        .border(2.dp, scoreBorder, CircleShape),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                        Text(
-                                            text = "${result.percentage.toInt()}%",
-                                            fontWeight = FontWeight.ExtraBold,
-                                            fontSize = 26.sp,
-                                            color = scoreColor
-                                        )
-                                        Text(
-                                            text = "${result.finalScore.toInt()}/${result.totalQuestions}",
-                                            fontSize = 12.sp,
-                                            fontWeight = FontWeight.SemiBold,
-                                            color = TextSecondary
-                                        )
-                                    }
-                                }
+                            // Section 1 Row
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 4.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text("Section 1", fontSize = 13.sp, modifier = Modifier.weight(1.5f))
+                                Text("4.0", fontSize = 13.sp, modifier = Modifier.weight(1f))
+                                Text("80.0%", fontSize = 13.sp, modifier = Modifier.weight(1.2f))
+                                Text("4", fontSize = 13.sp, modifier = Modifier.weight(1f))
+                                Text("1", fontSize = 13.sp, modifier = Modifier.weight(1f))
+                            }
 
-                                Spacer(modifier = Modifier.height(20.dp))
+                            // Section 2 Row
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 4.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text("Section 2", fontSize = 13.sp, modifier = Modifier.weight(1.5f))
+                                Text("1.0", fontSize = 13.sp, modifier = Modifier.weight(1f))
+                                Text("20.0%", fontSize = 13.sp, modifier = Modifier.weight(1.2f))
+                                Text("1", fontSize = 13.sp, modifier = Modifier.weight(1f))
+                                Text("4", fontSize = 13.sp, modifier = Modifier.weight(1f))
+                            }
 
-                                // 5 Stat Badges: Correct / Wrong / Multiple / Blank / Review
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceEvenly
-                                ) {
-                                    StatBadge(label = stringResource(R.string.correct_answers), count = result.correct, color = SuccessGreen, icon = "✓")
-                                    StatBadge(label = stringResource(R.string.wrong_answers), count = result.wrong, color = ErrorRed, icon = "✗")
-                                    StatBadge(label = stringResource(R.string.multiple_answers), count = result.multipleMarked, color = WarningAmber, icon = "⚏")
-                                    StatBadge(label = stringResource(R.string.unanswered_answers), count = result.unanswered, color = TextSecondary, icon = "—")
-                                    StatBadge(label = stringResource(R.string.needs_improvement), count = result.ambiguous, color = PurpleAccent, icon = "?")
-                                }
+                            HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            // Total Marks Row
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 4.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text("Total Marks", fontWeight = FontWeight.Bold, fontSize = 13.sp, modifier = Modifier.weight(1.5f))
+                                Text("${result.finalScore}", fontWeight = FontWeight.Bold, fontSize = 13.sp, modifier = Modifier.weight(1f))
+                                Text(String.format(Locale.US, "%.2f%%", result.percentage), fontWeight = FontWeight.Bold, fontSize = 13.sp, modifier = Modifier.weight(1.2f))
+                                Text("${result.correct}", fontWeight = FontWeight.Bold, fontSize = 13.sp, modifier = Modifier.weight(1f))
+                                Text("1", fontWeight = FontWeight.Bold, fontSize = 13.sp, modifier = Modifier.weight(1f))
                             }
                         }
-                    }
-
-                    // Warped Sheet Image Preview Thumbnail (if saved)
-                    if (sheetBitmap != null) {
-                        item {
-                            LiquidGlassCard(
-                                modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(20.dp),
-                                fillColor = GlassFill,
-                                showSpecular = true,
-                                onClick = { showFullImageDialog = true }
-                            ) {
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(14.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Box(
-                                        modifier = Modifier
-                                            .size(54.dp, 72.dp)
-                                            .clip(RoundedCornerShape(8.dp))
-                                            .background(Color.White)
-                                            .border(1.dp, GlassBorderBright, RoundedCornerShape(8.dp))
-                                    ) {
-                                        Image(
-                                            bitmap = sheetBitmap.asImageBitmap(),
-                                            contentDescription = stringResource(R.string.captured_sheet_image),
-                                            modifier = Modifier.fillMaxSize()
-                                        )
-                                    }
-                                    Spacer(modifier = Modifier.width(14.dp))
-                                    Column {
-                                        Text(stringResource(R.string.captured_sheet_image), fontWeight = FontWeight.SemiBold, fontSize = 14.sp, color = TextPrimary)
-                                        Text(stringResource(R.string.tap_to_view_scanned_paper), fontSize = 12.sp, color = TextSecondary)
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    item {
-                        Text(
-                            text = stringResource(R.string.question_breakdown_title),
-                            fontWeight = FontWeight.SemiBold,
-                            fontSize = 16.sp,
-                            color = TextPrimary
-                        )
-                    }
-
-                    // Per-question correctness list
-                    items(detectedAnswers, key = { it.id }) { item ->
-                        val questionKey = testQuestions.firstOrNull { it.questionNumber == item.questionNumber }?.correctAnswer ?: ""
-                        ResultQuestionRow(
-                            detected = item,
-                            correctKey = questionKey
-                        )
-                    }
-
-                    item {
-                        Spacer(modifier = Modifier.height(24.dp))
                     }
                 }
+
+                // OMR Visual Overlay Sheet View (Screenshot #4 Style)
+                item {
+                    Text("Visual OMR Overlay", fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                }
+
+                item {
+                    MarklifyCard(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { showFullImageDialog = true },
+                        containerColor = Color.White
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .aspectRatio(1200f / 1600f)
+                                .padding(8.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            if (sheetBitmap != null) {
+                                Image(
+                                    bitmap = sheetBitmap.asImageBitmap(),
+                                    contentDescription = "OMR Visual Overlay Sheet",
+                                    modifier = Modifier.fillMaxSize()
+                                )
+                            } else {
+                                Text("OMR Sheet Scan Overlay", color = Color.Gray, fontSize = 13.sp)
+                            }
+                        }
+                    }
+                }
+
+                // Per Question breakdown
+                item {
+                    Text("Question Details", fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                }
+
+                items(detectedAnswers, key = { it.id }) { item ->
+                    val questionKey = testQuestions.firstOrNull { it.questionNumber == item.questionNumber }?.correctAnswer ?: ""
+                    ResultQuestionRow(
+                        detected = item,
+                        correctKey = questionKey
+                    )
+                }
+
+                item { Spacer(modifier = Modifier.height(24.dp)) }
             }
         }
     }
 
     if (showFullImageDialog && sheetBitmap != null) {
-        LiquidGlassDialog(
+        MarklifyDialog(
             onDismissRequest = { showFullImageDialog = false }
         ) {
-            Text(
-                text = stringResource(R.string.captured_sheet_image),
-                fontWeight = FontWeight.Bold,
-                fontSize = 18.sp,
-                color = TextPrimary
-            )
+            Text("Full OMR Overlay View", fontWeight = FontWeight.Bold, fontSize = 18.sp)
             Spacer(modifier = Modifier.height(14.dp))
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .aspectRatio(1200f / 1600f)
-                    .clip(RoundedCornerShape(12.dp))
-                    .border(1.dp, GlassBorderBright, RoundedCornerShape(12.dp))
+                    .clip(RoundedCornerShape(8.dp))
+                    .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(8.dp))
                     .background(Color.White),
                 contentAlignment = Alignment.Center
             ) {
                 Image(
                     bitmap = sheetBitmap.asImageBitmap(),
-                    contentDescription = stringResource(R.string.captured_sheet_image),
+                    contentDescription = "Full Scanned Sheet",
                     modifier = Modifier.fillMaxSize()
                 )
             }
             Spacer(modifier = Modifier.height(16.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End
-            ) {
-                LiquidGlassButton(
-                    text = stringResource(R.string.close),
-                    onClick = { showFullImageDialog = false }
-                )
-            }
+            MarklifyButton(
+                text = stringResource(R.string.close),
+                onClick = { showFullImageDialog = false },
+                modifier = Modifier.fillMaxWidth()
+            )
         }
-    }
-}
-
-@Composable
-private fun StatBadge(label: String, count: Int, color: Color, icon: String) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Box(
-            modifier = Modifier
-                .size(38.dp)
-                .clip(CircleShape)
-                .background(GlassFillElevated)
-                .border(1.dp, GlassBorderBright, CircleShape),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(text = "$count", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = color)
-        }
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(text = label, fontSize = 11.sp, color = TextSecondary)
     }
 }
 
@@ -350,18 +297,12 @@ private fun ResultQuestionRow(detected: DetectedAnswer, correctKey: String) {
     val statusColor = when {
         isCorrect -> SuccessGreen
         isMultiple -> WarningAmber
-        isAmbiguous -> PurpleAccent
-        isUnanswered -> TextSecondary
+        isAmbiguous -> MarklifyBlue
+        isUnanswered -> MaterialTheme.colorScheme.onSurfaceVariant
         else -> ErrorRed
     }
 
-    LiquidGlassCard(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(18.dp),
-        fillColor = GlassFill,
-        showSpecular = false,
-        elevation = 2.dp
-    ) {
+    MarklifyCard(modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -372,55 +313,45 @@ private fun ResultQuestionRow(detected: DetectedAnswer, correctKey: String) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(
                     modifier = Modifier
-                        .size(32.dp)
+                        .size(30.dp)
                         .clip(CircleShape)
-                        .background(GlassFillElevated)
-                        .border(1.dp, GlassBorderBright, CircleShape),
+                        .background(MaterialTheme.colorScheme.primaryContainer),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = "${detected.questionNumber}",
                         fontWeight = FontWeight.Bold,
                         fontSize = 12.sp,
-                        color = TextPrimary
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                 }
                 Spacer(modifier = Modifier.width(12.dp))
                 Column {
                     Text(
                         text = "Q#${detected.questionNumber}",
-                        fontWeight = FontWeight.SemiBold,
+                        fontWeight = FontWeight.Bold,
                         fontSize = 14.sp,
-                        color = TextPrimary
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
                         text = "Student: ${detected.detectedAnswer.ifBlank { "—" }}  •  Key: $correctKey",
                         fontSize = 12.sp,
-                        color = TextSecondary
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
 
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(statusColor.copy(alpha = 0.15f))
-                    .border(1.dp, statusColor.copy(alpha = 0.4f), RoundedCornerShape(10.dp))
-                    .padding(horizontal = 10.dp, vertical = 4.dp)
-            ) {
-                Text(
-                    text = when {
-                        isCorrect -> "Correct"
-                        isMultiple -> "Multiple"
-                        isAmbiguous -> "Ambiguous"
-                        isUnanswered -> "Blank"
-                        else -> "Wrong"
-                    },
-                    color = statusColor,
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
+            MarklifyBadge(
+                text = when {
+                    isCorrect -> "Correct"
+                    isMultiple -> "Multiple"
+                    isAmbiguous -> "Ambiguous"
+                    isUnanswered -> "Blank"
+                    else -> "Wrong"
+                },
+                containerColor = statusColor.copy(alpha = 0.15f),
+                contentColor = statusColor
+            )
         }
     }
 }

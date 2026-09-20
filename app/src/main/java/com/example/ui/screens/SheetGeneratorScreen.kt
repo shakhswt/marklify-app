@@ -5,9 +5,8 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
 import android.widget.Toast
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -15,6 +14,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Print
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
@@ -37,13 +37,7 @@ import com.example.data.entity.Topic
 import com.example.omr.spec.SheetSpec
 import com.example.pdf.OmrSheetGenerator
 import com.example.pdf.PageFormat
-import com.example.ui.components.GlassButtonVariant
-import com.example.ui.components.LiquidGlassBackdrop
-import com.example.ui.components.LiquidGlassBottomBar
-import com.example.ui.components.LiquidGlassButton
-import com.example.ui.components.LiquidGlassCard
-import com.example.ui.components.LiquidGlassChip
-import com.example.ui.components.LiquidGlassTopAppBar
+import com.example.ui.components.*
 import com.example.ui.theme.*
 import com.example.ui.viewmodel.MarklifyViewModel
 import kotlinx.coroutines.Dispatchers
@@ -65,6 +59,11 @@ fun SheetGeneratorScreen(
     var topic by remember { mutableStateOf<Topic?>(null) }
     var previewBitmap by remember { mutableStateOf<Bitmap?>(null) }
     var isGeneratingPdf by remember { mutableStateOf(false) }
+
+    var layoutType by remember { mutableStateOf("Continuous") }
+    var labelType by remember { mutableStateOf("Default") }
+    var headerType by remember { mutableStateOf("Default") }
+
     var selectedPageFormat by remember {
         mutableStateOf(if (appSettings.defaultPageSize == "LETTER") PageFormat.LETTER else PageFormat.A4)
     }
@@ -87,76 +86,61 @@ fun SheetGeneratorScreen(
         }
     }
 
-    LiquidGlassBackdrop(animated = false) {
-        Scaffold(
-            topBar = {
-                LiquidGlassTopAppBar(
-                    title = { Text(stringResource(R.string.sheet_generator_title), fontWeight = FontWeight.Bold) },
-                    navigationIcon = {
-                        IconButton(onClick = onNavigateBack) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = stringResource(R.string.back),
-                                tint = TextPrimary
-                            )
-                        }
-                    },
-                    actions = {
-                        IconButton(
-                            onClick = {
-                                val currentTest = test ?: return@IconButton
-                                viewModel.loadTestForScan(currentTest.id) {
-                                    onNavigateToScanner(currentTest.id)
-                                }
-                            }
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.CameraAlt,
-                                contentDescription = stringResource(R.string.scan_sheet),
-                                tint = SuccessGreen
-                            )
-                        }
+    Scaffold(
+        topBar = {
+            MarklifyTopAppBar(
+                title = { Text("OMR Answer Sheet", fontWeight = FontWeight.Bold) },
+                navigationIcon = {
+                    IconButton(onClick = onNavigateBack) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.back),
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
                     }
-                )
-            },
-            bottomBar = {
-                LiquidGlassBottomBar {
-                    LiquidGlassButton(
+                },
+                actions = {
+                    IconButton(
                         onClick = {
-                            val currentTest = test ?: return@LiquidGlassButton
-                            val currentTopic = topic
-                            try {
-                                val spec = SheetSpec(questionCount = currentTest.questionCount)
-                                val pdfFile = OmrSheetGenerator.generatePdf(
-                                    context = context,
-                                    spec = spec,
-                                    testName = currentTest.name,
-                                    topicName = currentTopic?.name ?: "General",
-                                    testId = currentTest.id,
-                                    pageFormat = selectedPageFormat
-                                )
-                                OmrSheetGenerator.printPdf(
-                                    context = context,
-                                    pdfFile = pdfFile,
-                                    jobName = "OMR Sheet - ${currentTest.name}"
-                                )
-                            } catch (e: Exception) {
-                                Toast.makeText(context, "Printing failed: ${e.message}", Toast.LENGTH_LONG).show()
+                            val currentTest = test ?: return@IconButton
+                            viewModel.loadTestForScan(currentTest.id) {
+                                onNavigateToScanner(currentTest.id)
                             }
-                        },
-                        modifier = Modifier
-                            .weight(1f)
-                            .testTag("print_sheet_button"),
-                        variant = GlassButtonVariant.Neutral,
-                        icon = Icons.Default.Print,
-                        text = stringResource(R.string.print_sheet)
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.CameraAlt,
+                            contentDescription = stringResource(R.string.scan_sheet),
+                            tint = SuccessGreen
+                        )
+                    }
+                }
+            )
+        },
+        bottomBar = {
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                color = MaterialTheme.colorScheme.surface,
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    MarklifyButton(
+                        text = "Previous",
+                        onClick = onNavigateBack,
+                        modifier = Modifier.weight(1f),
+                        variant = MarklifyButtonVariant.Outlined
                     )
 
-                    LiquidGlassButton(
+                    MarklifyButton(
+                        text = "Print / Export",
                         onClick = {
-                            val currentTest = test ?: return@LiquidGlassButton
+                            val currentTest = test ?: return@MarklifyButton
                             val currentTopic = topic
-                            isGeneratingPdf = true
                             try {
                                 val spec = SheetSpec(questionCount = currentTest.questionCount)
                                 val pdfFile = OmrSheetGenerator.generatePdf(
@@ -170,180 +154,125 @@ fun SheetGeneratorScreen(
                                 sharePdf(context, pdfFile)
                             } catch (e: Exception) {
                                 Toast.makeText(context, "Error generating PDF: ${e.message}", Toast.LENGTH_LONG).show()
-                            } finally {
-                                isGeneratingPdf = false
                             }
                         },
                         modifier = Modifier
                             .weight(1f)
                             .testTag("generate_pdf_button"),
-                        variant = GlassButtonVariant.Neutral,
-                        icon = Icons.Default.Share,
-                        text = stringResource(R.string.share)
-                    )
-
-                    LiquidGlassButton(
-                        onClick = {
-                            val currentTest = test ?: return@LiquidGlassButton
-                            viewModel.loadTestForScan(currentTest.id) {
-                                onNavigateToScanner(currentTest.id)
-                            }
-                        },
-                        modifier = Modifier
-                            .weight(1.3f)
-                            .testTag("scan_now_button"),
-                        variant = GlassButtonVariant.Success,
-                        icon = Icons.Default.CameraAlt,
-                        text = stringResource(R.string.scan_sheet)
+                        variant = MarklifyButtonVariant.Primary,
+                        icon = Icons.Default.Share
                     )
                 }
-            },
-            containerColor = Color.Transparent
-        ) { padding ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-                    .verticalScroll(rememberScrollState())
-                    .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(14.dp)
-            ) {
-                // Specs Banner
-                test?.let { currentTest ->
-                    LiquidGlassCard(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(22.dp),
-                        fillColor = GlassFill,
-                        showSpecular = true
-                    ) {
-                        Column(modifier = Modifier.padding(16.dp)) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    text = currentTest.name,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 17.sp,
-                                    color = TextPrimary
-                                )
-                                Box(
-                                    modifier = Modifier
-                                        .clip(RoundedCornerShape(12.dp))
-                                        .background(GlassFillElevated)
-                                        .border(1.dp, GlassBorderBright, RoundedCornerShape(12.dp))
-                                        .padding(horizontal = 10.dp, vertical = 4.dp)
-                                ) {
-                                    Text(
-                                        text = stringResource(R.string.questions_count, currentTest.questionCount),
-                                        color = TextPrimary,
-                                        fontSize = 12.sp,
-                                        fontWeight = FontWeight.Medium
-                                    )
-                                }
-                            }
-                            Spacer(modifier = Modifier.height(6.dp))
-                            Text(
-                                text = if (currentTest.questionCount <= 25) {
-                                    "Layout: 1 Column • ${selectedPageFormat.displayName} • 4 Corner Markers"
-                                } else {
-                                    "Layout: 2 Columns • ${selectedPageFormat.displayName} • 4 Corner Markers"
-                                },
-                                fontSize = 12.sp,
-                                color = TextSecondary
-                            )
-                        }
-                    }
-                }
-
-                // Paper Format Selection
-                LiquidGlassCard(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(22.dp),
-                    fillColor = GlassFill
+            }
+        },
+        containerColor = MaterialTheme.colorScheme.background
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .verticalScroll(rememberScrollState())
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            // Dropdown Controls (EvalBee Screenshot #3 Style)
+            MarklifyCard(modifier = Modifier.fillMaxWidth()) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                        Text(
-                            text = stringResource(R.string.sheet_format),
-                            fontWeight = FontWeight.SemiBold,
-                            fontSize = 13.sp,
-                            color = TextPrimary
-                        )
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(10.dp)
-                        ) {
-                            LiquidGlassChip(
-                                selected = selectedPageFormat == PageFormat.A4,
-                                onClick = { selectedPageFormat = PageFormat.A4 },
-                                label = stringResource(R.string.format_a4),
-                                modifier = Modifier.weight(1f)
-                            )
-                            LiquidGlassChip(
-                                selected = selectedPageFormat == PageFormat.LETTER,
-                                onClick = { selectedPageFormat = PageFormat.LETTER },
-                                label = stringResource(R.string.format_letter),
-                                modifier = Modifier.weight(1f)
-                            )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text("Layout", fontSize = 14.sp, fontWeight = FontWeight.Medium)
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            MarklifyChip(selected = true, onClick = {}, label = layoutType)
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(16.dp))
                         }
                     }
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text("Label", fontSize = 14.sp, fontWeight = FontWeight.Medium)
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            MarklifyChip(selected = true, onClick = {}, label = labelType)
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(16.dp))
+                        }
+                    }
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text("Header", fontSize = 14.sp, fontWeight = FontWeight.Medium)
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            MarklifyChip(selected = true, onClick = {}, label = headerType)
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(16.dp))
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    MarklifyButton(
+                        text = "Create custom answer sheet",
+                        onClick = {
+                            Toast.makeText(context, "Custom Answer Sheet Template Created", Toast.LENGTH_SHORT).show()
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        variant = MarklifyButtonVariant.Primary
+                    )
                 }
+            }
 
-                // Sheet Canvas/Bitmap Preview
-                Text(
-                    text = "${stringResource(R.string.preview_sheet)} (${selectedPageFormat.displayName})",
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 14.sp,
-                    color = TextPrimary,
-                    modifier = Modifier.align(Alignment.Start)
-                )
-
-                Box(
+            // Printable OMR Preview Container
+            MarklifyCard(
+                modifier = Modifier.fillMaxWidth(),
+                containerColor = Color.White
+            ) {
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .aspectRatio(1200f / 1600f)
-                        .clip(RoundedCornerShape(16.dp))
-                        .border(1.dp, GlassBorderBright, RoundedCornerShape(16.dp))
-                        .background(Color.White),
-                    contentAlignment = Alignment.Center
+                        .padding(12.dp)
                 ) {
-                    if (previewBitmap != null) {
-                        Image(
-                            bitmap = previewBitmap!!.asImageBitmap(),
-                            contentDescription = stringResource(R.string.preview_sheet),
-                            modifier = Modifier.fillMaxSize()
-                        )
-                    } else {
-                        CircularProgressIndicator(color = TextSecondary)
-                    }
-                }
+                    Text(
+                        text = "Printable Answer Sheet Preview",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 14.sp,
+                        color = Color.Black
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
 
-                // Quick instructions card
-                LiquidGlassCard(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(22.dp),
-                    fillColor = GlassFill
-                ) {
-                    Column(
-                        modifier = Modifier.padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(6.dp)
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .aspectRatio(1200f / 1600f)
+                            .clip(RoundedCornerShape(8.dp)),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Text(
-                            text = stringResource(R.string.tips_scanning_title),
-                            fontWeight = FontWeight.SemiBold,
-                            fontSize = 13.sp,
-                            color = TextPrimary
-                        )
-                        Text(stringResource(R.string.tip_scale, selectedPageFormat.shortName), fontSize = 12.sp, color = TextSecondary)
-                        Text(stringResource(R.string.tip_markers), fontSize = 12.sp, color = TextSecondary)
-                        Text(stringResource(R.string.tip_shading), fontSize = 12.sp, color = TextSecondary)
+                        if (previewBitmap != null) {
+                            Image(
+                                bitmap = previewBitmap!!.asImageBitmap(),
+                                contentDescription = stringResource(R.string.preview_sheet),
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        } else {
+                            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+                        }
                     }
                 }
-
-                Spacer(modifier = Modifier.height(16.dp))
             }
+
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }

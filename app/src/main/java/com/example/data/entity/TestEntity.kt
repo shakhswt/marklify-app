@@ -23,5 +23,10 @@ data class TestEntity(
     val topicId: Long,
     val name: String,
     val questionCount: Int,
-    val createdAt: Long = System.currentTimeMillis()
+    val createdAt: Long = System.currentTimeMillis(),
+    val examType: String = "NEET",
+    val isPublic: Boolean = false,
+    val isArchived: Boolean = false,
+    val examDate: Long = System.currentTimeMillis(),
+    val description: String = ""
 )

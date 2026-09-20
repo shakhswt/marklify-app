@@ -30,7 +30,7 @@ enum class PageFormat(val displayName: String, val shortName: String, val widthP
 object OmrSheetGenerator {
 
     /**
-     * Renders the OMR sheet onto an Android Canvas using the exact SheetSpec coordinates.
+     * Renders the printable OMR sheet onto an Android Canvas using the exact SheetSpec coordinates.
      */
     fun renderToCanvas(
         canvas: Canvas,
@@ -49,7 +49,7 @@ object OmrSheetGenerator {
         val strokeBlackPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = Color.BLACK
             style = Paint.Style.STROKE
-            strokeWidth = 2.5f
+            strokeWidth = 2.2f
         }
 
         val thinStrokePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -60,53 +60,46 @@ object OmrSheetGenerator {
 
         val titlePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = Color.BLACK
-            textSize = 34f
+            textSize = 32f
             typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD)
             textAlign = Paint.Align.CENTER
         }
 
         val subtitlePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = Color.BLACK
-            textSize = 22f
+            textSize = 20f
             typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.NORMAL)
             textAlign = Paint.Align.CENTER
         }
 
         val fieldPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = Color.BLACK
-            textSize = 18f
+            textSize = 16f
             typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD)
             textAlign = Paint.Align.LEFT
         }
 
-        val instructionPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.DKGRAY
-            textSize = 15f
-            typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.ITALIC)
-            textAlign = Paint.Align.CENTER
-        }
-
         val qNumPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = Color.BLACK
-            textSize = 16f
+            textSize = 15f
             typeface = Typeface.create(Typeface.MONOSPACE, Typeface.BOLD)
             textAlign = Paint.Align.RIGHT
         }
 
         val letterPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = Color.BLACK
-            textSize = 14f
+            textSize = 12f
             typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD)
             textAlign = Paint.Align.CENTER
         }
 
-        // 2. Draw the 4 solid black corner markers
+        // 2. Draw Registration Corner Markers
         canvas.drawRect(spec.tlRect.left, spec.tlRect.top, spec.tlRect.right, spec.tlRect.bottom, solidBlackPaint)
         canvas.drawRect(spec.trRect.left, spec.trRect.top, spec.trRect.right, spec.trRect.bottom, solidBlackPaint)
         canvas.drawRect(spec.brRect.left, spec.brRect.top, spec.brRect.right, spec.brRect.bottom, solidBlackPaint)
         canvas.drawRect(spec.blRect.left, spec.blRect.top, spec.blRect.right, spec.blRect.bottom, solidBlackPaint)
 
-        // 3. Subtle outer alignment frame
+        // Frame
         canvas.drawRect(
             spec.tlRect.left - 10f,
             spec.tlRect.top - 10f,
@@ -115,44 +108,68 @@ object OmrSheetGenerator {
             thinStrokePaint
         )
 
-        // 4. Header content
+        // 3. Title & Header Information
         val centerX = spec.targetWidth / 2f
         canvas.drawText("MARKLIFY OMR ANSWER SHEET", centerX, 70f, titlePaint)
-        canvas.drawText("$testName  •  $topicName  •  ${spec.questionCount} Questions", centerX, 105f, subtitlePaint)
+        val actualCount = if (spec.questions.isNotEmpty()) spec.questions.size else spec.questionCount
+        canvas.drawText("$testName  •  $topicName  •  $actualCount Questions", centerX, 102f, subtitlePaint)
 
-        // Student Info Box
-        val boxLeft = 140f
-        val boxRight = spec.targetWidth - 140f
-        val boxTop = 125f
-        val boxBottom = 220f
-        canvas.drawRect(boxLeft, boxTop, boxRight, boxBottom, thinStrokePaint)
+        // Student Info Header Box
+        val boxLeft = 120f
+        val boxRight = spec.targetWidth - 120f
+        canvas.drawRect(boxLeft, 115f, boxRight, 150f, thinStrokePaint)
 
-        canvas.drawText("STUDENT NAME:", boxLeft + 20f, 160f, fieldPaint)
-        canvas.drawLine(boxLeft + 165f, 160f, centerX - 20f, 160f, thinStrokePaint)
+        canvas.drawText("NAME:", boxLeft + 15f, 138f, fieldPaint)
+        canvas.drawText("EXAM:", centerX - 100f, 138f, fieldPaint)
+        canvas.drawText("DATE:", boxRight - 220f, 138f, fieldPaint)
 
-        canvas.drawText("STUDENT ID:", centerX + 20f, 160f, fieldPaint)
-        canvas.drawLine(centerX + 140f, 160f, boxRight - 20f, 160f, thinStrokePaint)
-
-        canvas.drawText("DATE: __________________", boxLeft + 20f, 200f, fieldPaint)
-        canvas.drawText("SCORE: ________ / ${spec.questionCount}", centerX + 20f, 200f, fieldPaint)
-
-        // Instruction line
-        canvas.drawText(
-            "INSTRUCTIONS: Completely fill the bubble with dark pen/pencil. Correct: [●]  Incorrect: [✘] [✔] [—]",
-            centerX,
-            250f,
-            instructionPaint
-        )
-
-        // 5. Draw Column headers & Bubble items
-        if (spec.isTwoColumns) {
-            // Divider between columns
-            canvas.drawLine(centerX, 270f, centerX, 1530f, thinStrokePaint)
+        // 4. Roll Number Grid
+        if (spec.hasRollNoGrid) {
+            canvas.drawText("Roll No", spec.rollNoStartX + 65f, spec.rollNoStartY - 10f, fieldPaint)
+            val rollGridWidth = SheetSpec.ROLL_NO_COLS * spec.rollNoColWidth
+            canvas.drawRect(
+                spec.rollNoStartX,
+                spec.rollNoStartY,
+                spec.rollNoStartX + rollGridWidth,
+                spec.rollNoStartY + 30f,
+                thinStrokePaint
+            )
+            for (col in 1 until SheetSpec.ROLL_NO_COLS) {
+                val gx = spec.rollNoStartX + col * spec.rollNoColWidth
+                canvas.drawLine(gx, spec.rollNoStartY, gx, spec.rollNoStartY + 30f, thinStrokePaint)
+            }
+            // Roll No Bubbles
+            val rollBubbles = spec.getRollNoBubbles()
+            for (b in rollBubbles) {
+                // Digit row label on left
+                if (b.digitColumn == 0) {
+                    canvas.drawText(b.optionLetter, b.centerX - 24f, b.centerY + 4f, letterPaint)
+                }
+                canvas.drawCircle(b.centerX, b.centerY, b.radius, strokeBlackPaint)
+            }
         }
 
-        // Draw questions and bubbles
-        for (q in 1..spec.questionCount) {
+        // 5. Exam Set Grid
+        if (spec.hasExamSet) {
+            canvas.drawText("Exam Set", spec.examSetStartX + 50f, spec.examSetStartY - 10f, fieldPaint)
+            val setBubbles = spec.getExamSetBubbles()
+            for (b in setBubbles) {
+                canvas.drawText(b.optionLetter, b.centerX, b.centerY - b.radius - 4f, letterPaint)
+                canvas.drawCircle(b.centerX, b.centerY, b.radius, strokeBlackPaint)
+            }
+        }
+
+        // 6. Dividers for Multi-column layout
+        if (spec.isTwoColumns) {
+            canvas.drawLine(centerX, 480f, centerX, 1530f, thinStrokePaint)
+        }
+
+        // 7. Draw Questions & Bubbles
+        val count = if (spec.questions.isNotEmpty()) spec.questions.size else spec.questionCount
+        for (q in 1..count) {
             val bubbles = spec.getBubblesForQuestion(q)
+            if (bubbles.isEmpty()) continue
+
             val firstBubble = bubbles[0]
             val centerY = firstBubble.centerY
 
@@ -162,20 +179,20 @@ object OmrSheetGenerator {
             qNumPaint.getTextBounds(qText, 0, qText.length, textBounds)
             canvas.drawText(qText, firstBubble.centerX - 35f, centerY + textBounds.height() / 2f, qNumPaint)
 
-            // Draw Bubbles A, B, C, D
+            // Draw Bubbles
             for (bubble in bubbles) {
-                // Outer circle stroke
                 canvas.drawCircle(bubble.centerX, bubble.centerY, bubble.radius, strokeBlackPaint)
 
-                // Option letter centered inside circle
-                val lBounds = Rect()
-                letterPaint.getTextBounds(bubble.optionLetter, 0, 1, lBounds)
-                canvas.drawText(
-                    bubble.optionLetter,
-                    bubble.centerX,
-                    bubble.centerY + lBounds.height() / 2f - 1f,
-                    letterPaint
-                )
+                if (bubble.optionLetter.length <= 5) {
+                    val lBounds = Rect()
+                    letterPaint.getTextBounds(bubble.optionLetter, 0, bubble.optionLetter.length, lBounds)
+                    canvas.drawText(
+                        bubble.optionLetter,
+                        bubble.centerX,
+                        bubble.centerY + lBounds.height() / 2f - 1f,
+                        letterPaint
+                    )
+                }
             }
         }
     }
@@ -201,48 +218,46 @@ object OmrSheetGenerator {
     /**
      * Generates a printable PDF file formatted as A4 or US Letter.
      */
-     fun generatePdf(
-         context: Context,
-         spec: SheetSpec,
-         testName: String,
-         topicName: String,
-         testId: Long,
-         pageFormat: PageFormat = PageFormat.A4
-     ): File {
-         val pdfDocument = PdfDocument()
+    fun generatePdf(
+        context: Context,
+        spec: SheetSpec,
+        testName: String,
+        topicName: String,
+        testId: Long,
+        pageFormat: PageFormat = PageFormat.A4
+    ): File {
+        val pdfDocument = PdfDocument()
 
-         // Page dimensions in PostScript points (72 points/inch)
-         val pageInfo = PdfDocument.PageInfo.Builder(pageFormat.widthPt, pageFormat.heightPt, 1).create()
-         val page = pdfDocument.startPage(pageInfo)
+        val pageInfo = PdfDocument.PageInfo.Builder(pageFormat.widthPt, pageFormat.heightPt, 1).create()
+        val page = pdfDocument.startPage(pageInfo)
 
-         val canvas = page.canvas
-         // Scale canvas to fit 1200x1600 spec into target page format
-         val scaleX = pageFormat.widthPt.toFloat() / spec.targetWidth
-         val scaleY = pageFormat.heightPt.toFloat() / spec.targetHeight
-         val scale = Math.min(scaleX, scaleY)
+        val canvas = page.canvas
+        val scaleX = pageFormat.widthPt.toFloat() / spec.targetWidth
+        val scaleY = pageFormat.heightPt.toFloat() / spec.targetHeight
+        val scale = Math.min(scaleX, scaleY)
 
-         val offsetX = (pageFormat.widthPt.toFloat() - spec.targetWidth * scale) / 2f
-         val offsetY = (pageFormat.heightPt.toFloat() - spec.targetHeight * scale) / 2f
+        val offsetX = (pageFormat.widthPt.toFloat() - spec.targetWidth * scale) / 2f
+        val offsetY = (pageFormat.heightPt.toFloat() - spec.targetHeight * scale) / 2f
 
-         canvas.save()
-         canvas.translate(offsetX, offsetY)
-         canvas.scale(scale, scale)
+        canvas.save()
+        canvas.translate(offsetX, offsetY)
+        canvas.scale(scale, scale)
 
-         renderToCanvas(canvas, spec, testName, topicName)
+        renderToCanvas(canvas, spec, testName, topicName)
 
-         canvas.restore()
-         pdfDocument.finishPage(page)
+        canvas.restore()
+        pdfDocument.finishPage(page)
 
-         val outputDir = File(context.cacheDir, "omr_sheets").apply { mkdirs() }
-         val outputFile = File(outputDir, "OMR_Sheet_Test_${testId}_${pageFormat.shortName}_${System.currentTimeMillis()}.pdf")
+        val outputDir = File(context.cacheDir, "omr_sheets").apply { mkdirs() }
+        val outputFile = File(outputDir, "OMR_Sheet_Test_${testId}_${pageFormat.shortName}_${System.currentTimeMillis()}.pdf")
 
-         FileOutputStream(outputFile).use { out ->
-             pdfDocument.writeTo(out)
-         }
-         pdfDocument.close()
+        FileOutputStream(outputFile).use { out ->
+            pdfDocument.writeTo(out)
+        }
+        pdfDocument.close()
 
-         return outputFile
-     }
+        return outputFile
+    }
 
     /**
      * Prints a generated PDF using Android's built-in PrintManager.

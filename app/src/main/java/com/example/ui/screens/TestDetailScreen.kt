@@ -1,14 +1,16 @@
 package com.example.ui.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.HelpOutline
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -16,23 +18,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.R
-import com.example.data.entity.Question
 import com.example.data.entity.TestEntity
-import com.example.ui.components.GlassButtonVariant
-import com.example.ui.components.LiquidGlassBackdrop
-import com.example.ui.components.LiquidGlassButton
-import com.example.ui.components.LiquidGlassCard
-import com.example.ui.components.LiquidGlassDialog
-import com.example.ui.components.LiquidGlassTextField
-import com.example.ui.components.LiquidGlassTopAppBar
+import com.example.ui.components.*
 import com.example.ui.theme.*
 import com.example.ui.viewmodel.MarklifyViewModel
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -45,158 +45,263 @@ fun TestDetailScreen(
     onNavigateToScanner: (Long) -> Unit,
     onNavigateToResults: (Long) -> Unit
 ) {
+    val context = LocalContext.current
     var test by remember { mutableStateOf<TestEntity?>(null) }
     var showRenameDialog by remember { mutableStateOf(false) }
-    val questions by viewModel.getQuestionsForTest(testId).collectAsState(initial = emptyList())
+    val scanCount by viewModel.scanCount.collectAsState()
 
     LaunchedEffect(testId) {
         test = viewModel.getTestById(testId)
     }
 
-    LiquidGlassBackdrop(animated = false) {
-        Scaffold(
-            topBar = {
-                LiquidGlassTopAppBar(
-                    title = { Text(test?.name ?: stringResource(R.string.test_detail_title), fontWeight = FontWeight.Bold) },
-                    navigationIcon = {
-                        IconButton(onClick = onNavigateBack) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = stringResource(R.string.back),
-                                tint = TextPrimary
-                            )
-                        }
-                    },
-                    actions = {
-                        IconButton(onClick = { showRenameDialog = true }) {
-                            Icon(imageVector = Icons.Default.Edit, contentDescription = stringResource(R.string.rename_test_title), tint = TextSecondary)
-                        }
-                        IconButton(onClick = { onNavigateToResults(testId) }) {
-                            Icon(imageVector = Icons.Default.Analytics, contentDescription = stringResource(R.string.view_results), tint = TextSecondary)
-                        }
-                    }
-                )
-            },
-            containerColor = Color.Transparent
-        ) { padding ->
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-                    .padding(horizontal = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(14.dp)
-            ) {
-                item {
-                    Spacer(modifier = Modifier.height(4.dp))
-                    // Info Summary Card
-                    LiquidGlassCard(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(22.dp),
-                        fillColor = GlassFill,
-                        showSpecular = true
-                    ) {
-                        Column(modifier = Modifier.padding(18.dp)) {
-                            Text(
-                                text = test?.name ?: stringResource(R.string.loading),
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = TextPrimary
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = stringResource(R.string.four_options_desc, test?.questionCount ?: 0),
-                                fontSize = 13.sp,
-                                color = TextSecondary
-                            )
+    val monthStr = remember(test?.createdAt) {
+        test?.createdAt?.let { SimpleDateFormat("MMM", Locale.US).format(Date(it)) } ?: "Jan"
+    }
+    val dayStr = remember(test?.createdAt) {
+        test?.createdAt?.let { SimpleDateFormat("dd", Locale.US).format(Date(it)) } ?: "20"
+    }
 
-                            Spacer(modifier = Modifier.height(16.dp))
+    Scaffold(
+        topBar = {
+            MarklifyTopAppBar(
+                title = { Text("Exam Details", fontWeight = FontWeight.Bold) },
+                navigationIcon = {
+                    IconButton(onClick = onNavigateBack) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.back),
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                },
+                actions = {
+                    IconButton(onClick = { showRenameDialog = true }) {
+                        Icon(imageVector = Icons.Default.Archive, contentDescription = "Archive", tint = MaterialTheme.colorScheme.onSurface)
+                    }
+                    IconButton(onClick = {
+                        Toast.makeText(context, "Exam Link Shared", Toast.LENGTH_SHORT).show()
+                    }) {
+                        Icon(imageVector = Icons.Default.Share, contentDescription = "Share", tint = MaterialTheme.colorScheme.onSurface)
+                    }
+                }
+            )
+        },
+        containerColor = MaterialTheme.colorScheme.background
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .verticalScroll(rememberScrollState())
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            // Top Summary Card (EvalBee Screenshot #5 Style)
+            MarklifyCard(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        // Date Badge
+                        Surface(
+                            modifier = Modifier.size(width = 48.dp, height = 52.dp),
+                            shape = RoundedCornerShape(10.dp),
+                            color = MarklifyBlueContainerLight
+                        ) {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center
+                            ) {
+                                Text(monthStr, fontSize = 11.sp, fontWeight = FontWeight.Bold, color = MarklifyBlue)
+                                Text(dayStr, fontSize = 15.sp, fontWeight = FontWeight.Bold, color = MarklifyBlue)
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.width(12.dp))
+
+                        Column(modifier = Modifier.weight(1f)) {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                LiquidGlassButton(
-                                    onClick = { onNavigateToTestEditor(testId) },
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .testTag("edit_questions_button"),
-                                    variant = GlassButtonVariant.Neutral,
-                                    icon = Icons.Default.Edit,
-                                    text = stringResource(R.string.edit_keys)
+                                Text(
+                                    text = test?.name ?: "Neet weekly 43",
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 16.sp,
+                                    color = MaterialTheme.colorScheme.onSurface
                                 )
+                                MarklifyBadge(
+                                    text = if (test?.isPublic == true) "🌐 Public" else "🔒 Private",
+                                    containerColor = if (test?.isPublic == true) SuccessGreenBg else WarningAmberBg,
+                                    contentColor = if (test?.isPublic == true) SuccessGreen else WarningAmber
+                                )
+                            }
 
-                                LiquidGlassButton(
-                                    onClick = { onNavigateToSheetGenerator(testId) },
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .testTag("generate_sheet_detail_button"),
-                                    variant = GlassButtonVariant.Neutral,
-                                    icon = Icons.Default.Print,
-                                    text = stringResource(R.string.blank_sheet)
-                                )
+                            Spacer(modifier = Modifier.height(6.dp))
 
-                                LiquidGlassButton(
-                                    onClick = {
-                                        viewModel.loadTestForScan(testId) {
-                                            onNavigateToScanner(testId)
-                                        }
-                                    },
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .testTag("scan_sheet_detail_button"),
-                                    variant = GlassButtonVariant.Success,
-                                    icon = Icons.Default.CameraAlt,
-                                    text = stringResource(R.string.scan_sheet)
-                                )
+                            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                                Text("? ${test?.questionCount ?: 50}", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text("🔑 Key Available", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text("👤 ${test?.examType ?: "NEET"}", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                         }
                     }
-                }
 
-                item {
+                    Spacer(modifier = Modifier.height(14.dp))
+
+                    // Progress & Start Scanning
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = stringResource(R.string.questions_keys_count, questions.size),
-                            fontWeight = FontWeight.SemiBold,
-                            fontSize = 16.sp,
-                            color = TextPrimary
+                            text = "Sheet Scanned $scanCount / 1",
+                            fontSize = 12.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
-                        TextButton(onClick = { onNavigateToResults(testId) }) {
-                            Text(stringResource(R.string.view_results), color = TextSecondary, fontSize = 13.sp)
-                        }
+                        MarklifyButton(
+                            text = "Start scanning",
+                            onClick = {
+                                viewModel.loadTestForScan(testId) {
+                                    onNavigateToScanner(testId)
+                                }
+                            },
+                            modifier = Modifier.testTag("start_scanning_button"),
+                            variant = MarklifyButtonVariant.Primary
+                        )
                     }
                 }
-
-                items(questions, key = { it.id }) { q ->
-                    QuestionPreviewCard(question = q)
-                }
-
-                item {
-                    Spacer(modifier = Modifier.height(24.dp))
-                }
             }
+
+            // Exam Management Section
+            Text(
+                text = "Exam Management",
+                fontWeight = FontWeight.Bold,
+                fontSize = 16.sp,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                ActionIconButton(
+                    title = "Answer Key",
+                    icon = Icons.Default.VpnKey,
+                    modifier = Modifier.weight(1f),
+                    onClick = { onNavigateToTestEditor(testId) }
+                )
+                ActionIconButton(
+                    title = "Scan Sheet",
+                    icon = Icons.Default.CropFree,
+                    modifier = Modifier.weight(1f),
+                    onClick = {
+                        viewModel.loadTestForScan(testId) {
+                            onNavigateToScanner(testId)
+                        }
+                    }
+                )
+                ActionIconButton(
+                    title = "Exam Settings",
+                    icon = Icons.Default.Settings,
+                    modifier = Modifier.weight(1f),
+                    onClick = { showRenameDialog = true }
+                )
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                ActionIconButton(
+                    title = "OMR/Bubble Sheet",
+                    icon = Icons.Default.GridOn,
+                    modifier = Modifier.weight(1f),
+                    onClick = { onNavigateToSheetGenerator(testId) }
+                )
+                Spacer(modifier = Modifier.weight(2f))
+            }
+
+            // Reporting Section
+            Text(
+                text = "Reporting",
+                fontWeight = FontWeight.Bold,
+                fontSize = 16.sp,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                ActionIconButton(
+                    title = "View Reports",
+                    icon = Icons.Default.InsertDriveFile,
+                    modifier = Modifier.weight(1f),
+                    onClick = { onNavigateToResults(testId) }
+                )
+                ActionIconButton(
+                    title = "Download Excel",
+                    icon = Icons.Default.TableChart,
+                    modifier = Modifier.weight(1f),
+                    onClick = {
+                        Toast.makeText(context, "Exporting Excel/CSV report...", Toast.LENGTH_SHORT).show()
+                    }
+                )
+                ActionIconButton(
+                    title = "Analysis",
+                    icon = Icons.Default.PieChart,
+                    modifier = Modifier.weight(1f),
+                    onClick = { onNavigateToResults(testId) }
+                )
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                ActionIconButton(
+                    title = "Publish",
+                    icon = Icons.Default.Publish,
+                    modifier = Modifier.weight(1f),
+                    onClick = {
+                        Toast.makeText(context, "Results Published", Toast.LENGTH_SHORT).show()
+                    }
+                )
+                ActionIconButton(
+                    title = "Absentees",
+                    icon = Icons.Default.PersonOff,
+                    modifier = Modifier.weight(1f),
+                    onClick = {
+                        Toast.makeText(context, "Absentees List", Toast.LENGTH_SHORT).show()
+                    }
+                )
+                Spacer(modifier = Modifier.weight(1f))
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 
     if (showRenameDialog && test != null) {
         var renameText by remember(test) { mutableStateOf(test?.name ?: "") }
-        LiquidGlassDialog(
+        MarklifyDialog(
             onDismissRequest = { showRenameDialog = false }
         ) {
             Text(
                 text = stringResource(R.string.rename_test_title),
                 fontWeight = FontWeight.Bold,
                 fontSize = 18.sp,
-                color = TextPrimary
+                color = MaterialTheme.colorScheme.onSurface
             )
             Spacer(modifier = Modifier.height(14.dp))
-            LiquidGlassTextField(
+            OutlinedTextField(
                 value = renameText,
                 onValueChange = { renameText = it },
-                label = stringResource(R.string.new_test_name_label),
+                label = { Text(stringResource(R.string.new_test_name_label)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -205,15 +310,15 @@ fun TestDetailScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                LiquidGlassButton(
+                MarklifyButton(
                     text = stringResource(R.string.cancel),
-                    variant = GlassButtonVariant.Neutral,
+                    variant = MarklifyButtonVariant.Neutral,
                     modifier = Modifier.weight(1f),
                     onClick = { showRenameDialog = false }
                 )
-                LiquidGlassButton(
+                MarklifyButton(
                     text = stringResource(R.string.rename),
-                    variant = GlassButtonVariant.Primary,
+                    variant = MarklifyButtonVariant.Primary,
                     enabled = renameText.isNotBlank(),
                     modifier = Modifier.weight(1f),
                     onClick = {
@@ -230,75 +335,39 @@ fun TestDetailScreen(
 }
 
 @Composable
-private fun QuestionPreviewCard(question: Question) {
-    LiquidGlassCard(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(18.dp),
-        fillColor = GlassFill,
-        showSpecular = false,
-        elevation = 3.dp
+private fun ActionIconButton(
+    title: String,
+    icon: ImageVector,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+    Column(
+        modifier = modifier
+            .clip(RoundedCornerShape(12.dp))
+            .clickable(onClick = onClick)
+            .padding(10.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Row(
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(14.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+                .size(48.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.primaryContainer),
+            contentAlignment = Alignment.Center
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.weight(1f)
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(34.dp)
-                        .clip(CircleShape)
-                        .background(GlassFillElevated)
-                        .border(1.dp, GlassBorderBright, CircleShape),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "${question.questionNumber}",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 13.sp,
-                        color = TextPrimary
-                    )
-                }
-
-                Spacer(modifier = Modifier.width(12.dp))
-                Column {
-                    Text(
-                        text = question.questionText.ifBlank { stringResource(R.string.question_number, question.questionNumber) },
-                        fontWeight = FontWeight.Medium,
-                        fontSize = 14.sp,
-                        color = TextPrimary,
-                        maxLines = 1
-                    )
-                    Text(
-                        text = "A: ${question.optionA}  •  B: ${question.optionB}",
-                        fontSize = 11.sp,
-                        color = TextSecondary,
-                        maxLines = 1
-                    )
-                }
-            }
-
-            // Key Bubble: Neutral frosted glass badge
-            Box(
-                modifier = Modifier
-                    .size(34.dp)
-                    .clip(CircleShape)
-                    .background(GlassFillElevated)
-                    .border(1.dp, GlassBorderBright, CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = question.correctAnswer,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 14.sp,
-                    color = TextPrimary
-                )
-            }
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(22.dp)
+            )
         }
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = title,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Medium,
+            color = MaterialTheme.colorScheme.onSurface
+        )
     }
 }

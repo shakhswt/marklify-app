@@ -13,5 +13,6 @@ data class AppSettings(
     val ambiguousDiffMargin: Float = 0.20f,
     val defaultPageSize: String = "A4",
     val appLanguage: String = "en",
-    val hapticsEnabled: Boolean = true
+    val hapticsEnabled: Boolean = true,
+    val themeMode: String = "SYSTEM" // "SYSTEM", "LIGHT", "DARK"
 )

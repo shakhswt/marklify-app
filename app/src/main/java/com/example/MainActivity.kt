@@ -7,6 +7,7 @@ import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -34,12 +35,18 @@ class MainActivity : ComponentActivity() {
                 localizedContext.findActivityResultRegistryOwner() ?: this
             }
 
+            val isDarkTheme = when (settings.themeMode) {
+                "LIGHT" -> false
+                "DARK" -> true
+                else -> isSystemInDarkTheme()
+            }
+
             CompositionLocalProvider(
                 LocalContext provides localizedContext,
                 LocalActivityResultRegistryOwner provides activityResultRegistryOwner,
                 LocalOnBackPressedDispatcherOwner provides this,
             ) {
-                MarklifyTheme {
+                MarklifyTheme(darkTheme = isDarkTheme) {
                     AppNavigation(viewModel = viewModel)
                 }
             }

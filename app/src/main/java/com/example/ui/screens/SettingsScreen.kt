@@ -91,571 +91,307 @@ fun SettingsScreen(
         }
     }
 
-    // Live test calibration computation
-    val testResults = remember(fillThreshold, unansweredThreshold, multipleDiffMargin, ambiguousDiffMargin) {
-        val detector = AnswerDetector(
-            fillThreshold = fillThreshold,
-            unansweredThreshold = unansweredThreshold,
-            multipleDiffMargin = multipleDiffMargin,
-            ambiguousDiffMargin = ambiguousDiffMargin
-        )
-        val testMap = mapOf(
-            1 to listOf(
-                BubbleReading(1, 0, "A", 0.68f, 68, 100),
-                BubbleReading(1, 1, "B", 0.08f, 8, 100),
-                BubbleReading(1, 2, "C", 0.04f, 4, 100),
-                BubbleReading(1, 3, "D", 0.06f, 6, 100)
-            ),
-            2 to listOf(
-                BubbleReading(2, 0, "A", 0.52f, 52, 100),
-                BubbleReading(2, 1, "B", 0.49f, 49, 100),
-                BubbleReading(2, 2, "C", 0.05f, 5, 100),
-                BubbleReading(2, 3, "D", 0.03f, 3, 100)
-            ),
-            3 to listOf(
-                BubbleReading(3, 0, "A", 0.12f, 12, 100),
-                BubbleReading(3, 1, "B", 0.14f, 14, 100),
-                BubbleReading(3, 2, "C", 0.09f, 9, 100),
-                BubbleReading(3, 3, "D", 0.11f, 11, 100)
-            ),
-            4 to listOf(
-                BubbleReading(4, 0, "A", 0.32f, 32, 100),
-                BubbleReading(4, 1, "B", 0.24f, 24, 100),
-                BubbleReading(4, 2, "C", 0.05f, 5, 100),
-                BubbleReading(4, 3, "D", 0.03f, 3, 100)
+    Scaffold(
+        topBar = {
+            MarklifyTopAppBar(
+                title = { Text(stringResource(R.string.settings_title), fontWeight = FontWeight.Bold) },
+                navigationIcon = {
+                    IconButton(onClick = onNavigateBack) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.back),
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                },
+                actions = {
+                    IconButton(
+                        onClick = {
+                            viewModel.resetThresholdsToDefault()
+                            fillThreshold = AnswerDetector.DEFAULT_FILL_THRESHOLD
+                            unansweredThreshold = AnswerDetector.DEFAULT_UNANSWERED_THRESHOLD
+                            multipleDiffMargin = AnswerDetector.DEFAULT_MULTIPLE_DIFF_MARGIN
+                            ambiguousDiffMargin = AnswerDetector.DEFAULT_AMBIGUOUS_DIFF_MARGIN
+                            Toast.makeText(context, context.getString(R.string.reset_thresholds_toast), Toast.LENGTH_SHORT).show()
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.RestartAlt,
+                            contentDescription = stringResource(R.string.reset_thresholds),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
             )
-        )
-        detector.detectAnswers(testMap)
-    }
-
-    LiquidGlassBackdrop(animated = false) {
-        Scaffold(
-            topBar = {
-                LiquidGlassTopAppBar(
-                    title = { Text(stringResource(R.string.settings_title), fontWeight = FontWeight.Bold) },
-                    navigationIcon = {
-                        IconButton(onClick = onNavigateBack) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = stringResource(R.string.back),
-                                tint = TextPrimary
-                            )
-                        }
-                    },
-                    actions = {
-                        IconButton(
-                            onClick = {
-                                viewModel.resetThresholdsToDefault()
-                                fillThreshold = AnswerDetector.DEFAULT_FILL_THRESHOLD
-                                unansweredThreshold = AnswerDetector.DEFAULT_UNANSWERED_THRESHOLD
-                                multipleDiffMargin = AnswerDetector.DEFAULT_MULTIPLE_DIFF_MARGIN
-                                ambiguousDiffMargin = AnswerDetector.DEFAULT_AMBIGUOUS_DIFF_MARGIN
-                                Toast.makeText(context, context.getString(R.string.reset_thresholds_toast), Toast.LENGTH_SHORT).show()
-                            }
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.RestartAlt,
-                                contentDescription = stringResource(R.string.reset_thresholds),
-                                tint = TextSecondary
-                            )
-                        }
-                    }
-                )
-            },
-            containerColor = Color.Transparent
-        ) { padding ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-                    .verticalScroll(rememberScrollState())
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                // 1. Language Picker Card
-                LiquidGlassCard(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(22.dp),
-                    fillColor = GlassFill,
-                    showSpecular = true
-                ) {
-                    Column(modifier = Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(imageVector = Icons.Default.Language, contentDescription = null, tint = TextPrimary)
-                            Spacer(modifier = Modifier.width(10.dp))
-                            Text(
-                                text = stringResource(R.string.language_section),
-                                fontWeight = FontWeight.SemiBold,
-                                fontSize = 15.sp,
-                                color = TextPrimary
-                            )
-                        }
-
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            val languages = listOf(
-                                Triple("en", stringResource(R.string.language_en), "🇺🇸"),
-                                Triple("uz", stringResource(R.string.language_uz), "🇺🇿"),
-                                Triple("ru", stringResource(R.string.language_ru), "🇷🇺")
-                            )
-                            languages.forEach { (code, label, flag) ->
-                                val isSelected = currentSettings.appLanguage == code
-                                LiquidGlassChip(
-                                    selected = isSelected,
-                                    onClick = {
-                                        viewModel.setAppLanguage(code)
-                                        HapticManager.performBubbleDetectedTick(context, currentSettings.hapticsEnabled)
-                                    },
-                                    label = "$flag $label",
-                                    modifier = Modifier.weight(1f)
-                                )
-                            }
-                        }
-                    }
-                }
-
-                // 2. Tactile Haptic Feedback Switch Card
-                LiquidGlassCard(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(22.dp),
-                    fillColor = GlassFill,
-                    showSpecular = true
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(18.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Row(
-                            modifier = Modifier.weight(1f),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(40.dp)
-                                    .clip(CircleShape)
-                                    .background(GlassFillElevated)
-                                    .border(1.dp, GlassBorderBright, CircleShape),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Vibration,
-                                    contentDescription = null,
-                                    tint = TextPrimary,
-                                    modifier = Modifier.size(20.dp)
-                                )
-                            }
-                            Spacer(modifier = Modifier.width(12.dp))
-                            Column {
-                                Text(
-                                    text = stringResource(R.string.haptics_section),
-                                    fontWeight = FontWeight.SemiBold,
-                                    fontSize = 14.sp,
-                                    color = TextPrimary
-                                )
-                                Text(
-                                    text = stringResource(R.string.haptics_desc),
-                                    fontSize = 11.sp,
-                                    color = TextSecondary
-                                )
-                            }
-                        }
-
-                        LiquidGlassSwitch(
-                            checked = currentSettings.hapticsEnabled,
-                            onCheckedChange = {
-                                viewModel.setHapticsEnabled(it)
-                                if (it) HapticManager.performSubmissionSuccess(context, true)
-                            }
-                        )
-                    }
-                }
-
-                // 3. Calibration Header Info Card
-                LiquidGlassCard(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(22.dp),
-                    fillColor = GlassFill,
-                    showSpecular = true
-                ) {
-                    Row(
-                        modifier = Modifier.padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(44.dp)
-                                .clip(CircleShape)
-                                .background(GlassFillElevated)
-                                .border(1.dp, GlassBorderBright, CircleShape),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Tune,
-                                contentDescription = null,
-                                tint = TextPrimary,
-                                modifier = Modifier.size(24.dp)
-                            )
-                        }
-                        Spacer(modifier = Modifier.width(14.dp))
-                        Column {
-                            Text(
-                                text = stringResource(R.string.calibration_section),
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 15.sp,
-                                color = TextPrimary
-                            )
-                            Spacer(modifier = Modifier.height(2.dp))
-                            Text(
-                                text = stringResource(R.string.calibration_desc),
-                                fontSize = 12.sp,
-                                color = TextSecondary
-                            )
-                        }
-                    }
-                }
-
-                // 4. Calibration Sliders Card
-                LiquidGlassCard(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(22.dp),
-                    fillColor = GlassFill,
-                    showSpecular = true
-                ) {
-                    Column(modifier = Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        },
+        containerColor = MaterialTheme.colorScheme.background
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .verticalScroll(rememberScrollState())
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            // 1. Theme Selector Card (Classic Light / Dark / System)
+            MarklifyCard(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(imageVector = Icons.Default.Palette, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                        Spacer(modifier = Modifier.width(10.dp))
                         Text(
-                            text = stringResource(R.string.calibration_section),
-                            fontWeight = FontWeight.SemiBold,
+                            text = "Appearance Theme",
+                            fontWeight = FontWeight.Bold,
                             fontSize = 15.sp,
-                            color = TextPrimary
+                            color = MaterialTheme.colorScheme.onSurface
                         )
-
-                        // 1. Fill Threshold
-                        Column {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Text(stringResource(R.string.fill_threshold), fontSize = 13.sp, fontWeight = FontWeight.Medium, color = TextPrimary)
-                                Text(String.format(Locale.US, "%.0f%%", fillThreshold * 100), fontSize = 13.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
-                            }
-                            Text(stringResource(R.string.fill_threshold_desc), fontSize = 11.sp, color = TextSecondary)
-                            Slider(
-                                value = fillThreshold,
-                                onValueChange = { fillThreshold = it },
-                                valueRange = 0.15f..0.70f,
-                                steps = 10,
-                                colors = SliderDefaults.colors(
-                                    thumbColor = TextPrimary,
-                                    activeTrackColor = TextPrimary.copy(alpha = 0.7f),
-                                    inactiveTrackColor = GlassFillSubtle
-                                )
-                            )
-                        }
-
-                        // 2. Unanswered Threshold
-                        Column {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Text(stringResource(R.string.unanswered_threshold), fontSize = 13.sp, fontWeight = FontWeight.Medium, color = TextPrimary)
-                                Text(String.format(Locale.US, "%.0f%%", unansweredThreshold * 100), fontSize = 13.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
-                            }
-                            Text(stringResource(R.string.unanswered_threshold_desc), fontSize = 11.sp, color = TextSecondary)
-                            Slider(
-                                value = unansweredThreshold,
-                                onValueChange = { unansweredThreshold = it },
-                                valueRange = 0.05f..0.40f,
-                                steps = 7,
-                                colors = SliderDefaults.colors(
-                                    thumbColor = TextPrimary,
-                                    activeTrackColor = TextPrimary.copy(alpha = 0.7f),
-                                    inactiveTrackColor = GlassFillSubtle
-                                )
-                            )
-                        }
-
-                        // 3. Multiple Mark Difference Margin
-                        Column {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Text(stringResource(R.string.multiple_diff), fontSize = 13.sp, fontWeight = FontWeight.Medium, color = TextPrimary)
-                                Text(String.format(Locale.US, "%.0f%%", multipleDiffMargin * 100), fontSize = 13.sp, fontWeight = FontWeight.Bold, color = WarningAmber)
-                            }
-                            Text(stringResource(R.string.multiple_diff_desc), fontSize = 11.sp, color = TextSecondary)
-                            Slider(
-                                value = multipleDiffMargin,
-                                onValueChange = { multipleDiffMargin = it },
-                                valueRange = 0.05f..0.35f,
-                                steps = 5,
-                                colors = SliderDefaults.colors(
-                                    thumbColor = WarningAmber,
-                                    activeTrackColor = WarningAmber,
-                                    inactiveTrackColor = GlassFillSubtle
-                                )
-                            )
-                        }
-
-                        // 4. Ambiguous Difference Margin
-                        Column {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Text(stringResource(R.string.ambiguous_diff), fontSize = 13.sp, fontWeight = FontWeight.Medium, color = TextPrimary)
-                                Text(String.format(Locale.US, "%.0f%%", ambiguousDiffMargin * 100), fontSize = 13.sp, fontWeight = FontWeight.Bold, color = PurpleAccent)
-                            }
-                            Text(stringResource(R.string.ambiguous_diff_desc), fontSize = 11.sp, color = TextSecondary)
-                            Slider(
-                                value = ambiguousDiffMargin,
-                                onValueChange = { ambiguousDiffMargin = it },
-                                valueRange = 0.05f..0.40f,
-                                steps = 6,
-                                colors = SliderDefaults.colors(
-                                    thumbColor = PurpleAccent,
-                                    activeTrackColor = PurpleAccent,
-                                    inactiveTrackColor = GlassFillSubtle
-                                )
-                            )
-                        }
                     }
-                }
 
-                // 5. Live Test Pattern Preview Card
-                LiquidGlassCard(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(22.dp),
-                    fillColor = GlassFill,
-                    showSpecular = true
-                ) {
-                    Column(modifier = Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = stringResource(R.string.live_calibration),
-                                fontWeight = FontWeight.SemiBold,
-                                fontSize = 14.sp,
-                                color = TextPrimary
-                            )
-                            LiquidGlassBadge(text = stringResource(R.string.simulated_sample))
-                        }
-
-                        Text(
-                            text = stringResource(R.string.live_calibration_desc),
-                            fontSize = 12.sp,
-                            color = TextSecondary
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        val themes = listOf(
+                            Triple("SYSTEM", "System", "⚙️"),
+                            Triple("LIGHT", "Light", "☀️"),
+                            Triple("DARK", "Dark", "🌙")
                         )
-
-                        testResults.forEach { item ->
-                            val (label, badgeColor, badgeBg, badgeBorder) = when {
-                                item.isUnanswered -> Quad(stringResource(R.string.unanswered_flag), TextSecondary, GlassFillSubtle, GlassBorderSubtle)
-                                item.isMultiple -> Quad(stringResource(R.string.multiple_marked_flag), WarningAmber, WarningAmberBg, WarningAmberBorder)
-                                item.isAmbiguous -> Quad(stringResource(R.string.ambiguous_flag), PurpleAccent, Color(0x33A78BFA), Color(0x66A78BFA))
-                                else -> Quad(stringResource(R.string.single_answer, item.detectedAnswer), SuccessGreen, SuccessGreenBg, SuccessGreenBorder)
-                            }
-
-                            val topRatio = item.bubbleReadings.maxOfOrNull { it.fillRatio } ?: 0f
-
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clip(RoundedCornerShape(12.dp))
-                                    .background(GlassFillElevated)
-                                    .border(1.dp, GlassBorderSubtle, RoundedCornerShape(12.dp))
-                                    .padding(horizontal = 14.dp, vertical = 10.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Column {
-                                    Text(
-                                        text = stringResource(R.string.question_number, item.questionNumber),
-                                        fontWeight = FontWeight.SemiBold,
-                                        fontSize = 13.sp,
-                                        color = TextPrimary
-                                    )
-                                    Text(
-                                        text = "Peak: ${(topRatio * 100).toInt()}% • Conf: ${(item.confidence * 100).toInt()}%",
-                                        fontSize = 11.sp,
-                                        color = TextSecondary
-                                    )
-                                }
-                                Box(
-                                    modifier = Modifier
-                                        .clip(RoundedCornerShape(8.dp))
-                                        .background(badgeBg)
-                                        .border(1.dp, badgeBorder, RoundedCornerShape(8.dp))
-                                        .padding(horizontal = 10.dp, vertical = 4.dp)
-                                ) {
-                                    Text(
-                                        text = label,
-                                        color = badgeColor,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 12.sp
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-
-                // 6. Default Page Size Card
-                LiquidGlassCard(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(22.dp),
-                    fillColor = GlassFill,
-                    showSpecular = true
-                ) {
-                    Column(modifier = Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        Text(
-                            text = stringResource(R.string.default_page_size),
-                            fontWeight = FontWeight.SemiBold,
-                            fontSize = 14.sp,
-                            color = TextPrimary
-                        )
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            val a4Selected = defaultPageSize == "A4"
-                            LiquidGlassChip(
-                                selected = a4Selected,
-                                onClick = { defaultPageSize = "A4" },
-                                label = stringResource(R.string.format_a4),
-                                modifier = Modifier.weight(1f)
-                            )
-
-                            val letterSelected = defaultPageSize == "LETTER"
-                            LiquidGlassChip(
-                                selected = letterSelected,
-                                onClick = { defaultPageSize = "LETTER" },
-                                label = stringResource(R.string.format_letter),
+                        themes.forEach { (code, label, icon) ->
+                            val isSelected = currentSettings.themeMode == code
+                            MarklifyChip(
+                                selected = isSelected,
+                                onClick = {
+                                    viewModel.setThemeMode(code)
+                                    HapticManager.performBubbleDetectedTick(context, currentSettings.hapticsEnabled)
+                                },
+                                label = "$icon $label",
                                 modifier = Modifier.weight(1f)
                             )
                         }
                     }
                 }
+            }
 
-                // 7. Save Settings Button
-                LiquidGlassButton(
-                    onClick = {
-                        viewModel.saveThresholdSettings(
-                            fillThreshold = fillThreshold,
-                            unansweredThreshold = unansweredThreshold,
-                            multipleDiffMargin = multipleDiffMargin,
-                            ambiguousDiffMargin = ambiguousDiffMargin,
-                            defaultPageSize = defaultPageSize
+            // 2. Language Picker Card
+            MarklifyCard(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(imageVector = Icons.Default.Language, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Text(
+                            text = stringResource(R.string.language_section),
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 15.sp,
+                            color = MaterialTheme.colorScheme.onSurface
                         )
-                        HapticManager.performSubmissionSuccess(context, currentSettings.hapticsEnabled)
-                        Toast.makeText(context, context.getString(R.string.settings_saved_toast), Toast.LENGTH_SHORT).show()
-                    },
+                    }
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        val languages = listOf(
+                            Triple("en", stringResource(R.string.language_en), "🇺🇸"),
+                            Triple("uz", stringResource(R.string.language_uz), "🇺🇿"),
+                            Triple("ru", stringResource(R.string.language_ru), "🇷🇺")
+                        )
+                        languages.forEach { (code, label, flag) ->
+                            val isSelected = currentSettings.appLanguage == code
+                            MarklifyChip(
+                                selected = isSelected,
+                                onClick = {
+                                    viewModel.setAppLanguage(code)
+                                    HapticManager.performBubbleDetectedTick(context, currentSettings.hapticsEnabled)
+                                },
+                                label = "$flag $label",
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+                    }
+                }
+            }
+
+            // 3. Tactile Haptic Feedback Switch Card
+            MarklifyCard(modifier = Modifier.fillMaxWidth()) {
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .testTag("save_settings_button"),
-                    variant = GlassButtonVariant.Primary,
-                    icon = Icons.Default.Save,
-                    text = stringResource(R.string.save_settings)
-                )
-
-                // 8. Database Backup & Restore Card
-                LiquidGlassCard(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(22.dp),
-                    fillColor = GlassFill,
-                    showSpecular = true
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Column(modifier = Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(imageVector = Icons.Default.Backup, contentDescription = null, tint = TextPrimary)
-                            Spacer(modifier = Modifier.width(10.dp))
-                            Text(
-                                text = stringResource(R.string.backup_section),
-                                fontWeight = FontWeight.SemiBold,
-                                fontSize = 14.sp,
-                                color = TextPrimary
-                            )
-                        }
-                        Text(
-                            text = stringResource(R.string.backup_desc),
-                            fontSize = 12.sp,
-                            color = TextSecondary
-                        )
-
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(10.dp)
-                        ) {
-                            LiquidGlassButton(
-                                onClick = {
-                                    isExporting = true
-                                    viewModel.exportDatabaseBackup(context) { file ->
-                                        isExporting = false
-                                        DataBackupManager.shareFile(
-                                            context = context,
-                                            file = file,
-                                            mimeType = "application/json",
-                                            chooserTitle = context.getString(R.string.export_backup_chooser)
-                                        )
-                                    }
-                                },
-                                modifier = Modifier.weight(1f),
-                                variant = GlassButtonVariant.Neutral,
-                                icon = Icons.Default.Download,
-                                text = stringResource(R.string.export_json)
-                            )
-
-                            LiquidGlassButton(
-                                onClick = { filePickerLauncher.launch("application/json") },
-                                modifier = Modifier.weight(1f),
-                                variant = GlassButtonVariant.Neutral,
-                                icon = Icons.Default.Upload,
-                                text = stringResource(R.string.restore_json)
-                            )
-                        }
-                    }
-                }
-
-                // Restore Dialog in Liquid Glass
-                importMessage?.let { msg ->
-                    LiquidGlassDialog(
-                        onDismissRequest = { importMessage = null }
+                    Row(
+                        modifier = Modifier.weight(1f),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(
-                            text = stringResource(R.string.backup_restored_title),
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 18.sp,
-                            color = TextPrimary
+                        Icon(
+                            imageVector = Icons.Default.Vibration,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(24.dp)
                         )
-                        Spacer(modifier = Modifier.height(12.dp))
-                        Text(
-                            text = msg,
-                            color = TextSecondary,
-                            fontSize = 14.sp,
-                            lineHeight = 20.sp
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column {
+                            Text(
+                                text = stringResource(R.string.haptics_section),
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 15.sp,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = stringResource(R.string.haptics_desc),
+                                fontSize = 12.sp,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+
+                    MarklifySwitch(
+                        checked = currentSettings.hapticsEnabled,
+                        onCheckedChange = {
+                            viewModel.setHapticsEnabled(it)
+                            if (it) HapticManager.performSubmissionSuccess(context, true)
+                        }
+                    )
+                }
+            }
+
+            // 4. Default Page Size Card
+            MarklifyCard(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Text(
+                        text = stringResource(R.string.default_page_size),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 15.sp,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        val a4Selected = defaultPageSize == "A4"
+                        MarklifyChip(
+                            selected = a4Selected,
+                            onClick = { defaultPageSize = "A4" },
+                            label = stringResource(R.string.format_a4),
+                            modifier = Modifier.weight(1f)
                         )
-                        Spacer(modifier = Modifier.height(20.dp))
-                        LiquidGlassButton(
-                            text = stringResource(R.string.done),
-                            onClick = { importMessage = null },
-                            modifier = Modifier.fillMaxWidth(),
-                            variant = GlassButtonVariant.Primary
+
+                        val letterSelected = defaultPageSize == "LETTER"
+                        MarklifyChip(
+                            selected = letterSelected,
+                            onClick = { defaultPageSize = "LETTER" },
+                            label = stringResource(R.string.format_letter),
+                            modifier = Modifier.weight(1f)
                         )
                     }
                 }
-
-                Spacer(modifier = Modifier.height(24.dp))
             }
+
+            // 5. Database Backup & Restore Card
+            MarklifyCard(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(imageVector = Icons.Default.Backup, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Text(
+                            text = stringResource(R.string.backup_section),
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 15.sp,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                    Text(
+                        text = stringResource(R.string.backup_desc),
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        MarklifyButton(
+                            onClick = {
+                                isExporting = true
+                                viewModel.exportDatabaseBackup(context) { file ->
+                                    isExporting = false
+                                    DataBackupManager.shareFile(
+                                        context = context,
+                                        file = file,
+                                        mimeType = "application/json",
+                                        chooserTitle = context.getString(R.string.export_backup_chooser)
+                                    )
+                                }
+                            },
+                            modifier = Modifier.weight(1f),
+                            variant = MarklifyButtonVariant.Neutral,
+                            icon = Icons.Default.Download,
+                            text = stringResource(R.string.export_json)
+                        )
+
+                        MarklifyButton(
+                            onClick = { filePickerLauncher.launch("application/json") },
+                            modifier = Modifier.weight(1f),
+                            variant = MarklifyButtonVariant.Neutral,
+                            icon = Icons.Default.Upload,
+                            text = stringResource(R.string.restore_json)
+                        )
+                    }
+                }
+            }
+
+            // Save Settings Button
+            MarklifyButton(
+                onClick = {
+                    viewModel.saveThresholdSettings(
+                        fillThreshold = fillThreshold,
+                        unansweredThreshold = unansweredThreshold,
+                        multipleDiffMargin = multipleDiffMargin,
+                        ambiguousDiffMargin = ambiguousDiffMargin,
+                        defaultPageSize = defaultPageSize
+                    )
+                    HapticManager.performSubmissionSuccess(context, currentSettings.hapticsEnabled)
+                    Toast.makeText(context, context.getString(R.string.settings_saved_toast), Toast.LENGTH_SHORT).show()
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("save_settings_button"),
+                variant = MarklifyButtonVariant.Primary,
+                icon = Icons.Default.Save,
+                text = stringResource(R.string.save_settings)
+            )
+
+            // Restore Dialog
+            importMessage?.let { msg ->
+                MarklifyDialog(
+                    onDismissRequest = { importMessage = null }
+                ) {
+                    Text(
+                        text = stringResource(R.string.backup_restored_title),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Text(
+                        text = msg,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontSize = 14.sp,
+                        lineHeight = 20.sp
+                    )
+                    Spacer(modifier = Modifier.height(20.dp))
+                    MarklifyButton(
+                        text = stringResource(R.string.done),
+                        onClick = { importMessage = null },
+                        modifier = Modifier.fillMaxWidth(),
+                        variant = MarklifyButtonVariant.Primary
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }
-
-private data class Quad<A, B, C, D>(val first: A, val second: B, val third: C, val fourth: D)
