@@ -1,10 +1,22 @@
 package com.example.util
 
 import android.content.Context
+import android.content.ContextWrapper
 import android.content.res.Configuration
+import android.content.res.Resources
 import android.os.Build
 import android.os.LocaleList
+import androidx.activity.result.ActivityResultRegistryOwner
 import java.util.Locale
+
+class LocalizedContextWrapper(
+    baseContext: Context,
+    private val localizedResourcesContext: Context
+) : ContextWrapper(baseContext) {
+    override fun getResources(): Resources {
+        return localizedResourcesContext.resources
+    }
+}
 
 object LocaleHelper {
 
@@ -32,6 +44,18 @@ object LocaleHelper {
             config.locale = locale
         }
 
-        return context.createConfigurationContext(config)
+        val configContext = context.createConfigurationContext(config)
+        return LocalizedContextWrapper(context, configContext)
     }
+}
+
+fun Context.findActivityResultRegistryOwner(): ActivityResultRegistryOwner? {
+    var currentContext: Context? = this
+    while (currentContext is ContextWrapper) {
+        if (currentContext is ActivityResultRegistryOwner) {
+            return currentContext
+        }
+        currentContext = currentContext.baseContext
+    }
+    return currentContext as? ActivityResultRegistryOwner
 }
