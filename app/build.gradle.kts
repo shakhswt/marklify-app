@@ -20,29 +20,51 @@ android {
   }
 
   signingConfigs {
-    create("release") {
-      val keystorePath = System.getenv("KEYSTORE_PATH") ?: "${rootDir}/my-upload-key.jks"
-      storeFile = file(keystorePath)
-      storePassword = System.getenv("STORE_PASSWORD")
-      keyAlias = "upload"
-      keyPassword = System.getenv("KEY_PASSWORD")
+    val releaseKeystorePath = System.getenv("KEYSTORE_PATH")
+    val hasReleaseKeystore = releaseKeystorePath != null && file(releaseKeystorePath).exists()
+
+    if (hasReleaseKeystore) {
+      create("release") {
+        storeFile = file(releaseKeystorePath)
+        storePassword = System.getenv("STORE_PASSWORD")
+        keyAlias = System.getenv("KEY_ALIAS") ?: "upload"
+        keyPassword = System.getenv("KEY_PASSWORD")
+      }
     }
-    create("debugConfig") {
-      storeFile = file("${rootDir}/debug.keystore")
-      storePassword = "android"
-      keyAlias = "androiddebugkey"
-      keyPassword = "android"
+
+    val customDebugKeystore = file("${rootDir}/debug.keystore")
+    if (customDebugKeystore.exists()) {
+      create("debugConfig") {
+        storeFile = customDebugKeystore
+        storePassword = "android"
+        keyAlias = "androiddebugkey"
+        keyPassword = "android"
+      }
     }
   }
 
   buildTypes {
     release {
       isCrunchPngs = false
-      isMinifyEnabled = false
+      isMinifyEnabled = true
+      isShrinkResources = true
       proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-      signingConfig = signingConfigs.getByName("release")
+      val releaseKeystorePath = System.getenv("KEYSTORE_PATH")
+      val hasReleaseKeystore = releaseKeystorePath != null && file(releaseKeystorePath).exists()
+      val allowDebugForRelease = System.getenv("ALLOW_DEBUG_SIGNING_FOR_RELEASE") == "true"
+      if (hasReleaseKeystore) {
+        signingConfig = signingConfigs.getByName("release")
+      } else if (allowDebugForRelease || project.hasProperty("localReleaseVerification")) {
+        // Explicit opt-in for local assembleRelease verification only
+        signingConfig = signingConfigs.findByName("debugConfig") ?: signingConfigs.getByName("debug")
+      }
     }
-    debug { signingConfig = signingConfigs.getByName("debugConfig") }
+    debug {
+      val customDebugKeystore = file("${rootDir}/debug.keystore")
+      if (customDebugKeystore.exists()) {
+        signingConfig = signingConfigs.getByName("debugConfig")
+      }
+    }
   }
   compileOptions {
     sourceCompatibility = JavaVersion.VERSION_11

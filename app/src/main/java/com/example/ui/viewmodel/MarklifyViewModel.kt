@@ -20,6 +20,7 @@ import com.example.omr.OmrEngine
 import com.example.omr.processing.AnswerDetector
 import com.example.omr.processing.DetectedQuestionAnswer
 import com.example.omr.processing.ScoringEngine
+import androidx.room.withTransaction
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -158,8 +159,8 @@ class MarklifyViewModel(application: Application) : AndroidViewModel(application
         defaultPageSize: String = appSettings.value.defaultPageSize
     ) {
         viewModelScope.launch(Dispatchers.IO) {
-            val updated = AppSettings(
-                id = 1,
+            val current = settingsDao.getSettings() ?: AppSettings()
+            val updated = current.copy(
                 fillThreshold = fillThreshold,
                 unansweredThreshold = unansweredThreshold,
                 multipleDiffMargin = multipleDiffMargin,
@@ -176,12 +177,28 @@ class MarklifyViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
+    fun setAppLanguage(language: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val current = settingsDao.getSettings() ?: AppSettings()
+            settingsDao.saveSettings(current.copy(appLanguage = language))
+        }
+    }
+
+    fun setHapticsEnabled(enabled: Boolean) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val current = settingsDao.getSettings() ?: AppSettings()
+            settingsDao.saveSettings(current.copy(hapticsEnabled = enabled))
+        }
+    }
+
     fun resetThresholdsToDefault() {
+        val current = appSettings.value
         saveThresholdSettings(
             fillThreshold = AnswerDetector.DEFAULT_FILL_THRESHOLD,
             unansweredThreshold = AnswerDetector.DEFAULT_UNANSWERED_THRESHOLD,
             multipleDiffMargin = AnswerDetector.DEFAULT_MULTIPLE_DIFF_MARGIN,
-            ambiguousDiffMargin = AnswerDetector.DEFAULT_AMBIGUOUS_DIFF_MARGIN
+            ambiguousDiffMargin = AnswerDetector.DEFAULT_AMBIGUOUS_DIFF_MARGIN,
+            defaultPageSize = current.defaultPageSize
         )
     }
 
@@ -489,35 +506,46 @@ class MarklifyViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    fun importDatabaseBackup(jsonString: String, onComplete: (BackupImportStats) -> Unit) {
+    fun importDatabaseBackup(
+        jsonString: String,
+        onError: (String) -> Unit = {},
+        onComplete: (BackupImportStats) -> Unit
+    ) {
         viewModelScope.launch(Dispatchers.IO) {
-            val data = DataBackupManager.parseBackupJson(jsonString)
+            try {
+                val data = DataBackupManager.parseBackupJson(jsonString)
+                db.withTransaction {
+                    for (topic in data.topics) {
+                        topicDao.insertTopic(topic)
+                    }
+                    for (test in data.tests) {
+                        testDao.insertTest(test)
+                    }
+                    if (data.questions.isNotEmpty()) {
+                        questionDao.insertQuestions(data.questions)
+                    }
+                    for (scan in data.scanResults) {
+                        scanResultDao.insertScanResult(scan)
+                    }
+                    if (data.detectedAnswers.isNotEmpty()) {
+                        detectedAnswerDao.insertAnswers(data.detectedAnswers)
+                    }
+                }
 
-            for (topic in data.topics) {
-                topicDao.insertTopic(topic)
-            }
-            for (test in data.tests) {
-                testDao.insertTest(test)
-            }
-            if (data.questions.isNotEmpty()) {
-                questionDao.insertQuestions(data.questions)
-            }
-            for (scan in data.scanResults) {
-                scanResultDao.insertScanResult(scan)
-            }
-            if (data.detectedAnswers.isNotEmpty()) {
-                detectedAnswerDao.insertAnswers(data.detectedAnswers)
-            }
+                val stats = BackupImportStats(
+                    topicCount = data.topics.size,
+                    testCount = data.tests.size,
+                    questionCount = data.questions.size,
+                    scanCount = data.scanResults.size
+                )
 
-            val stats = BackupImportStats(
-                topicCount = data.topics.size,
-                testCount = data.tests.size,
-                questionCount = data.questions.size,
-                scanCount = data.scanResults.size
-            )
-
-            withContext(Dispatchers.Main) {
-                onComplete(stats)
+                withContext(Dispatchers.Main) {
+                    onComplete(stats)
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    onError(e.localizedMessage ?: "Failed to restore backup")
+                }
             }
         }
     }

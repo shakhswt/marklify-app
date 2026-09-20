@@ -6,7 +6,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -24,17 +23,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.R
 import com.example.data.entity.TestEntity
 import com.example.data.entity.Topic
 import com.example.ui.components.GlassButtonVariant
 import com.example.ui.components.LiquidGlassBackdrop
 import com.example.ui.components.LiquidGlassButton
 import com.example.ui.components.LiquidGlassCard
+import com.example.ui.components.LiquidGlassDialog
+import com.example.ui.components.LiquidGlassEmptyState
+import com.example.ui.components.LiquidGlassFAB
+import com.example.ui.components.LiquidGlassTextField
 import com.example.ui.components.LiquidGlassTopAppBar
-import com.example.ui.components.liquidGlassSurface
 import com.example.ui.theme.*
 import com.example.ui.viewmodel.MarklifyViewModel
 import java.text.SimpleDateFormat
@@ -65,53 +69,34 @@ fun TopicDetailScreen(
         Scaffold(
             topBar = {
                 LiquidGlassTopAppBar(
-                    title = { Text(topic?.name ?: "Topic Tests", fontWeight = FontWeight.Bold) },
+                    title = { Text(topic?.name ?: stringResource(R.string.topic_tests_title), fontWeight = FontWeight.Bold) },
                     navigationIcon = {
                         IconButton(onClick = onNavigateBack) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = "Back",
+                                contentDescription = stringResource(R.string.back),
                                 tint = TextPrimary
                             )
                         }
                     },
                     actions = {
                         IconButton(onClick = { showCreateTestDialog = true }) {
-                            Icon(imageVector = Icons.Default.Add, contentDescription = "Add Test", tint = TextPrimary)
+                            Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = stringResource(R.string.create_test),
+                                tint = TextPrimary
+                            )
                         }
                     }
                 )
             },
             floatingActionButton = {
-                Box(
-                    modifier = Modifier
-                        .liquidGlassSurface(
-                            shape = RoundedCornerShape(22.dp),
-                            fillColor = GlassFillElevated,
-                            showSpecular = true,
-                            elevation = 8.dp
-                        )
-                        .clickable { showCreateTestDialog = true }
-                        .testTag("create_test_fab")
-                        .padding(horizontal = 20.dp, vertical = 14.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Default.Add,
-                            contentDescription = null,
-                            tint = TextPrimary,
-                            modifier = Modifier.size(20.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = "Create Test",
-                            color = TextPrimary,
-                            fontWeight = FontWeight.SemiBold,
-                            fontSize = 14.sp
-                        )
-                    }
-                }
+                LiquidGlassFAB(
+                    icon = Icons.Default.Add,
+                    onClick = { showCreateTestDialog = true },
+                    modifier = Modifier.testTag("create_test_fab"),
+                    contentDescription = stringResource(R.string.create_test_dialog)
+                )
             },
             containerColor = Color.Transparent
         ) { padding ->
@@ -130,38 +115,11 @@ fun TopicDetailScreen(
                             .weight(1f),
                         contentAlignment = Alignment.Center
                     ) {
-                        LiquidGlassCard(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(24.dp),
-                            shape = RoundedCornerShape(24.dp),
-                            fillColor = GlassFill
-                        ) {
-                            Column(
-                                modifier = Modifier.padding(32.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(56.dp)
-                                        .clip(CircleShape)
-                                        .background(GlassFillElevated)
-                                        .border(1.dp, GlassBorderBright, CircleShape),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Assignment,
-                                        contentDescription = null,
-                                        tint = TextSecondary,
-                                        modifier = Modifier.size(28.dp)
-                                    )
-                                }
-                                Spacer(modifier = Modifier.height(14.dp))
-                                Text("No tests in this topic yet", color = TextPrimary, fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
-                                Spacer(modifier = Modifier.height(6.dp))
-                                Text("Tap + to add a test and configure its answer key.", color = TextSecondary, fontSize = 13.sp)
-                            }
-                        }
+                        LiquidGlassEmptyState(
+                            icon = Icons.Default.Assignment,
+                            title = stringResource(R.string.no_tests_in_topic),
+                            description = stringResource(R.string.no_tests_in_topic_hint)
+                        )
                     }
                 } else {
                     LazyColumn(
@@ -216,7 +174,7 @@ fun TopicDetailScreen(
                                                     color = TextPrimary
                                                 )
                                                 Text(
-                                                    text = "${test.questionCount} Questions  •  $dateStr",
+                                                    text = stringResource(R.string.questions_and_date, test.questionCount, dateStr),
                                                     fontSize = 12.sp,
                                                     color = TextSecondary
                                                 )
@@ -227,7 +185,7 @@ fun TopicDetailScreen(
                                             IconButton(onClick = { testToRename = test }) {
                                                 Icon(
                                                     imageVector = Icons.Default.Edit,
-                                                    contentDescription = "Rename Test",
+                                                    contentDescription = stringResource(R.string.rename_test_title),
                                                     tint = TextSecondary,
                                                     modifier = Modifier.size(18.dp)
                                                 )
@@ -235,7 +193,7 @@ fun TopicDetailScreen(
                                             IconButton(onClick = { testToDelete = test }) {
                                                 Icon(
                                                     imageVector = Icons.Default.Delete,
-                                                    contentDescription = "Delete",
+                                                    contentDescription = stringResource(R.string.delete),
                                                     tint = ErrorRed,
                                                     modifier = Modifier.size(18.dp)
                                                 )
@@ -253,7 +211,7 @@ fun TopicDetailScreen(
                                             modifier = Modifier.weight(1f),
                                             variant = GlassButtonVariant.Neutral,
                                             icon = Icons.Default.Print,
-                                            text = "Sheet PDF"
+                                            text = stringResource(R.string.sheet_pdf)
                                         )
 
                                         LiquidGlassButton(
@@ -265,7 +223,7 @@ fun TopicDetailScreen(
                                             modifier = Modifier.weight(1f),
                                             variant = GlassButtonVariant.Success,
                                             icon = Icons.Default.CameraAlt,
-                                            text = "Scan"
+                                            text = stringResource(R.string.scan_sheet)
                                         )
                                     }
                                 }
@@ -282,33 +240,48 @@ fun TopicDetailScreen(
         var testName by remember { mutableStateOf("") }
         var questionCountText by remember { mutableStateOf("20") }
 
-        AlertDialog(
-            onDismissRequest = { showCreateTestDialog = false },
-            containerColor = FrostedBarBackground,
-            shape = RoundedCornerShape(24.dp),
-            title = { Text("Create Test", color = TextPrimary, fontWeight = FontWeight.Bold) },
-            text = {
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    OutlinedTextField(
-                        value = testName,
-                        onValueChange = { testName = it },
-                        label = { Text("Test Name (e.g. Unit 3 Test)") },
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    OutlinedTextField(
-                        value = questionCountText,
-                        onValueChange = { questionCountText = it.filter { c -> c.isDigit() }.take(3) },
-                        label = { Text("Number of Questions (1–100)") },
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-            },
-            confirmButton = {
+        LiquidGlassDialog(
+            onDismissRequest = { showCreateTestDialog = false }
+        ) {
+            Text(
+                text = stringResource(R.string.create_test_dialog),
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp,
+                color = TextPrimary
+            )
+            Spacer(modifier = Modifier.height(14.dp))
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                LiquidGlassTextField(
+                    value = testName,
+                    onValueChange = { testName = it },
+                    label = stringResource(R.string.test_name_hint),
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                LiquidGlassTextField(
+                    value = questionCountText,
+                    onValueChange = { questionCountText = it.filter { c -> c.isDigit() }.take(3) },
+                    label = stringResource(R.string.question_count_label),
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+            Spacer(modifier = Modifier.height(18.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
                 LiquidGlassButton(
-                    text = "Create",
+                    text = stringResource(R.string.cancel),
+                    variant = GlassButtonVariant.Neutral,
+                    modifier = Modifier.weight(1f),
+                    onClick = { showCreateTestDialog = false }
+                )
+                LiquidGlassButton(
+                    text = stringResource(R.string.create_test),
+                    variant = GlassButtonVariant.Primary,
                     enabled = testName.isNotBlank(),
+                    modifier = Modifier.weight(1f),
                     onClick = {
                         val count = questionCountText.toIntOrNull()?.coerceIn(1, 100) ?: 20
                         if (testName.isNotBlank()) {
@@ -318,60 +291,85 @@ fun TopicDetailScreen(
                         }
                     }
                 )
-            },
-            dismissButton = {
-                TextButton(onClick = { showCreateTestDialog = false }) {
-                    Text("Cancel", color = TextSecondary)
-                }
             }
-        )
+        }
     }
 
     testToDelete?.let { test ->
-        AlertDialog(
-            onDismissRequest = { testToDelete = null },
-            containerColor = FrostedBarBackground,
-            shape = RoundedCornerShape(24.dp),
-            title = { Text("Delete Test?", color = TextPrimary, fontWeight = FontWeight.Bold) },
-            text = { Text("Are you sure you want to delete '${test.name}' and all associated questions & scan history?", color = TextSecondary) },
-            confirmButton = {
+        LiquidGlassDialog(
+            onDismissRequest = { testToDelete = null }
+        ) {
+            Text(
+                text = stringResource(R.string.delete_test_title),
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp,
+                color = TextPrimary
+            )
+            Spacer(modifier = Modifier.height(10.dp))
+            Text(
+                text = stringResource(R.string.delete_test_message, test.name),
+                color = TextSecondary,
+                fontSize = 14.sp
+            )
+            Spacer(modifier = Modifier.height(18.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
                 LiquidGlassButton(
-                    text = "Delete",
+                    text = stringResource(R.string.cancel),
+                    variant = GlassButtonVariant.Neutral,
+                    modifier = Modifier.weight(1f),
+                    onClick = { testToDelete = null }
+                )
+                LiquidGlassButton(
+                    text = stringResource(R.string.delete),
                     variant = GlassButtonVariant.Danger,
+                    modifier = Modifier.weight(1f),
                     onClick = {
                         viewModel.deleteTest(test)
                         testToDelete = null
                     }
                 )
-            },
-            dismissButton = {
-                TextButton(onClick = { testToDelete = null }) {
-                    Text("Cancel", color = TextSecondary)
-                }
             }
-        )
+        }
     }
 
     testToRename?.let { testItem ->
         var renameTestText by remember(testItem) { mutableStateOf(testItem.name) }
-        AlertDialog(
-            onDismissRequest = { testToRename = null },
-            containerColor = FrostedBarBackground,
-            shape = RoundedCornerShape(24.dp),
-            title = { Text("Rename Test", color = TextPrimary, fontWeight = FontWeight.Bold) },
-            text = {
-                OutlinedTextField(
-                    value = renameTestText,
-                    onValueChange = { renameTestText = it },
-                    label = { Text("New Test Name") },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            },
-            confirmButton = {
+        LiquidGlassDialog(
+            onDismissRequest = { testToRename = null }
+        ) {
+            Text(
+                text = stringResource(R.string.rename_test_title),
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp,
+                color = TextPrimary
+            )
+            Spacer(modifier = Modifier.height(14.dp))
+            LiquidGlassTextField(
+                value = renameTestText,
+                onValueChange = { renameTestText = it },
+                label = stringResource(R.string.new_test_name_label),
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(18.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
                 LiquidGlassButton(
-                    text = "Rename",
+                    text = stringResource(R.string.cancel),
+                    variant = GlassButtonVariant.Neutral,
+                    modifier = Modifier.weight(1f),
+                    onClick = { testToRename = null }
+                )
+                LiquidGlassButton(
+                    text = stringResource(R.string.rename),
+                    variant = GlassButtonVariant.Primary,
                     enabled = renameTestText.isNotBlank(),
+                    modifier = Modifier.weight(1f),
                     onClick = {
                         if (renameTestText.isNotBlank()) {
                             viewModel.renameTest(testItem.id, renameTestText)
@@ -379,12 +377,7 @@ fun TopicDetailScreen(
                         }
                     }
                 )
-            },
-            dismissButton = {
-                TextButton(onClick = { testToRename = null }) {
-                    Text("Cancel", color = TextSecondary)
-                }
             }
-        )
+        }
     }
 }

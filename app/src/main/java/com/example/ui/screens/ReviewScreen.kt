@@ -20,10 +20,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.R
 import com.example.data.entity.Question
 import com.example.omr.processing.DetectedQuestionAnswer
 import com.example.ui.components.GlassButtonVariant
@@ -32,9 +35,12 @@ import com.example.ui.components.LiquidGlassBadge
 import com.example.ui.components.LiquidGlassBottomBar
 import com.example.ui.components.LiquidGlassButton
 import com.example.ui.components.LiquidGlassCard
+import com.example.ui.components.LiquidGlassDialog
+import com.example.ui.components.LiquidGlassTextField
 import com.example.ui.components.LiquidGlassTopAppBar
 import com.example.ui.theme.*
 import com.example.ui.viewmodel.MarklifyViewModel
+import com.example.util.HapticManager
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -43,6 +49,8 @@ fun ReviewScreen(
     onNavigateBack: () -> Unit,
     onConfirmAndScore: (Long) -> Unit
 ) {
+    val context = LocalContext.current
+    val appSettings by viewModel.appSettings.collectAsState()
     val test by viewModel.selectedTest.collectAsState()
     val questions by viewModel.selectedQuestions.collectAsState()
     val warpedBitmap by viewModel.scannedBitmap.collectAsState()
@@ -63,9 +71,9 @@ fun ReviewScreen(
                 LiquidGlassTopAppBar(
                     title = {
                         Column {
-                            Text("Review Detected Answers", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                            Text(stringResource(R.string.review_title), fontWeight = FontWeight.Bold, fontSize = 18.sp)
                             Text(
-                                text = if (flaggedCount > 0) "$flaggedCount flagged for review" else "All answers detected cleanly",
+                                text = if (flaggedCount > 0) stringResource(R.string.flagged_count, flaggedCount) else stringResource(R.string.all_clean),
                                 fontSize = 11.sp,
                                 color = if (flaggedCount > 0) WarningAmber else SuccessGreen
                             )
@@ -75,7 +83,7 @@ fun ReviewScreen(
                         IconButton(onClick = onNavigateBack) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = "Back",
+                                contentDescription = stringResource(R.string.back),
                                 tint = TextPrimary
                             )
                         }
@@ -86,13 +94,13 @@ fun ReviewScreen(
                 LiquidGlassBottomBar {
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = "${reviewAnswers.size} / ${questions.size} Answered",
+                            text = stringResource(R.string.answered_ratio, reviewAnswers.size, questions.size),
                             fontWeight = FontWeight.SemiBold,
                             fontSize = 13.sp,
                             color = TextPrimary
                         )
                         Text(
-                            text = "Student: ${studentName.ifBlank { "Anonymous" }}",
+                            text = stringResource(R.string.student_prefix, studentName.ifBlank { stringResource(R.string.student_anonymous) }),
                             fontSize = 11.sp,
                             color = TextSecondary,
                             maxLines = 1
@@ -102,13 +110,14 @@ fun ReviewScreen(
                     LiquidGlassButton(
                         onClick = {
                             viewModel.confirmAndScore { resultId ->
+                                HapticManager.performSubmissionSuccess(context, appSettings.hapticsEnabled)
                                 onConfirmAndScore(resultId)
                             }
                         },
                         modifier = Modifier.testTag("confirm_and_score_button"),
                         variant = GlassButtonVariant.Success,
                         icon = Icons.Default.CheckCircle,
-                        text = "Confirm & Score"
+                        text = stringResource(R.string.confirm_and_score)
                     )
                 }
             },
@@ -135,7 +144,7 @@ fun ReviewScreen(
                             verticalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
                             Text(
-                                text = "Student Details",
+                                text = stringResource(R.string.student_details),
                                 fontWeight = FontWeight.SemiBold,
                                 fontSize = 14.sp,
                                 color = TextPrimary
@@ -144,19 +153,19 @@ fun ReviewScreen(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
-                                OutlinedTextField(
+                                LiquidGlassTextField(
                                     value = studentName,
                                     onValueChange = { viewModel.studentName.value = it },
-                                    label = { Text("Student Name") },
+                                    label = stringResource(R.string.student_name_label),
                                     singleLine = true,
                                     modifier = Modifier
                                         .weight(1f)
                                         .testTag("student_name_input")
                                 )
-                                OutlinedTextField(
+                                LiquidGlassTextField(
                                     value = studentId,
                                     onValueChange = { viewModel.studentId.value = it },
-                                    label = { Text("Student ID") },
+                                    label = stringResource(R.string.student_id_label),
                                     singleLine = true,
                                     modifier = Modifier
                                         .weight(1f)
@@ -194,25 +203,25 @@ fun ReviewScreen(
                                     ) {
                                         Image(
                                             bitmap = warpedBitmap!!.asImageBitmap(),
-                                            contentDescription = "Scanned Sheet",
+                                            contentDescription = stringResource(R.string.scanned_sheet_capture),
                                             modifier = Modifier.fillMaxSize()
                                         )
                                     }
                                     Spacer(modifier = Modifier.width(14.dp))
                                     Column {
                                         Text(
-                                            text = "Aligned Sheet Capture",
+                                            text = stringResource(R.string.scanned_sheet_capture),
                                             fontWeight = FontWeight.SemiBold,
                                             fontSize = 14.sp,
                                             color = TextPrimary
                                         )
                                         Text(
-                                            text = "Top-down normalized perspective",
+                                            text = stringResource(R.string.top_down_perspective),
                                             fontSize = 12.sp,
                                             color = TextSecondary
                                         )
                                         Text(
-                                            text = "Tap to enlarge photo",
+                                            text = stringResource(R.string.tap_to_enlarge),
                                             fontSize = 11.sp,
                                             color = TextSecondary
                                         )
@@ -226,7 +235,7 @@ fun ReviewScreen(
                 // Question Items with manual overrides
                 item {
                     Text(
-                        text = "Verify Answers (Tap letter to override):",
+                        text = stringResource(R.string.verify_answers_hint),
                         fontWeight = FontWeight.SemiBold,
                         fontSize = 14.sp,
                         color = TextPrimary
@@ -255,35 +264,42 @@ fun ReviewScreen(
     }
 
     if (showFullImageDialog && warpedBitmap != null) {
-        AlertDialog(
-            onDismissRequest = { showFullImageDialog = false },
-            containerColor = FrostedBarBackground,
-            shape = RoundedCornerShape(24.dp),
-            title = { Text("Scanned Sheet Capture", color = TextPrimary, fontWeight = FontWeight.Bold) },
-            text = {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(1200f / 1600f)
-                        .clip(RoundedCornerShape(12.dp))
-                        .border(1.dp, GlassBorderBright, RoundedCornerShape(12.dp))
-                        .background(Color.White),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Image(
-                        bitmap = warpedBitmap!!.asImageBitmap(),
-                        contentDescription = "Full Sheet",
-                        modifier = Modifier.fillMaxSize()
-                    )
-                }
-            },
-            confirmButton = {
+        LiquidGlassDialog(
+            onDismissRequest = { showFullImageDialog = false }
+        ) {
+            Text(
+                text = stringResource(R.string.scanned_sheet_capture),
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp,
+                color = TextPrimary
+            )
+            Spacer(modifier = Modifier.height(14.dp))
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(1200f / 1600f)
+                    .clip(RoundedCornerShape(14.dp))
+                    .border(1.dp, GlassBorderBright, RoundedCornerShape(14.dp))
+                    .background(Color.White),
+                contentAlignment = Alignment.Center
+            ) {
+                Image(
+                    bitmap = warpedBitmap!!.asImageBitmap(),
+                    contentDescription = stringResource(R.string.scanned_sheet_capture),
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End
+            ) {
                 LiquidGlassButton(
-                    text = "Close",
+                    text = stringResource(R.string.close),
                     onClick = { showFullImageDialog = false }
                 )
             }
-        )
+        }
     }
 }
 
@@ -340,7 +356,7 @@ private fun ReviewQuestionCard(
                     )
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
-                        text = "(Key: ${question.correctAnswer})",
+                        text = stringResource(R.string.key_prefix, question.correctAnswer),
                         fontSize = 12.sp,
                         color = TextSecondary
                     )
@@ -351,7 +367,7 @@ private fun ReviewQuestionCard(
                     when {
                         detected.isMultiple -> {
                             LiquidGlassBadge(
-                                text = "Multiple Marked",
+                                text = stringResource(R.string.multiple_marked_flag),
                                 textColor = WarningAmber,
                                 backgroundColor = WarningAmberBg,
                                 borderColor = WarningAmberBorder
@@ -359,7 +375,7 @@ private fun ReviewQuestionCard(
                         }
                         detected.isAmbiguous -> {
                             LiquidGlassBadge(
-                                text = "Ambiguous Fill",
+                                text = stringResource(R.string.ambiguous_flag),
                                 textColor = WarningAmber,
                                 backgroundColor = WarningAmberBg,
                                 borderColor = WarningAmberBorder
@@ -367,7 +383,7 @@ private fun ReviewQuestionCard(
                         }
                         detected.isUnanswered -> {
                             LiquidGlassBadge(
-                                text = "Unanswered",
+                                text = stringResource(R.string.unanswered_flag),
                                 textColor = TextMuted,
                                 backgroundColor = GlassFillSubtle,
                                 borderColor = GlassBorderSubtle
@@ -375,7 +391,7 @@ private fun ReviewQuestionCard(
                         }
                         else -> {
                             LiquidGlassBadge(
-                                text = "Detected ${detected.detectedAnswer}",
+                                text = stringResource(R.string.detected_answer_badge, detected.detectedAnswer),
                                 textColor = SuccessGreen,
                                 backgroundColor = SuccessGreenBg,
                                 borderColor = SuccessGreenBorder
@@ -434,7 +450,7 @@ private fun ReviewQuestionCard(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "None",
+                        text = stringResource(R.string.none_answer),
                         fontWeight = FontWeight.Medium,
                         fontSize = 11.sp,
                         color = if (isUnanswered) WarningAmber else TextSecondary

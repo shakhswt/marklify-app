@@ -17,19 +17,24 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.R
 import com.example.data.entity.Question
 import com.example.data.entity.TestEntity
 import com.example.ui.components.GlassButtonVariant
 import com.example.ui.components.LiquidGlassBackdrop
 import com.example.ui.components.LiquidGlassButton
 import com.example.ui.components.LiquidGlassCard
+import com.example.ui.components.LiquidGlassTextField
 import com.example.ui.components.LiquidGlassTopAppBar
 import com.example.ui.theme.*
 import com.example.ui.viewmodel.MarklifyViewModel
+import com.example.util.HapticManager
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -38,6 +43,8 @@ fun TestEditorScreen(
     viewModel: MarklifyViewModel,
     onNavigateBack: () -> Unit
 ) {
+    val context = LocalContext.current
+    val appSettings by viewModel.appSettings.collectAsState()
     var test by remember { mutableStateOf<TestEntity?>(null) }
     val initialQuestions by viewModel.getQuestionsForTest(testId).collectAsState(initial = emptyList())
     var editableQuestions by remember { mutableStateOf<List<Question>>(emptyList()) }
@@ -61,15 +68,15 @@ fun TestEditorScreen(
                 LiquidGlassTopAppBar(
                     title = {
                         Column {
-                            Text(test?.name ?: "Edit Questions", fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                            Text("${editableQuestions.size} Questions (1–100)", fontSize = 11.sp, color = TextSecondary)
+                            Text(test?.name ?: stringResource(R.string.edit_questions_title), fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                            Text(stringResource(R.string.questions_count_range, editableQuestions.size), fontSize = 11.sp, color = TextSecondary)
                         }
                     },
                     navigationIcon = {
                         IconButton(onClick = onNavigateBack) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = "Back",
+                                contentDescription = stringResource(R.string.back),
                                 tint = TextPrimary
                             )
                         }
@@ -78,12 +85,13 @@ fun TestEditorScreen(
                         LiquidGlassButton(
                             onClick = {
                                 viewModel.updateQuestionsBatch(editableQuestions)
+                                HapticManager.performSubmissionSuccess(context, appSettings.hapticsEnabled)
                                 showSavedSnackbar = true
                             },
                             modifier = Modifier.testTag("save_questions_button"),
                             variant = GlassButtonVariant.Neutral,
                             icon = Icons.Default.Save,
-                            text = "Save"
+                            text = stringResource(R.string.save)
                         )
                     }
                 )
@@ -96,11 +104,11 @@ fun TestEditorScreen(
                         contentColor = TextPrimary,
                         action = {
                             TextButton(onClick = { showSavedSnackbar = false }) {
-                                Text("OK", color = TextPrimary, fontWeight = FontWeight.Bold)
+                                Text(stringResource(R.string.done), color = TextPrimary, fontWeight = FontWeight.Bold)
                             }
                         }
                     ) {
-                        Text("All questions & answer keys saved successfully!")
+                        Text(stringResource(R.string.questions_saved_toast))
                     }
                 }
             },
@@ -130,8 +138,8 @@ fun TestEditorScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Column {
-                                Text("Question Count", fontWeight = FontWeight.SemiBold, fontSize = 14.sp, color = TextPrimary)
-                                Text("Quickly adjust number of items", fontSize = 11.sp, color = TextSecondary)
+                                Text(stringResource(R.string.question_count_label), fontWeight = FontWeight.SemiBold, fontSize = 14.sp, color = TextPrimary)
+                                Text(stringResource(R.string.quick_adjust_items), fontSize = 11.sp, color = TextSecondary)
                             }
 
                             Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -227,19 +235,19 @@ private fun QuestionEditorCard(
                     }
                     Spacer(modifier = Modifier.width(10.dp))
                     Text(
-                        text = "Question #${question.questionNumber}",
+                        text = stringResource(R.string.question_number, question.questionNumber),
                         fontWeight = FontWeight.SemiBold,
                         fontSize = 14.sp,
                         color = TextPrimary
                     )
                 }
 
-                // Correct Answer key selector: Saturated color ONLY for semantic selected key
+                // Correct Answer key selector
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
-                    Text("Key:", fontSize = 12.sp, color = TextSecondary)
+                    Text(stringResource(R.string.key_label), fontSize = 12.sp, color = TextSecondary)
                     listOf("A", "B", "C", "D").forEach { letter ->
                         val isSelected = question.correctAnswer.equals(letter, ignoreCase = true)
                         Box(
@@ -270,10 +278,10 @@ private fun QuestionEditorCard(
             }
 
             // Question Text Input
-            OutlinedTextField(
+            LiquidGlassTextField(
                 value = question.questionText,
                 onValueChange = { onUpdate(question.copy(questionText = it)) },
-                label = { Text("Question Text (optional)") },
+                label = stringResource(R.string.question_text_label),
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
             )
@@ -283,17 +291,17 @@ private fun QuestionEditorCard(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                OutlinedTextField(
+                LiquidGlassTextField(
                     value = question.optionA,
                     onValueChange = { onUpdate(question.copy(optionA = it)) },
-                    label = { Text("Option A") },
+                    label = stringResource(R.string.option_a_label),
                     modifier = Modifier.weight(1f),
                     singleLine = true
                 )
-                OutlinedTextField(
+                LiquidGlassTextField(
                     value = question.optionB,
                     onValueChange = { onUpdate(question.copy(optionB = it)) },
-                    label = { Text("Option B") },
+                    label = stringResource(R.string.option_b_label),
                     modifier = Modifier.weight(1f),
                     singleLine = true
                 )
@@ -304,17 +312,17 @@ private fun QuestionEditorCard(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                OutlinedTextField(
+                LiquidGlassTextField(
                     value = question.optionC,
                     onValueChange = { onUpdate(question.copy(optionC = it)) },
-                    label = { Text("Option C") },
+                    label = stringResource(R.string.option_c_label),
                     modifier = Modifier.weight(1f),
                     singleLine = true
                 )
-                OutlinedTextField(
+                LiquidGlassTextField(
                     value = question.optionD,
                     onValueChange = { onUpdate(question.copy(optionD = it)) },
-                    label = { Text("Option D") },
+                    label = stringResource(R.string.option_d_label),
                     modifier = Modifier.weight(1f),
                     singleLine = true
                 )

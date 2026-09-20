@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -22,12 +21,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.R
 import com.example.data.backup.DataBackupManager
 import com.example.data.entity.GradedTestRecord
 import com.example.data.entity.ScanResult
@@ -35,6 +35,10 @@ import com.example.ui.components.GlassButtonVariant
 import com.example.ui.components.LiquidGlassBackdrop
 import com.example.ui.components.LiquidGlassButton
 import com.example.ui.components.LiquidGlassCard
+import com.example.ui.components.LiquidGlassChip
+import com.example.ui.components.LiquidGlassDialog
+import com.example.ui.components.LiquidGlassEmptyState
+import com.example.ui.components.LiquidGlassSearchField
 import com.example.ui.components.LiquidGlassTopAppBar
 import com.example.ui.theme.*
 import com.example.ui.viewmodel.MarklifyViewModel
@@ -120,15 +124,15 @@ fun HistoryScreen(
                 LiquidGlassTopAppBar(
                     title = {
                         Column {
-                            Text("Graded Tests History", fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                            Text("$totalGraded Total Graded Records", fontSize = 11.sp, color = TextSecondary)
+                            Text(stringResource(R.string.history_title), fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                            Text(stringResource(R.string.graded_sheets_count, totalGraded), fontSize = 11.sp, color = TextSecondary)
                         }
                     },
                     navigationIcon = {
                         IconButton(onClick = onNavigateBack) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = "Back",
+                                contentDescription = stringResource(R.string.back),
                                 tint = TextPrimary
                             )
                         }
@@ -156,7 +160,7 @@ fun HistoryScreen(
                                 } else {
                                     Icon(
                                         imageVector = Icons.Default.FileDownload,
-                                        contentDescription = "Export History to CSV",
+                                        contentDescription = stringResource(R.string.export_all_csv),
                                         tint = TextPrimary
                                     )
                                 }
@@ -166,7 +170,7 @@ fun HistoryScreen(
                         // Sort menu button
                         Box {
                             IconButton(onClick = { showSortMenu = true }) {
-                                Icon(imageVector = Icons.Default.Sort, contentDescription = "Sort Options", tint = TextPrimary)
+                                Icon(imageVector = Icons.Default.Sort, contentDescription = stringResource(R.string.sort), tint = TextPrimary)
                             }
                             DropdownMenu(
                                 expanded = showSortMenu,
@@ -223,7 +227,7 @@ fun HistoryScreen(
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Text(
-                                        text = "Overall Performance",
+                                        text = stringResource(R.string.overall_performance),
                                         fontWeight = FontWeight.Bold,
                                         fontSize = 15.sp,
                                         color = TextPrimary
@@ -236,7 +240,7 @@ fun HistoryScreen(
                                             .padding(horizontal = 10.dp, vertical = 4.dp)
                                     ) {
                                         Text(
-                                            text = "${passRate.toInt()}% Pass Rate",
+                                            text = stringResource(R.string.pass_rate_badge, passRate.toInt()),
                                             fontWeight = FontWeight.SemiBold,
                                             fontSize = 12.sp,
                                             color = if (passRate >= 60f) SuccessGreen else WarningAmber
@@ -256,13 +260,13 @@ fun HistoryScreen(
                                         modifier = Modifier.weight(1f)
                                     )
                                     HistoryStatBox(
-                                        title = "Avg Score",
+                                        title = stringResource(R.string.average_label),
                                         value = "${averageScore.toInt()}%",
                                         color = if (averageScore >= 70f) SuccessGreen else WarningAmber,
                                         modifier = Modifier.weight(1f)
                                     )
                                     HistoryStatBox(
-                                        title = "Highest",
+                                        title = stringResource(R.string.highest_label),
                                         value = "${topScore.toInt()}%",
                                         color = SuccessGreen,
                                         modifier = Modifier.weight(1f)
@@ -275,30 +279,10 @@ fun HistoryScreen(
 
                 // Search Bar
                 item {
-                    OutlinedTextField(
+                    LiquidGlassSearchField(
                         value = searchQuery,
                         onValueChange = { searchQuery = it },
-                        placeholder = { Text("Search by student name, ID, or test...", color = TextSecondary) },
-                        leadingIcon = {
-                            Icon(imageVector = Icons.Default.Search, contentDescription = null, tint = TextSecondary)
-                        },
-                        trailingIcon = {
-                            if (searchQuery.isNotEmpty()) {
-                                IconButton(onClick = { searchQuery = "" }) {
-                                    Icon(imageVector = Icons.Default.Clear, contentDescription = "Clear search", tint = TextSecondary)
-                                }
-                            }
-                        },
-                        singleLine = true,
-                        shape = RoundedCornerShape(18.dp),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedContainerColor = GlassFillElevated,
-                            unfocusedContainerColor = GlassFill,
-                            focusedBorderColor = GlassBorderBright,
-                            unfocusedBorderColor = GlassBorder,
-                            focusedTextColor = TextPrimary,
-                            unfocusedTextColor = TextPrimary
-                        ),
+                        placeholder = stringResource(R.string.search_history_placeholder),
                         modifier = Modifier
                             .fillMaxWidth()
                             .testTag("history_search_input")
@@ -312,26 +296,11 @@ fun HistoryScreen(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         items(HistoryScoreFilter.values()) { filter ->
-                            val isSelected = selectedFilter == filter
-                            Box(
-                                modifier = Modifier
-                                    .clip(RoundedCornerShape(16.dp))
-                                    .background(if (isSelected) GlassFillElevated else GlassFillSubtle)
-                                    .border(
-                                        1.dp,
-                                        if (isSelected) GlassBorderBright else GlassBorderSubtle,
-                                        RoundedCornerShape(16.dp)
-                                    )
-                                    .clickable { selectedFilter = filter }
-                                    .padding(horizontal = 14.dp, vertical = 8.dp)
-                            ) {
-                                Text(
-                                    text = filter.label,
-                                    fontSize = 12.sp,
-                                    fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
-                                    color = if (isSelected) TextPrimary else TextSecondary
-                                )
-                            }
+                            LiquidGlassChip(
+                                selected = selectedFilter == filter,
+                                onClick = { selectedFilter = filter },
+                                label = filter.label
+                            )
                         }
                     }
                 }
@@ -339,57 +308,19 @@ fun HistoryScreen(
                 // Graded Test History List
                 if (filteredRecords.isEmpty()) {
                     item {
-                        LiquidGlassCard(
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(22.dp),
-                            fillColor = GlassFill
-                        ) {
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(36.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.Center
-                            ) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(54.dp)
-                                        .clip(CircleShape)
-                                        .background(GlassFillElevated)
-                                        .border(1.dp, GlassBorderBright, CircleShape),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.AssignmentLate,
-                                        contentDescription = null,
-                                        tint = TextSecondary,
-                                        modifier = Modifier.size(28.dp)
-                                    )
-                                }
-                                Spacer(modifier = Modifier.height(14.dp))
-                                Text(
-                                    text = if (searchQuery.isNotBlank() || selectedFilter != HistoryScoreFilter.ALL) {
-                                        "No matching graded tests"
-                                    } else {
-                                        "No graded tests history yet"
-                                    },
-                                    fontWeight = FontWeight.Bold,
-                                    color = TextPrimary,
-                                    fontSize = 16.sp
-                                )
-                                Spacer(modifier = Modifier.height(6.dp))
-                                Text(
-                                    text = if (searchQuery.isNotBlank()) {
-                                        "Try clearing search or changing your filter criteria."
-                                    } else {
-                                        "Completed test scans and student grades will automatically appear here."
-                                    },
-                                    color = TextSecondary,
-                                    fontSize = 13.sp,
-                                    textAlign = TextAlign.Center
-                                )
+                        LiquidGlassEmptyState(
+                            icon = Icons.Default.AssignmentLate,
+                            title = if (searchQuery.isNotBlank() || selectedFilter != HistoryScoreFilter.ALL) {
+                                stringResource(R.string.no_matching_graded_tests)
+                            } else {
+                                stringResource(R.string.no_history_title)
+                            },
+                            description = if (searchQuery.isNotBlank()) {
+                                stringResource(R.string.no_matching_hint)
+                            } else {
+                                stringResource(R.string.no_history_desc)
                             }
-                        }
+                        )
                     }
                 } else {
                     items(filteredRecords, key = { it.id }) { record ->
@@ -410,21 +341,36 @@ fun HistoryScreen(
 
     // Delete Confirmation Dialog
     recordToDelete?.let { record ->
-        AlertDialog(
-            onDismissRequest = { recordToDelete = null },
-            containerColor = FrostedBarBackground,
-            shape = RoundedCornerShape(24.dp),
-            title = { Text("Delete Graded Record?", color = TextPrimary, fontWeight = FontWeight.Bold) },
-            text = {
-                Text(
-                    "Are you sure you want to permanently delete the graded test record for '${record.studentName}' (${record.testName})?",
-                    color = TextSecondary
-                )
-            },
-            confirmButton = {
+        LiquidGlassDialog(
+            onDismissRequest = { recordToDelete = null }
+        ) {
+            Text(
+                text = stringResource(R.string.delete_result_title),
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp,
+                color = TextPrimary
+            )
+            Spacer(modifier = Modifier.height(10.dp))
+            Text(
+                text = stringResource(R.string.delete_result_message, record.studentName),
+                color = TextSecondary,
+                fontSize = 14.sp
+            )
+            Spacer(modifier = Modifier.height(18.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
                 LiquidGlassButton(
-                    text = "Delete",
+                    text = stringResource(R.string.cancel),
+                    variant = GlassButtonVariant.Neutral,
+                    modifier = Modifier.weight(1f),
+                    onClick = { recordToDelete = null }
+                )
+                LiquidGlassButton(
+                    text = stringResource(R.string.delete),
                     variant = GlassButtonVariant.Danger,
+                    modifier = Modifier.weight(1f),
                     onClick = {
                         val scanResult = ScanResult(
                             id = record.id,
@@ -447,13 +393,8 @@ fun HistoryScreen(
                         Toast.makeText(context, "Graded test record deleted", Toast.LENGTH_SHORT).show()
                     }
                 )
-            },
-            dismissButton = {
-                TextButton(onClick = { recordToDelete = null }) {
-                    Text("Cancel", color = TextSecondary)
-                }
             }
-        )
+        }
     }
 }
 
@@ -570,14 +511,14 @@ private fun GradedTestHistoryCard(
                     IconButton(onClick = onDelete) {
                         Icon(
                             imageVector = Icons.Default.Delete,
-                            contentDescription = "Delete record",
+                            contentDescription = stringResource(R.string.delete),
                             tint = ErrorRed,
                             modifier = Modifier.size(18.dp)
                         )
                     }
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                        contentDescription = "View detail",
+                        contentDescription = null,
                         tint = TextSecondary,
                         modifier = Modifier.size(16.dp)
                     )
@@ -604,10 +545,10 @@ private fun GradedTestHistoryCard(
                     ScoreStatPill(label = "✓ ${record.correct}", color = SuccessGreen, bg = SuccessGreenBg, border = SuccessGreenBorder)
                     ScoreStatPill(label = "✗ ${record.wrong}", color = ErrorRed, bg = ErrorRedBg, border = ErrorRedBorder)
                     if (record.multipleMarked > 0) {
-                        ScoreStatPill(label = "⚠ ${record.multipleMarked} Multi", color = WarningAmber, bg = WarningAmberBg, border = WarningAmberBorder)
+                        ScoreStatPill(label = "⚠ ${record.multipleMarked}", color = WarningAmber, bg = WarningAmberBg, border = WarningAmberBorder)
                     }
                     if (record.unanswered > 0) {
-                        ScoreStatPill(label = "— ${record.unanswered} Blank", color = TextSecondary, bg = GlassFillSubtle, border = GlassBorderSubtle)
+                        ScoreStatPill(label = "— ${record.unanswered}", color = TextSecondary, bg = GlassFillSubtle, border = GlassBorderSubtle)
                     }
                 }
 

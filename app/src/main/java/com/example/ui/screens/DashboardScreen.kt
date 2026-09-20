@@ -10,24 +10,28 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.Assignment
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.R
 import com.example.data.entity.ScanResult
-import com.example.data.entity.TestEntity
+import com.example.ui.components.*
 import com.example.ui.theme.*
 import com.example.ui.viewmodel.MarklifyViewModel
+import com.example.util.HapticManager
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -45,22 +49,24 @@ fun DashboardScreen(
     onNavigateToSettings: () -> Unit,
     onNavigateToHistory: () -> Unit
 ) {
+    val context = LocalContext.current
     val topicCount by viewModel.topicCount.collectAsState()
     val testCount by viewModel.testCount.collectAsState()
     val scanCount by viewModel.scanCount.collectAsState()
     val allTests by viewModel.allTests.collectAsState()
     val recentScans by viewModel.recentScanResults.collectAsState()
     val topics by viewModel.topics.collectAsState()
+    val appSettings by viewModel.appSettings.collectAsState()
 
     var showCreateTopicDialog by remember { mutableStateOf(false) }
     var showCreateTestDialog by remember { mutableStateOf(false) }
     var showSelectTestForSheetDialog by remember { mutableStateOf(false) }
     var showSelectTestForScanDialog by remember { mutableStateOf(false) }
 
-    com.example.ui.components.LiquidGlassBackdrop(animated = true) {
+    LiquidGlassBackdrop(animated = true) {
         Scaffold(
             topBar = {
-                com.example.ui.components.LiquidGlassTopAppBar(
+                LiquidGlassTopAppBar(
                     title = {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Box(
@@ -81,13 +87,13 @@ fun DashboardScreen(
                             Spacer(modifier = Modifier.width(12.dp))
                             Column {
                                 Text(
-                                    text = "Marklify",
+                                    text = stringResource(R.string.app_name),
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 19.sp,
                                     color = TextPrimary
                                 )
                                 Text(
-                                    text = "OMR Sheet Creator & Auto-Grader",
+                                    text = stringResource(R.string.app_tagline),
                                     fontSize = 11.sp,
                                     color = TextSecondary
                                 )
@@ -101,7 +107,7 @@ fun DashboardScreen(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Folder,
-                                contentDescription = "View Topics",
+                                contentDescription = stringResource(R.string.dashboard_topics),
                                 tint = TextSecondary
                             )
                         }
@@ -111,7 +117,7 @@ fun DashboardScreen(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Settings,
-                                contentDescription = "Scanner Settings & Calibration",
+                                contentDescription = stringResource(R.string.settings_title),
                                 tint = TextSecondary
                             )
                         }
@@ -120,392 +126,426 @@ fun DashboardScreen(
             },
             containerColor = Color.Transparent
         ) { padding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            // Stats Row
-            item {
-                Spacer(modifier = Modifier.height(4.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    StatCard(
-                        title = "Topics",
-                        count = topicCount.toString(),
-                        icon = Icons.Default.Folder,
-                        accentColor = ElectricBlue,
-                        modifier = Modifier
-                            .weight(1f)
-                            .clickable { onNavigateToTopics() }
-                    )
-                    StatCard(
-                        title = "Tests",
-                        count = testCount.toString(),
-                        icon = Icons.Default.Assignment,
-                        accentColor = IndigoAccent,
-                        modifier = Modifier.weight(1f)
-                    )
-                    StatCard(
-                        title = "Scans",
-                        count = scanCount.toString(),
-                        icon = Icons.Default.QrCodeScanner,
-                        accentColor = PurpleAccent,
-                        modifier = Modifier
-                            .weight(1f)
-                            .clickable { onNavigateToHistory() }
-                    )
-                }
-            }
-
-            // Quick Actions Header
-            item {
-                Text(
-                    text = "Quick Actions",
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 16.sp,
-                    color = TextPrimary
-                )
-            }
-
-            // 4 Grid Action Buttons
-            item {
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                // Stats Row
+                item {
+                    Spacer(modifier = Modifier.height(4.dp))
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
-                        ActionCard(
-                            title = "Create Topic",
-                            subtitle = "Organize tests by subject",
-                            icon = Icons.Default.CreateNewFolder,
-                            color = ElectricBlue,
+                        StatCard(
+                            title = stringResource(R.string.dashboard_topics),
+                            count = topicCount.toString(),
+                            icon = Icons.Default.Folder,
                             modifier = Modifier
                                 .weight(1f)
-                                .testTag("create_topic_button"),
-                            onClick = { showCreateTopicDialog = true }
+                                .clickable { onNavigateToTopics() }
                         )
-                        ActionCard(
-                            title = "Create Test",
-                            subtitle = "Questions & answer keys",
-                            icon = Icons.Default.AddBox,
-                            color = IndigoAccent,
-                            modifier = Modifier
-                                .weight(1f)
-                                .testTag("create_test_button"),
-                            onClick = {
-                                if (topics.isEmpty()) {
-                                    showCreateTopicDialog = true
-                                } else {
-                                    showCreateTestDialog = true
-                                }
-                            }
+                        StatCard(
+                            title = stringResource(R.string.dashboard_tests),
+                            count = testCount.toString(),
+                            icon = Icons.AutoMirrored.Filled.Assignment,
+                            modifier = Modifier.weight(1f)
                         )
-                    }
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        ActionCard(
-                            title = "Generate Sheet",
-                            subtitle = "Printable OMR bubble form",
-                            icon = Icons.Default.Print,
-                            color = PurpleAccent,
+                        StatCard(
+                            title = stringResource(R.string.dashboard_graded_sheets),
+                            count = scanCount.toString(),
+                            icon = Icons.Default.QrCodeScanner,
                             modifier = Modifier
                                 .weight(1f)
-                                .testTag("generate_sheet_button"),
-                            onClick = { showSelectTestForSheetDialog = true }
-                        )
-                        ActionCard(
-                            title = "Scan Sheet",
-                            subtitle = "CameraX & OpenCV auto-grade",
-                            icon = Icons.Default.CameraAlt,
-                            color = SuccessGreen,
-                            modifier = Modifier
-                                .weight(1f)
-                                .testTag("scan_sheet_button"),
-                            onClick = { showSelectTestForScanDialog = true }
+                                .clickable { onNavigateToHistory() }
                         )
                     }
                 }
-            }
 
-            // Recent Scans Section
-            item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
+                // Quick Actions Header
+                item {
                     Text(
-                        text = "Recent Scan Results",
+                        text = stringResource(R.string.quick_actions),
                         fontWeight = FontWeight.SemiBold,
                         fontSize = 16.sp,
                         color = TextPrimary
                     )
-                    TextButton(
-                        onClick = onNavigateToHistory,
-                        modifier = Modifier.testTag("view_full_history_button")
-                    ) {
-                        Text(
-                            text = "View Full History →",
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = ElectricBlue
-                        )
-                    }
                 }
-            }
 
-            if (recentScans.isEmpty()) {
+                // 4 Grid Action Buttons
                 item {
-                    com.example.ui.components.LiquidGlassCard(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(22.dp),
-                        fillColor = GlassFill,
-                        showSpecular = true
-                    ) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(32.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
+                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
-                            Box(
+                            ActionCard(
+                                title = stringResource(R.string.create_topic),
+                                subtitle = stringResource(R.string.create_topic_desc),
+                                icon = Icons.Default.CreateNewFolder,
                                 modifier = Modifier
-                                    .size(54.dp)
-                                    .clip(CircleShape)
-                                    .background(GlassFillElevated)
-                                    .border(1.dp, GlassBorderBright, CircleShape),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Scanner,
-                                    contentDescription = null,
-                                    tint = TextSecondary,
-                                    modifier = Modifier.size(28.dp)
-                                )
-                            }
-                            Spacer(modifier = Modifier.height(14.dp))
-                            Text(
-                                text = "No scans completed yet",
-                                fontWeight = FontWeight.SemiBold,
-                                color = TextPrimary,
-                                fontSize = 15.sp
+                                    .weight(1f)
+                                    .testTag("create_topic_button"),
+                                onClick = { showCreateTopicDialog = true }
                             )
-                            Spacer(modifier = Modifier.height(6.dp))
-                            Text(
-                                text = "Generate a blank sheet, print or display it, and tap 'Scan Sheet' to auto-grade.",
-                                color = TextSecondary,
-                                fontSize = 13.sp,
-                                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                            ActionCard(
+                                title = stringResource(R.string.create_test),
+                                subtitle = stringResource(R.string.create_test_desc),
+                                icon = Icons.Default.AddBox,
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .testTag("create_test_button"),
+                                onClick = {
+                                    if (topics.isEmpty()) {
+                                        showCreateTopicDialog = true
+                                    } else {
+                                        showCreateTestDialog = true
+                                    }
+                                }
+                            )
+                        }
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            ActionCard(
+                                title = stringResource(R.string.generate_sheet),
+                                subtitle = stringResource(R.string.generate_sheet_desc),
+                                icon = Icons.Default.Print,
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .testTag("generate_sheet_button"),
+                                onClick = { showSelectTestForSheetDialog = true }
+                            )
+                            ActionCard(
+                                title = stringResource(R.string.scan_sheet),
+                                subtitle = stringResource(R.string.scan_sheet_desc),
+                                icon = Icons.Default.CameraAlt,
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .testTag("scan_sheet_button"),
+                                onClick = { showSelectTestForScanDialog = true }
                             )
                         }
                     }
                 }
-            } else {
-                items(recentScans, key = { it.id }) { scan ->
-                    RecentScanCard(
-                        scan = scan,
-                        onClick = { onNavigateToResultDetail(scan.id) }
-                    )
-                }
-            }
 
-            item {
-                Spacer(modifier = Modifier.height(24.dp))
+                // Recent Graded Sheets Section
+                item {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = stringResource(R.string.recent_scans),
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 16.sp,
+                            color = TextPrimary
+                        )
+
+                        if (recentScans.isNotEmpty()) {
+                            Text(
+                                text = stringResource(R.string.view_all_history),
+                                fontSize = 13.sp,
+                                color = TextSecondary,
+                                fontWeight = FontWeight.Medium,
+                                modifier = Modifier.clickable { onNavigateToHistory() }
+                            )
+                        }
+                    }
+                }
+
+                if (recentScans.isEmpty()) {
+                    item {
+                        LiquidGlassEmptyState(
+                            icon = Icons.Default.QrCodeScanner,
+                            title = stringResource(R.string.no_recent_scans),
+                            description = stringResource(R.string.no_recent_scans_desc)
+                        )
+                    }
+                } else {
+                    items(recentScans, key = { it.id }) { scan ->
+                        RecentScanCard(
+                            scan = scan,
+                            onClick = { onNavigateToResultDetail(scan.id) }
+                        )
+                    }
+                }
+
+                item {
+                    Spacer(modifier = Modifier.height(24.dp))
+                }
             }
         }
     }
 
-    // Dialog: Create Topic
+    // Dialog: Create Topic in Liquid Glass
     if (showCreateTopicDialog) {
         var topicName by remember { mutableStateOf("") }
-        AlertDialog(
-            onDismissRequest = { showCreateTopicDialog = false },
-            title = { Text("Create New Topic") },
-            text = {
-                OutlinedTextField(
-                    value = topicName,
-                    onValueChange = { topicName = it },
-                    label = { Text("Topic Name (e.g. Mathematics)") },
-                    singleLine = true,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag("topic_name_input")
+        LiquidGlassDialog(
+            onDismissRequest = { showCreateTopicDialog = false }
+        ) {
+            Text(
+                text = stringResource(R.string.create_topic_dialog_title),
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp,
+                color = TextPrimary
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            LiquidGlassTextField(
+                value = topicName,
+                onValueChange = { topicName = it },
+                label = stringResource(R.string.topic_name_label),
+                placeholder = "e.g. Mathematics",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("topic_name_input")
+            )
+            Spacer(modifier = Modifier.height(20.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                LiquidGlassButton(
+                    text = stringResource(R.string.cancel),
+                    onClick = { showCreateTopicDialog = false },
+                    modifier = Modifier.weight(1f),
+                    variant = GlassButtonVariant.Neutral
                 )
-            },
-            confirmButton = {
-                Button(
+                LiquidGlassButton(
+                    text = stringResource(R.string.confirm),
                     onClick = {
                         if (topicName.isNotBlank()) {
                             viewModel.createTopic(topicName) {
+                                HapticManager.performSubmissionSuccess(context, appSettings.hapticsEnabled)
                                 showCreateTopicDialog = false
                             }
                         }
                     },
                     enabled = topicName.isNotBlank(),
-                    modifier = Modifier.testTag("save_topic_button")
-                ) {
-                    Text("Create")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showCreateTopicDialog = false }) {
-                    Text("Cancel")
-                }
+                    modifier = Modifier
+                        .weight(1f)
+                        .testTag("save_topic_button"),
+                    variant = GlassButtonVariant.Primary
+                )
             }
-        )
+        }
     }
 
-    // Dialog: Create Test
+    // Dialog: Create Test in Liquid Glass
     if (showCreateTestDialog) {
         var testName by remember { mutableStateOf("") }
         var questionCountText by remember { mutableStateOf("20") }
         var selectedTopicId by remember { mutableStateOf(topics.firstOrNull()?.id ?: 0L) }
 
-        AlertDialog(
-            onDismissRequest = { showCreateTestDialog = false },
-            title = { Text("Create New Test") },
-            text = {
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Text("Select Topic:", fontSize = 12.sp, color = TextSecondary)
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        topics.take(3).forEach { topic ->
-                            FilterChip(
-                                selected = selectedTopicId == topic.id,
-                                onClick = { selectedTopicId = topic.id },
-                                label = { Text(topic.name, maxLines = 1, overflow = TextOverflow.Ellipsis) }
-                            )
-                        }
-                    }
+        LiquidGlassDialog(
+            onDismissRequest = { showCreateTestDialog = false }
+        ) {
+            Text(
+                text = stringResource(R.string.create_test_dialog_title),
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp,
+                color = TextPrimary
+            )
+            Spacer(modifier = Modifier.height(14.dp))
 
-                    OutlinedTextField(
-                        value = testName,
-                        onValueChange = { testName = it },
-                        label = { Text("Test Name (e.g. Midterm 2026)") },
-                        singleLine = true,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .testTag("test_name_input")
-                    )
-
-                    OutlinedTextField(
-                        value = questionCountText,
-                        onValueChange = { questionCountText = it.filter { char -> char.isDigit() }.take(3) },
-                        label = { Text("Question Count (1–100)") },
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth()
+            Text(
+                text = stringResource(R.string.select_topic_label),
+                fontSize = 12.sp,
+                color = TextSecondary,
+                fontWeight = FontWeight.Medium
+            )
+            Spacer(modifier = Modifier.height(6.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                topics.take(3).forEach { topic ->
+                    LiquidGlassChip(
+                        selected = selectedTopicId == topic.id,
+                        onClick = { selectedTopicId = topic.id },
+                        label = topic.name,
+                        modifier = Modifier.weight(1f)
                     )
                 }
-            },
-            confirmButton = {
-                Button(
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+            LiquidGlassTextField(
+                value = testName,
+                onValueChange = { testName = it },
+                label = stringResource(R.string.test_name_label),
+                placeholder = "e.g. Midterm 2026",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("test_name_input")
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+            LiquidGlassTextField(
+                value = questionCountText,
+                onValueChange = { questionCountText = it.filter { char -> char.isDigit() }.take(3) },
+                label = stringResource(R.string.question_count_label),
+                placeholder = "20",
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(20.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                LiquidGlassButton(
+                    text = stringResource(R.string.cancel),
+                    onClick = { showCreateTestDialog = false },
+                    modifier = Modifier.weight(1f),
+                    variant = GlassButtonVariant.Neutral
+                )
+                LiquidGlassButton(
+                    text = stringResource(R.string.confirm),
                     onClick = {
                         val count = questionCountText.toIntOrNull()?.coerceIn(1, 100) ?: 20
                         if (testName.isNotBlank() && selectedTopicId > 0) {
                             viewModel.createTest(selectedTopicId, testName, count) { newTestId ->
+                                HapticManager.performSubmissionSuccess(context, appSettings.hapticsEnabled)
                                 showCreateTestDialog = false
                                 onNavigateToTestDetail(newTestId)
                             }
                         }
                     },
                     enabled = testName.isNotBlank() && selectedTopicId > 0,
-                    modifier = Modifier.testTag("save_test_button")
-                ) {
-                    Text("Create Test")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showCreateTestDialog = false }) {
-                    Text("Cancel")
-                }
+                    modifier = Modifier
+                        .weight(1f)
+                        .testTag("save_test_button"),
+                    variant = GlassButtonVariant.Primary
+                )
             }
-        )
+        }
     }
 
-    // Dialog: Select Test for Blank Sheet
+    // Dialog: Select Test for Blank Sheet in Liquid Glass
     if (showSelectTestForSheetDialog) {
-        AlertDialog(
-            onDismissRequest = { showSelectTestForSheetDialog = false },
-            title = { Text("Select Test for OMR Sheet") },
-            text = {
-                if (allTests.isEmpty()) {
-                    Text("No tests found. Please create a test first.")
-                } else {
-                    LazyColumn(modifier = Modifier.heightIn(max = 280.dp)) {
-                        items(allTests) { test ->
-                            ListItem(
-                                headlineContent = { Text(test.name, fontWeight = FontWeight.SemiBold) },
-                                supportingContent = { Text("${test.questionCount} Questions") },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clickable {
-                                        showSelectTestForSheetDialog = false
-                                        onNavigateToSheetGenerator(test.id)
-                                    }
-                            )
+        LiquidGlassDialog(
+            onDismissRequest = { showSelectTestForSheetDialog = false }
+        ) {
+            Text(
+                text = stringResource(R.string.select_test_for_sheet),
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp,
+                color = TextPrimary
+            )
+            Spacer(modifier = Modifier.height(14.dp))
+
+            if (allTests.isEmpty()) {
+                Text(
+                    text = stringResource(R.string.no_tests_found),
+                    color = TextSecondary,
+                    fontSize = 13.sp
+                )
+            } else {
+                LazyColumn(
+                    modifier = Modifier.heightIn(max = 280.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(allTests) { test ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(14.dp))
+                                .background(GlassFillElevated)
+                                .border(1.dp, GlassBorderSubtle, RoundedCornerShape(14.dp))
+                                .clickable {
+                                    showSelectTestForSheetDialog = false
+                                    onNavigateToSheetGenerator(test.id)
+                                }
+                                .padding(14.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column {
+                                Text(test.name, fontWeight = FontWeight.SemiBold, fontSize = 14.sp, color = TextPrimary)
+                                Text(stringResource(R.string.questions_count, test.questionCount), fontSize = 12.sp, color = TextSecondary)
+                            }
+                            Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null, tint = TextSecondary, modifier = Modifier.size(16.dp))
                         }
                     }
                 }
-            },
-            confirmButton = {
-                TextButton(onClick = { showSelectTestForSheetDialog = false }) {
-                    Text("Close")
-                }
             }
-        )
+
+            Spacer(modifier = Modifier.height(18.dp))
+            LiquidGlassButton(
+                text = stringResource(R.string.close),
+                onClick = { showSelectTestForSheetDialog = false },
+                modifier = Modifier.fillMaxWidth(),
+                variant = GlassButtonVariant.Neutral
+            )
+        }
     }
 
-    // Dialog: Select Test for Scan Sheet
+    // Dialog: Select Test for Scan Sheet in Liquid Glass
     if (showSelectTestForScanDialog) {
-        AlertDialog(
-            onDismissRequest = { showSelectTestForScanDialog = false },
-            title = { Text("Select Test to Scan") },
-            text = {
-                if (allTests.isEmpty()) {
-                    Text("No tests found. Please create a test first.")
-                } else {
-                    LazyColumn(modifier = Modifier.heightIn(max = 280.dp)) {
-                        items(allTests) { test ->
-                            ListItem(
-                                headlineContent = { Text(test.name, fontWeight = FontWeight.SemiBold) },
-                                supportingContent = { Text("${test.questionCount} Questions") },
-                                trailingContent = {
-                                    Icon(
-                                        imageVector = Icons.Default.CameraAlt,
-                                        contentDescription = null,
-                                        tint = SuccessGreen
-                                    )
-                                },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clickable {
-                                        showSelectTestForScanDialog = false
-                                        viewModel.loadTestForScan(test.id) {
-                                            onNavigateToScanner(test.id)
-                                        }
+        LiquidGlassDialog(
+            onDismissRequest = { showSelectTestForScanDialog = false }
+        ) {
+            Text(
+                text = stringResource(R.string.select_test_for_scan),
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp,
+                color = TextPrimary
+            )
+            Spacer(modifier = Modifier.height(14.dp))
+
+            if (allTests.isEmpty()) {
+                Text(
+                    text = stringResource(R.string.no_tests_found),
+                    color = TextSecondary,
+                    fontSize = 13.sp
+                )
+            } else {
+                LazyColumn(
+                    modifier = Modifier.heightIn(max = 280.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(allTests) { test ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(14.dp))
+                                .background(GlassFillElevated)
+                                .border(1.dp, GlassBorderSubtle, RoundedCornerShape(14.dp))
+                                .clickable {
+                                    showSelectTestForScanDialog = false
+                                    viewModel.loadTestForScan(test.id) {
+                                        onNavigateToScanner(test.id)
                                     }
-                            )
+                                }
+                                .padding(14.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column {
+                                Text(test.name, fontWeight = FontWeight.SemiBold, fontSize = 14.sp, color = TextPrimary)
+                                Text(stringResource(R.string.questions_count, test.questionCount), fontSize = 12.sp, color = TextSecondary)
+                            }
+                            Icon(Icons.Default.CameraAlt, contentDescription = null, tint = SuccessGreen, modifier = Modifier.size(18.dp))
                         }
                     }
                 }
-            },
-            confirmButton = {
-                TextButton(onClick = { showSelectTestForScanDialog = false }) {
-                    Text("Close")
-                }
             }
-        )
-    }
+
+            Spacer(modifier = Modifier.height(18.dp))
+            LiquidGlassButton(
+                text = stringResource(R.string.close),
+                onClick = { showSelectTestForScanDialog = false },
+                modifier = Modifier.fillMaxWidth(),
+                variant = GlassButtonVariant.Neutral
+            )
+        }
     }
 }
 
@@ -514,10 +554,9 @@ private fun StatCard(
     title: String,
     count: String,
     icon: ImageVector,
-    accentColor: Color,
     modifier: Modifier = Modifier
 ) {
-    com.example.ui.components.LiquidGlassCard(
+    LiquidGlassCard(
         modifier = modifier,
         shape = RoundedCornerShape(20.dp),
         fillColor = GlassFill,
@@ -569,11 +608,10 @@ private fun ActionCard(
     title: String,
     subtitle: String,
     icon: ImageVector,
-    color: Color,
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
-    com.example.ui.components.LiquidGlassCard(
+    LiquidGlassCard(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(22.dp),
         fillColor = GlassFill,
@@ -629,14 +667,13 @@ private fun RecentScanCard(
         SimpleDateFormat("MMM d, HH:mm", Locale.getDefault()).format(Date(scan.scanTime))
     }
 
-    // High-contrast semantic glass pills: ONLY functional states get color tint
     val (scoreColor, scoreBg, scoreBorder) = when {
         scan.percentage >= 80f -> Triple(SuccessGreen, SuccessGreenBg, SuccessGreenBorder)
         scan.percentage >= 50f -> Triple(WarningAmber, WarningAmberBg, WarningAmberBorder)
         else -> Triple(ErrorRed, ErrorRedBg, ErrorRedBorder)
     }
 
-    com.example.ui.components.LiquidGlassCard(
+    LiquidGlassCard(
         modifier = Modifier
             .fillMaxWidth()
             .testTag("scan_result_item_${scan.id}"),
@@ -685,7 +722,14 @@ private fun RecentScanCard(
                         color = TextSecondary
                     )
                     Text(
-                        text = "Final Score: ${scan.finalScore.toInt()}/${scan.totalQuestions}  •  ✓ ${scan.correct}  ✗ ${scan.wrong}  — ${scan.unanswered}",
+                        text = stringResource(
+                            R.string.final_score_summary,
+                            scan.finalScore.toInt(),
+                            scan.totalQuestions,
+                            scan.correct,
+                            scan.wrong,
+                            scan.unanswered
+                        ),
                         fontSize = 12.sp,
                         color = TextMuted
                     )
@@ -694,7 +738,7 @@ private fun RecentScanCard(
 
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                contentDescription = "View Details",
+                contentDescription = stringResource(R.string.details),
                 tint = TextSecondary,
                 modifier = Modifier.size(18.dp)
             )

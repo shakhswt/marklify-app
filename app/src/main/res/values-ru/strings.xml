@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App & General -->
+    <string name="app_name">Marklify</string>
+    <string name="app_tagline">Создание и автопроверка бланков OMR</string>
+    <string name="back">Назад</string>
+    <string name="close">Закрыть</string>
+    <string name="cancel">Отмена</string>
+    <string name="save">Сохранить</string>
+    <string name="done">Готово</string>
+    <string name="delete">Удалить</string>
+    <string name="edit">Редактировать</string>
+    <string name="rename">Переименовать</string>
+    <string name="retry">Повторить</string>
+    <string name="search">Поиск</string>
+    <string name="search_hint">Поиск по учащемуся или тесту…</string>
+    <string name="filter">Фильтр</string>
+    <string name="sort">Сортировка</string>
+    <string name="export">Экспорт</string>
+    <string name="confirm">Подтвердить</string>
+    <string name="details">Подробнее</string>
+    <string name="success">Успешно</string>
+    <string name="error">Ошибка</string>
+    <string name="loading">Загрузка…</string>
+    <string name="share">Поделиться</string>
+    <string name="print">Печать</string>
+
+    <!-- Dashboard -->
+    <string name="dashboard_topics">Темы</string>
+    <string name="dashboard_tests">Тесты</string>
+    <string name="dashboard_graded_sheets">Проверенные</string>
+    <string name="quick_actions">Быстрые действия</string>
+    <string name="create_topic">Создать тему</string>
+    <string name="create_topic_desc">Добавить предмет или категорию</string>
+    <string name="create_test">Создать тест</string>
+    <string name="create_test_desc">Новый тест с ключом ответов</string>
+    <string name="generate_sheet">Сгенерировать бланк</string>
+    <string name="generate_sheet_desc">Печатный бланк ответов</string>
+    <string name="scan_sheet">Сканировать бланк</string>
+    <string name="scan_sheet_desc">Камера и автопроверка</string>
+    <string name="recent_scans">Недавние проверенные бланки</string>
+    <string name="view_all_history">Вся история</string>
+    <string name="no_recent_scans">Бланки пока не сканировались</string>
+    <string name="no_recent_scans_desc">Сканируйте бланки ответов учащихся с помощью камеры, чтобы мгновенно увидеть результаты здесь.</string>
+    <string name="create_topic_dialog_title">Создание новой темы</string>
+    <string name="topic_name_label">Название темы (например: Математика, Физика)</string>
+    <string name="create_test_dialog_title">Создание нового теста</string>
+    <string name="select_topic_label">Выберите тему</string>
+    <string name="test_name_label">Название теста (например: Промежуточный контроль 2026)</string>
+    <string name="question_count_label">Количество вопросов (1–100)</string>
+    <string name="select_test_for_sheet">Выберите тест для бланка</string>
+    <string name="select_test_for_scan">Выберите тест для сканирования</string>
+    <string name="no_tests_found">Тесты не найдены. Сначала создайте тест.</string>
+    <string name="questions_count">%1$d вопросов</string>
+    <string name="final_score_summary">Итоговый балл: %1$d/%2$d  •  ✓ %3$d  ✗ %4$d  — %5$d</string>
+
+    <!-- Topics & Topic Detail -->
+    <string name="topics_title">Темы и предметы</string>
+    <string name="no_topics_title">Темы пока не созданы</string>
+    <string name="no_topics_desc">Создайте предмет или категорию для организации тестов и ключей ответов.</string>
+    <string name="rename_topic">Переименовать тему</string>
+    <string name="delete_topic">Удалить тему</string>
+    <string name="delete_topic_confirm">Вы уверены, что хотите удалить «%1$s»? Все тесты и результаты проверок в этой теме также будут удалены.</string>
+    <string name="tests_in_topic">%1$d тестов</string>
+
+    <!-- Tests & Test Detail & Editor -->
+    <string name="test_detail_title">Детали теста</string>
+    <string name="edit_test">Редактировать тест</string>
+    <string name="delete_test">Удалить тест</string>
+    <string name="delete_test_confirm">Вы уверены, что хотите удалить «%1$s»? Все записи проверок для этого теста будут удалены.</string>
+    <string name="answer_key">Ключ ответов</string>
+    <string name="edit_key">Редактировать ключ</string>
+    <string name="question_number">Вопрос %1$d</string>
+    <string name="correct_answer">Правильный ответ: %1$s</string>
+    <string name="save_key">Сохранить ключ ответов</string>
+    <string name="key_saved_toast">Ключ ответов успешно сохранён</string>
+
+    <!-- Scanner -->
+    <string name="scanner_title">Сканирование бланка</string>
+    <string name="scanner_subtitle">%1$d вопросов • Совместите 4 угловых маркера</string>
+    <string name="looking_for_sheet">Поиск бланка…</string>
+    <string name="hold_steady">Бланк обнаружен! Держите неподвижно…</string>
+    <string name="capturing_photo">Съёмка в высоком разрешении…</string>
+    <string name="reading_bubbles">Распознавание меток на фото…</string>
+    <string name="sheet_not_found">Маркеры бланка не обнаружены. Обеспечьте хорошее освещение.</string>
+    <string name="failed_perspective">Не удалось выровнять перспективу бланка. Держите камеру ровно.</string>
+    <string name="manual_capture">Сделать снимок</string>
+    <string name="pick_photo">Выбрать из галереи</string>
+    <string name="scanning_from_photo">Сканирование из фотографии…</string>
+    <string name="opencv_unavailable_title">OpenCV недоступен</string>
+    <string name="opencv_unavailable_desc">Не удалось инициализировать OpenCV на этом устройстве. Функции сканирования временно недоступны.</string>
+    <string name="retry_opencv">Повторить инициализацию OpenCV</string>
+    <string name="go_back">Вернуться назад</string>
+    <string name="opencv_retry_success">OpenCV успешно инициализирован!</string>
+    <string name="opencv_retry_failed">Ошибка перезапуска OpenCV. Перезапустите приложение.</string>
+    <string name="camera_permission_required">Требуется доступ к камере</string>
+    <string name="camera_permission_desc">Marklify необходим доступ к камере для сканирования и автопроверки бланков ответов.</string>
+    <string name="grant_camera_permission">Предоставить доступ к камере</string>
+
+    <!-- Review -->
+    <string name="review_title">Проверка распознанных ответов</string>
+    <string name="all_clean">Все ответы распознаны чётко</string>
+    <string name="flagged_count">%1$d ответов требуют проверки преподавателем</string>
+    <string name="student_details">Данные учащегося</string>
+    <string name="student_name_label">Ф.И.О. учащегося</string>
+    <string name="student_id_label">ID / Номер учащегося</string>
+    <string name="view_scanned_sheet">Посмотреть скан бланка</string>
+    <string name="confirm_and_score">Подтвердить и оценить</string>
+    <string name="answered_ratio">%1$d / %2$d заполнено</string>
+    <string name="student_anonymous">Без имени</string>
+    <string name="student_prefix">Учащийся: %1$s</string>
+    <string name="flagged_for_review">ПРОВЕРИТЬ</string>
+    <string name="multiple_marked_flag">Несколько меток</string>
+    <string name="ambiguous_flag">Неоднозначно / Слабый контраст</string>
+    <string name="unanswered_flag">Не заполнено</string>
+    <string name="single_answer">Один ответ: %1$s</string>
+
+    <!-- Results & Result Detail -->
+    <string name="results_title">Результаты проверки</string>
+    <string name="student_score">Результат: %1$d/%2$d (%3$.0f%%)</string>
+    <string name="passed">Сдано</string>
+    <string name="needs_improvement">Требует внимания</string>
+    <string name="failed">Не сдано</string>
+    <string name="correct_answers">Верно</string>
+    <string name="wrong_answers">Неверно</string>
+    <string name="unanswered_answers">Пропущено</string>
+    <string name="multiple_answers">Несколько</string>
+    <string name="export_csv">Экспорт в CSV</string>
+    <string name="question_analysis">Детализация по вопросам</string>
+
+    <!-- History -->
+    <string name="history_title">История проверок</string>
+    <string name="all_records">Все проверенные бланки</string>
+    <string name="filter_by_test">Фильтр по тестам</string>
+    <string name="no_history_title">История пуста</string>
+    <string name="no_history_desc">Здесь будут отображаться завершённые сканирования и оценки.</string>
+    <string name="export_all_csv">Экспорт всей истории в CSV</string>
+
+    <!-- Sheet Generator -->
+    <string name="sheet_generator_title">Генератор бланков OMR</string>
+    <string name="sheet_format">Формат бумаги</string>
+    <string name="format_a4">A4 (210 × 297 мм)</string>
+    <string name="format_letter">US Letter (8.5 × 11\")</string>
+    <string name="save_pdf">Экспорт в PDF</string>
+    <string name="print_sheet">Печать бланка</string>
+    <string name="generating_pdf">Генерация PDF…</string>
+    <string name="sheet_generated">Бланк OMR успешно сгенерирован</string>
+    <string name="preview_sheet">Предпросмотр макета бланка</string>
+
+    <!-- Settings & Calibration -->
+    <string name="settings_title">Настройки и калибровка</string>
+    <string name="language_section">Язык приложения</string>
+    <string name="language_en">English</string>
+    <string name="language_uz">O‘zbekcha (Lotin)</string>
+    <string name="language_ru">Русский</string>
+    <string name="haptics_section">Тактильный виброотклик</string>
+    <string name="haptics_desc">Мягкий виброотклик при фиксации бланка и двойной вибросигнал при сохранении результатов.</string>
+    <string name="haptics_toggle">Тактильный отклик</string>
+    <string name="calibration_section">Калибровка чувствительности OMR</string>
+    <string name="calibration_desc">Настройте пороги оптического распознавания под плотность карандаша, ручку или освещение.</string>
+    <string name="fill_threshold">Порог заполнения метки</string>
+    <string name="fill_threshold_desc">Минимальный процент покрытия пикселей метки для признания ответа.</string>
+    <string name="unanswered_threshold">Порог пустого кружка</string>
+    <string name="unanswered_threshold_desc">Метки с заполнением ниже этого порога считаются полностью пустыми.</string>
+    <string name="multiple_diff">Интервал множественного выбора</string>
+    <string name="multiple_diff_desc">Если разница между двумя метками меньше этого значения, ответ помечается как множественный.</string>
+    <string name="ambiguous_diff">Интервал спорного выбора</string>
+    <string name="ambiguous_diff_desc">Если разница между 1-м и 2-м кружком меньше порога, вопрос помечается для проверки преподавателем.</string>
+    <string name="live_calibration">Тестовый шаблон калибровки</string>
+    <string name="live_calibration_desc">Посмотрите, как текущие пороги классифицируют 4 типичных сценария ответов в реальном времени:</string>
+    <string name="simulated_sample">Пример симуляции</string>
+    <string name="default_page_size">Формат бумаги бланка по умолчанию</string>
+    <string name="save_settings">Сохранить настройки и пороги</string>
+    <string name="settings_saved_toast">Настройки и пороги успешно сохранены</string>
+    <string name="reset_thresholds">Сбросить по умолчанию</string>
+    <string name="reset_thresholds_toast">Пороги сброшены до значений по умолчанию</string>
+    <string name="backup_section">Резервное копирование и восстановление</string>
+    <string name="backup_desc">Экспортируйте все темы, тесты, ключи и результаты в автономный JSON-файл или восстановите данные на новом устройстве.</string>
+    <string name="export_json">Экспорт JSON</string>
+    <string name="restore_json">Восстановить JSON</string>
+    <string name="export_backup_chooser">Экспорт резервной копии базы Marklify</string>
+    <string name="backup_restored_title">Резервная копия восстановлена</string>
+    <string name="backup_restored_summary">Успешно импортировано:\n• %1$d тем\n• %2$d тестов\n• %3$d вопросов\n• %4$d записей проверок</string>
+    <string name="backup_empty">Выбранный файл резервной копии пуст</string>
+    <string name="backup_read_failed">Не удалось прочитать резервную копию: %1$s</string>
+
+    <!-- Additional Screen Strings -->
+    <string name="topics_and_subjects">Темы и предметы</string>
+    <string name="new_topic">Новая тема</string>
+    <string name="no_topics_hint">Нажмите +, чтобы добавить первую тему или предмет.</string>
+    <string name="created_date">Создано: %1$s</string>
+    <string name="new_topic_name_label">Новое название темы</string>
+    <string name="delete_topic_title">Удалить тему?</string>
+    <string name="delete_topic_message">Удаление \"%1$s\" также удалит все тесты и вопросы внутри нее.</string>
+    <string name="topic_tests_title">Тесты темы</string>
+    <string name="no_tests_in_topic">В этой теме еще нет тестов</string>
+    <string name="no_tests_in_topic_hint">Нажмите +, чтобы добавить тест и настроить ключ ответов.</string>
+    <string name="questions_and_date">%1$d вопросов  •  %2$s</string>
+    <string name="sheet_pdf">Бланк PDF</string>
+    <string name="create_test_dialog">Создать тест</string>
+    <string name="test_name_hint">Название теста (напр., Тест по модулю 3)</string>
+    <string name="delete_test_title">Удалить тест?</string>
+    <string name="delete_test_message">Вы уверены, что хотите удалить \"%1$s\" и все связанные вопросы и историю сканирования?</string>
+    <string name="rename_test_title">Переименовать тест</string>
+    <string name="new_test_name_label">Новое название теста</string>
+    <string name="edit_questions_title">Редактировать вопросы</string>
+    <string name="questions_count_range">%1$d вопросов (1–100)</string>
+    <string name="questions_saved_toast">Все вопросы и ключи ответов успешно сохранены!</string>
+    <string name="quick_adjust_items">Быстро изменить количество вопросов</string>
+    <string name="question_text_label">Текст вопроса (необязательно)</string>
+    <string name="option_a_label">Вариант A</string>
+    <string name="option_b_label">Вариант B</string>
+    <string name="option_c_label">Вариант C</string>
+    <string name="option_d_label">Вариант D</string>
+    <string name="key_label">Ключ:</string>
+    <string name="four_options_desc">%1$d вопросов  •  4 варианта (A, B, C, D)</string>
+    <string name="edit_keys">Редактировать ключи</string>
+    <string name="blank_sheet">Чистый бланк</string>
+    <string name="questions_keys_count">Вопросы и ключи ответов (%1$d)</string>
+    <string name="view_results">Смотреть результаты</string>
+    <string name="graded_sheets_count">%1$d проверенных бланков</string>
+    <string name="class_performance_overview">Общий обзор успеваемости</string>
+    <string name="students_count">%1$d учеников</string>
+    <string name="average_label">Средний</string>
+    <string name="no_scans_yet">Для этого теста еще нет сканирований</string>
+    <string name="no_scans_hint">Нажмите кнопку сканирования, чтобы проверить бланки учеников.</string>
+    <string name="delete_result_title">Удалить результат?</string>
+    <string name="delete_result_message">Вы уверены, что хотите удалить результат оценки для \"%1$s\"?</string>
+    <string name="grading_report">Отчет об оценивании</string>
+    <string name="captured_sheet_image">Снимок бланка</string>
+    <string name="tap_to_view_scanned_paper">Нажмите для просмотра полного бланка</string>
+    <string name="question_breakdown_title">Повопросный разбор</string>
+    <string name="overall_performance">Общая успеваемость</string>
+    <string name="pass_rate_badge">%1$d%% Успеваемость</string>
+    <string name="highest_label">Наивысший</string>
+    <string name="search_history_placeholder">Поиск по имени ученика, ID или тесту…</string>
+    <string name="no_matching_graded_tests">Нет подходящих проверенных тестов</string>
+    <string name="no_matching_hint">Попробуйте очистить поиск или изменить фильтры.</string>
+    <string name="tips_scanning_title">Советы для точного сканирования:</string>
+    <string name="tip_scale">• Печатайте на стандартной белой бумаге (%1$s) в масштабе 100%% (Не подгоняйте под размер страницы).</string>
+    <string name="tip_markers">• Убедитесь, что все 4 угловых черных квадрата полностью напечатаны.</string>
+    <string name="tip_shading">• Объясните ученикам, что кружки нужно плотно закрашивать черной или синей ручкой.</string>
+    <string name="scanned_sheet_capture">Снимок бланка</string>
+    <string name="top_down_perspective">Нормализованная перспектива сверху</string>
+    <string name="tap_to_enlarge">Нажмите для увеличения</string>
+    <string name="verify_answers_hint">Проверьте ответы (Нажмите букву для исправления):</string>
+    <string name="key_prefix">(Ключ: %1$s)</string>
+    <string name="detected_answer_badge">Распознано: %1$s</string>
+    <string name="none_answer">Нет</string>
+</resources>

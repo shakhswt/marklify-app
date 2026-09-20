@@ -135,19 +135,43 @@ object DataBackupManager {
     }
 
     /**
-     * Parses a backup JSON string into strongly-typed entity lists.
+     * Parses and strictly validates a backup JSON string into strongly-typed entity lists.
+     * Throws IllegalArgumentException on invalid or corrupted data before modifying any database state.
      */
     fun parseBackupJson(jsonString: String): BackupImportData {
-        val root = JSONObject(jsonString)
+        if (jsonString.isBlank()) {
+            throw IllegalArgumentException("Backup content is empty.")
+        }
+
+        val root = try {
+            JSONObject(jsonString)
+        } catch (e: Exception) {
+            throw IllegalArgumentException("Malformed JSON format: ${e.message}")
+        }
+
+        val appIdentifier = root.optString("app", "")
+        if (appIdentifier != "Marklify") {
+            throw IllegalArgumentException("Invalid backup file: Not a Marklify backup archive.")
+        }
+
+        val version = root.optInt("version", 0)
+        if (version <= 0) {
+            throw IllegalArgumentException("Unsupported or missing backup version: $version")
+        }
 
         val topics = mutableListOf<Topic>()
         val topicsArray = root.optJSONArray("topics") ?: JSONArray()
         for (i in 0 until topicsArray.length()) {
-            val obj = topicsArray.getJSONObject(i)
+            val obj = topicsArray.optJSONObject(i)
+                ?: throw IllegalArgumentException("Malformed topic entry at index $i")
+            val name = obj.optString("name", "").trim()
+            if (name.isBlank()) {
+                throw IllegalArgumentException("Topic at index $i has an empty name.")
+            }
             topics.add(
                 Topic(
                     id = obj.optLong("id", 0),
-                    name = obj.getString("name"),
+                    name = name,
                     createdAt = obj.optLong("createdAt", System.currentTimeMillis())
                 )
             )
@@ -156,13 +180,18 @@ object DataBackupManager {
         val tests = mutableListOf<TestEntity>()
         val testsArray = root.optJSONArray("tests") ?: JSONArray()
         for (i in 0 until testsArray.length()) {
-            val obj = testsArray.getJSONObject(i)
+            val obj = testsArray.optJSONObject(i)
+                ?: throw IllegalArgumentException("Malformed test entry at index $i")
+            val name = obj.optString("name", "").trim()
+            if (name.isBlank()) {
+                throw IllegalArgumentException("Test at index $i has an empty name.")
+            }
             tests.add(
                 TestEntity(
                     id = obj.optLong("id", 0),
-                    topicId = obj.getLong("topicId"),
-                    name = obj.getString("name"),
-                    questionCount = obj.optInt("questionCount", 10),
+                    topicId = obj.optLong("topicId", 0),
+                    name = name,
+                    questionCount = obj.optInt("questionCount", 10).coerceIn(1, 100),
                     createdAt = obj.optLong("createdAt", System.currentTimeMillis())
                 )
             )
@@ -171,13 +200,15 @@ object DataBackupManager {
         val questions = mutableListOf<Question>()
         val questionsArray = root.optJSONArray("questions") ?: JSONArray()
         for (i in 0 until questionsArray.length()) {
-            val obj = questionsArray.getJSONObject(i)
+            val obj = questionsArray.optJSONObject(i)
+                ?: throw IllegalArgumentException("Malformed question entry at index $i")
+            val qNum = obj.optInt("questionNumber", i + 1)
             questions.add(
                 Question(
                     id = obj.optLong("id", 0),
-                    testId = obj.getLong("testId"),
-                    questionNumber = obj.getInt("questionNumber"),
-                    questionText = obj.optString("questionText", "Question ${obj.getInt("questionNumber")}"),
+                    testId = obj.optLong("testId", 0),
+                    questionNumber = qNum,
+                    questionText = obj.optString("questionText", "Question $qNum"),
                     optionA = obj.optString("optionA", "Option A"),
                     optionB = obj.optString("optionB", "Option B"),
                     optionC = obj.optString("optionC", "Option C"),
@@ -190,11 +221,12 @@ object DataBackupManager {
         val scans = mutableListOf<ScanResult>()
         val scansArray = root.optJSONArray("scanResults") ?: JSONArray()
         for (i in 0 until scansArray.length()) {
-            val obj = scansArray.getJSONObject(i)
+            val obj = scansArray.optJSONObject(i)
+                ?: throw IllegalArgumentException("Malformed scan result entry at index $i")
             scans.add(
                 ScanResult(
                     id = obj.optLong("id", 0),
-                    testId = obj.getLong("testId"),
+                    testId = obj.optLong("testId", 0),
                     studentName = obj.optString("studentName", "Student"),
                     studentId = obj.optString("studentId", "N/A"),
                     scanTime = obj.optLong("scanTime", System.currentTimeMillis()),
@@ -213,12 +245,13 @@ object DataBackupManager {
         val answers = mutableListOf<DetectedAnswer>()
         val answersArray = root.optJSONArray("detectedAnswers") ?: JSONArray()
         for (i in 0 until answersArray.length()) {
-            val obj = answersArray.getJSONObject(i)
+            val obj = answersArray.optJSONObject(i)
+                ?: throw IllegalArgumentException("Malformed detected answer entry at index $i")
             answers.add(
                 DetectedAnswer(
                     id = obj.optLong("id", 0),
-                    scanResultId = obj.getLong("scanResultId"),
-                    questionNumber = obj.getInt("questionNumber"),
+                    scanResultId = obj.optLong("scanResultId", 0),
+                    questionNumber = obj.optInt("questionNumber", i + 1),
                     detectedAnswer = obj.optString("detectedAnswer", "unanswered"),
                     isCorrect = obj.optBoolean("isCorrect", false)
                 )
@@ -242,13 +275,11 @@ object DataBackupManager {
         val file = File(dir, "marklify_${sanitizedTestName}_results_$dateStr.csv")
 
         val sb = StringBuilder()
-        // Header
         sb.append("Student Name,Student ID,Total Questions,Correct,Wrong,Unanswered,Multiple Marked,Ambiguous,Score Percentage,Scan Date\n")
 
         val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
 
         for (r in results) {
-            // Escape CSV strings
             val name = escapeCsv(r.studentName)
             val sid = escapeCsv(r.studentId)
             val scanDate = dateFormat.format(Date(r.scanTime))

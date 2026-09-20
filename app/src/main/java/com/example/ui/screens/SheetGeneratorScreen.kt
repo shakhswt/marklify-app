@@ -8,7 +8,6 @@ import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -27,10 +26,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.FileProvider
+import com.example.R
 import com.example.data.entity.TestEntity
 import com.example.data.entity.Topic
 import com.example.omr.spec.SheetSpec
@@ -41,6 +42,7 @@ import com.example.ui.components.LiquidGlassBackdrop
 import com.example.ui.components.LiquidGlassBottomBar
 import com.example.ui.components.LiquidGlassButton
 import com.example.ui.components.LiquidGlassCard
+import com.example.ui.components.LiquidGlassChip
 import com.example.ui.components.LiquidGlassTopAppBar
 import com.example.ui.theme.*
 import com.example.ui.viewmodel.MarklifyViewModel
@@ -89,12 +91,12 @@ fun SheetGeneratorScreen(
         Scaffold(
             topBar = {
                 LiquidGlassTopAppBar(
-                    title = { Text("OMR Sheet Generator", fontWeight = FontWeight.Bold) },
+                    title = { Text(stringResource(R.string.sheet_generator_title), fontWeight = FontWeight.Bold) },
                     navigationIcon = {
                         IconButton(onClick = onNavigateBack) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = "Back",
+                                contentDescription = stringResource(R.string.back),
                                 tint = TextPrimary
                             )
                         }
@@ -108,7 +110,11 @@ fun SheetGeneratorScreen(
                                 }
                             }
                         ) {
-                            Icon(imageVector = Icons.Default.CameraAlt, contentDescription = "Scan", tint = SuccessGreen)
+                            Icon(
+                                imageVector = Icons.Default.CameraAlt,
+                                contentDescription = stringResource(R.string.scan_sheet),
+                                tint = SuccessGreen
+                            )
                         }
                     }
                 )
@@ -143,7 +149,7 @@ fun SheetGeneratorScreen(
                             .testTag("print_sheet_button"),
                         variant = GlassButtonVariant.Neutral,
                         icon = Icons.Default.Print,
-                        text = "Print"
+                        text = stringResource(R.string.print_sheet)
                     )
 
                     LiquidGlassButton(
@@ -173,7 +179,7 @@ fun SheetGeneratorScreen(
                             .testTag("generate_pdf_button"),
                         variant = GlassButtonVariant.Neutral,
                         icon = Icons.Default.Share,
-                        text = "Share"
+                        text = stringResource(R.string.share)
                     )
 
                     LiquidGlassButton(
@@ -188,7 +194,7 @@ fun SheetGeneratorScreen(
                             .testTag("scan_now_button"),
                         variant = GlassButtonVariant.Success,
                         icon = Icons.Default.CameraAlt,
-                        text = "Scan Sheet"
+                        text = stringResource(R.string.scan_sheet)
                     )
                 }
             },
@@ -231,7 +237,7 @@ fun SheetGeneratorScreen(
                                         .padding(horizontal = 10.dp, vertical = 4.dp)
                                 ) {
                                     Text(
-                                        text = "${currentTest.questionCount} Questions",
+                                        text = stringResource(R.string.questions_count, currentTest.questionCount),
                                         color = TextPrimary,
                                         fontSize = 12.sp,
                                         fontWeight = FontWeight.Medium
@@ -260,7 +266,7 @@ fun SheetGeneratorScreen(
                 ) {
                     Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                         Text(
-                            text = "Page Paper Size:",
+                            text = stringResource(R.string.sheet_format),
                             fontWeight = FontWeight.SemiBold,
                             fontSize = 13.sp,
                             color = TextPrimary
@@ -269,58 +275,25 @@ fun SheetGeneratorScreen(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
-                            val isA4 = selectedPageFormat == PageFormat.A4
-                            Box(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .clip(RoundedCornerShape(14.dp))
-                                    .background(if (isA4) GlassFillElevated else GlassFillSubtle)
-                                    .border(
-                                        1.dp,
-                                        if (isA4) GlassBorderBright else GlassBorderSubtle,
-                                        RoundedCornerShape(14.dp)
-                                    )
-                                    .clickable { selectedPageFormat = PageFormat.A4 }
-                                    .padding(vertical = 10.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = "Standard A4",
-                                    fontSize = 13.sp,
-                                    fontWeight = if (isA4) FontWeight.Bold else FontWeight.Normal,
-                                    color = if (isA4) TextPrimary else TextSecondary
-                                )
-                            }
-
-                            val isLetter = selectedPageFormat == PageFormat.LETTER
-                            Box(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .clip(RoundedCornerShape(14.dp))
-                                    .background(if (isLetter) GlassFillElevated else GlassFillSubtle)
-                                    .border(
-                                        1.dp,
-                                        if (isLetter) GlassBorderBright else GlassBorderSubtle,
-                                        RoundedCornerShape(14.dp)
-                                    )
-                                    .clickable { selectedPageFormat = PageFormat.LETTER }
-                                    .padding(vertical = 10.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = "US Letter (8.5×11\")",
-                                    fontSize = 13.sp,
-                                    fontWeight = if (isLetter) FontWeight.Bold else FontWeight.Normal,
-                                    color = if (isLetter) TextPrimary else TextSecondary
-                                )
-                            }
+                            LiquidGlassChip(
+                                selected = selectedPageFormat == PageFormat.A4,
+                                onClick = { selectedPageFormat = PageFormat.A4 },
+                                label = stringResource(R.string.format_a4),
+                                modifier = Modifier.weight(1f)
+                            )
+                            LiquidGlassChip(
+                                selected = selectedPageFormat == PageFormat.LETTER,
+                                onClick = { selectedPageFormat = PageFormat.LETTER },
+                                label = stringResource(R.string.format_letter),
+                                modifier = Modifier.weight(1f)
+                            )
                         }
                     }
                 }
 
                 // Sheet Canvas/Bitmap Preview
                 Text(
-                    text = "Printable Sheet Preview (${selectedPageFormat.displayName})",
+                    text = "${stringResource(R.string.preview_sheet)} (${selectedPageFormat.displayName})",
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 14.sp,
                     color = TextPrimary,
@@ -339,7 +312,7 @@ fun SheetGeneratorScreen(
                     if (previewBitmap != null) {
                         Image(
                             bitmap = previewBitmap!!.asImageBitmap(),
-                            contentDescription = "OMR Sheet Preview",
+                            contentDescription = stringResource(R.string.preview_sheet),
                             modifier = Modifier.fillMaxSize()
                         )
                     } else {
@@ -358,14 +331,14 @@ fun SheetGeneratorScreen(
                         verticalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
                         Text(
-                            text = "Tips for Best Scanning Accuracy:",
+                            text = stringResource(R.string.tips_scanning_title),
                             fontWeight = FontWeight.SemiBold,
                             fontSize = 13.sp,
                             color = TextPrimary
                         )
-                        Text("• Print on standard white paper (${selectedPageFormat.shortName}) at 100% scale (Do not fit to printable area).", fontSize = 12.sp, color = TextSecondary)
-                        Text("• Ensure all 4 corner solid black alignment squares are completely printed.", fontSize = 12.sp, color = TextSecondary)
-                        Text("• Instruct students to shade bubbles firmly using black or dark blue ink.", fontSize = 12.sp, color = TextSecondary)
+                        Text(stringResource(R.string.tip_scale, selectedPageFormat.shortName), fontSize = 12.sp, color = TextSecondary)
+                        Text(stringResource(R.string.tip_markers), fontSize = 12.sp, color = TextSecondary)
+                        Text(stringResource(R.string.tip_shading), fontSize = 12.sp, color = TextSecondary)
                     }
                 }
 

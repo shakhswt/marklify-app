@@ -1,21 +1,30 @@
-# Add project specific ProGuard rules here.
-# You can control the set of applied configuration files using the
-# proguardFiles setting in build.gradle.
-#
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
+# ProGuard & R8 rules for Marklify
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+# Preserve OpenCV native interfaces and loaders
+-keep class org.opencv.** { *; }
+-dontwarn org.opencv.**
+-keepclasseswithmembernames class * {
+    native <methods>;
+}
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+# Preserve Room database runtime, schemas and DAOs
+-keep class * extends androidx.room.RoomDatabase
+-keep @androidx.room.Entity class * { *; }
+-keep @androidx.room.Dao interface * { *; }
+-dontwarn androidx.room.paging.**
 
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+# Preserve Data and Backup Models used in JSON serialization/deserialization
+-keep class com.example.data.entity.** { *; }
+-keep class com.example.data.backup.** { *; }
+-keep class com.example.omr.processing.** { *; }
+-keep class com.example.omr.spec.** { *; }
+
+# CameraX
+-keep class androidx.camera.core.** { *; }
+-keep class androidx.camera.camera2.** { *; }
+-keep class androidx.camera.lifecycle.** { *; }
+-keep class androidx.camera.view.** { *; }
+-dontwarn androidx.camera.**
+
+# Preserve line numbers and attributes for clean debugging and stack traces
+-keepattributes SourceFile,LineNumberTable,InnerClasses,EnclosingMethod

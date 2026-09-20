@@ -20,9 +20,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.R
 import com.example.data.entity.DetectedAnswer
 import com.example.data.entity.Question
 import com.example.data.entity.ScanResult
@@ -31,8 +33,8 @@ import com.example.ui.components.GlassButtonVariant
 import com.example.ui.components.LiquidGlassBackdrop
 import com.example.ui.components.LiquidGlassButton
 import com.example.ui.components.LiquidGlassCard
+import com.example.ui.components.LiquidGlassDialog
 import com.example.ui.components.LiquidGlassTopAppBar
-import com.example.ui.components.liquidGlassSurface
 import com.example.ui.theme.*
 import com.example.ui.viewmodel.MarklifyViewModel
 import java.io.File
@@ -101,12 +103,12 @@ fun ResultDetailScreen(
         Scaffold(
             topBar = {
                 LiquidGlassTopAppBar(
-                    title = { Text("Grading Report", fontWeight = FontWeight.Bold) },
+                    title = { Text(stringResource(R.string.grading_report), fontWeight = FontWeight.Bold) },
                     navigationIcon = {
                         IconButton(onClick = onNavigateBack) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = "Back",
+                                contentDescription = stringResource(R.string.back),
                                 tint = TextPrimary
                             )
                         }
@@ -117,7 +119,11 @@ fun ResultDetailScreen(
                                 viewModel.deleteScanResult(res)
                                 onNavigateBack()
                             }) {
-                                Icon(imageVector = Icons.Default.Delete, contentDescription = "Delete", tint = ErrorRed)
+                                Icon(
+                                    imageVector = Icons.Default.Delete,
+                                    contentDescription = stringResource(R.string.delete),
+                                    tint = ErrorRed
+                                )
                             }
                         }
                     }
@@ -161,7 +167,7 @@ fun ResultDetailScreen(
                                 )
                                 Spacer(modifier = Modifier.height(2.dp))
                                 Text(
-                                    text = "Student ID: ${result.studentId}  •  ${test?.name ?: "Test"}",
+                                    text = "ID: ${result.studentId}  •  ${test?.name ?: ""}",
                                     fontSize = 13.sp,
                                     color = TextSecondary
                                 )
@@ -201,11 +207,11 @@ fun ResultDetailScreen(
                                     modifier = Modifier.fillMaxWidth(),
                                     horizontalArrangement = Arrangement.SpaceEvenly
                                 ) {
-                                    StatBadge(label = "Correct", count = result.correct, color = SuccessGreen, icon = "✓")
-                                    StatBadge(label = "Wrong", count = result.wrong, color = ErrorRed, icon = "✗")
-                                    StatBadge(label = "Multiple", count = result.multipleMarked, color = WarningAmber, icon = "⚏")
-                                    StatBadge(label = "Blank", count = result.unanswered, color = TextSecondary, icon = "—")
-                                    StatBadge(label = "Review", count = result.ambiguous, color = PurpleAccent, icon = "?")
+                                    StatBadge(label = stringResource(R.string.correct_answers), count = result.correct, color = SuccessGreen, icon = "✓")
+                                    StatBadge(label = stringResource(R.string.wrong_answers), count = result.wrong, color = ErrorRed, icon = "✗")
+                                    StatBadge(label = stringResource(R.string.multiple_answers), count = result.multipleMarked, color = WarningAmber, icon = "⚏")
+                                    StatBadge(label = stringResource(R.string.unanswered_answers), count = result.unanswered, color = TextSecondary, icon = "—")
+                                    StatBadge(label = stringResource(R.string.needs_improvement), count = result.ambiguous, color = PurpleAccent, icon = "?")
                                 }
                             }
                         }
@@ -236,14 +242,14 @@ fun ResultDetailScreen(
                                     ) {
                                         Image(
                                             bitmap = sheetBitmap.asImageBitmap(),
-                                            contentDescription = "Scanned Sheet",
+                                            contentDescription = stringResource(R.string.captured_sheet_image),
                                             modifier = Modifier.fillMaxSize()
                                         )
                                     }
                                     Spacer(modifier = Modifier.width(14.dp))
                                     Column {
-                                        Text("Captured Sheet Image", fontWeight = FontWeight.SemiBold, fontSize = 14.sp, color = TextPrimary)
-                                        Text("Tap to view full scanned paper", fontSize = 12.sp, color = TextSecondary)
+                                        Text(stringResource(R.string.captured_sheet_image), fontWeight = FontWeight.SemiBold, fontSize = 14.sp, color = TextPrimary)
+                                        Text(stringResource(R.string.tap_to_view_scanned_paper), fontSize = 12.sp, color = TextSecondary)
                                     }
                                 }
                             }
@@ -252,7 +258,7 @@ fun ResultDetailScreen(
 
                     item {
                         Text(
-                            text = "Question-by-Question Breakdown",
+                            text = stringResource(R.string.question_breakdown_title),
                             fontWeight = FontWeight.SemiBold,
                             fontSize = 16.sp,
                             color = TextPrimary
@@ -277,84 +283,81 @@ fun ResultDetailScreen(
     }
 
     if (showFullImageDialog && sheetBitmap != null) {
-        AlertDialog(
-            onDismissRequest = { showFullImageDialog = false },
-            containerColor = FrostedBarBackground,
-            shape = RoundedCornerShape(24.dp),
-            title = { Text("Captured Sheet Photo", color = TextPrimary, fontWeight = FontWeight.Bold) },
-            text = {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(1200f / 1600f)
-                        .clip(RoundedCornerShape(12.dp))
-                        .border(1.dp, GlassBorderBright, RoundedCornerShape(12.dp))
-                        .background(Color.White),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Image(
-                        bitmap = sheetBitmap.asImageBitmap(),
-                        contentDescription = "Full Sheet",
-                        modifier = Modifier.fillMaxSize()
-                    )
-                }
-            },
-            confirmButton = {
+        LiquidGlassDialog(
+            onDismissRequest = { showFullImageDialog = false }
+        ) {
+            Text(
+                text = stringResource(R.string.captured_sheet_image),
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp,
+                color = TextPrimary
+            )
+            Spacer(modifier = Modifier.height(14.dp))
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(1200f / 1600f)
+                    .clip(RoundedCornerShape(12.dp))
+                    .border(1.dp, GlassBorderBright, RoundedCornerShape(12.dp))
+                    .background(Color.White),
+                contentAlignment = Alignment.Center
+            ) {
+                Image(
+                    bitmap = sheetBitmap.asImageBitmap(),
+                    contentDescription = stringResource(R.string.captured_sheet_image),
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End
+            ) {
                 LiquidGlassButton(
-                    text = "Close",
+                    text = stringResource(R.string.close),
                     onClick = { showFullImageDialog = false }
                 )
             }
-        )
+        }
     }
 }
 
 @Composable
-private fun StatBadge(
-    label: String,
-    count: Int,
-    color: Color,
-    icon: String
-) {
+private fun StatBadge(label: String, count: Int, color: Color, icon: String) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Box(
             modifier = Modifier
-                .size(34.dp)
+                .size(38.dp)
                 .clip(CircleShape)
                 .background(GlassFillElevated)
-                .border(1.dp, color.copy(alpha = 0.5f), CircleShape),
+                .border(1.dp, GlassBorderBright, CircleShape),
             contentAlignment = Alignment.Center
         ) {
-            Text(text = icon, fontWeight = FontWeight.Bold, color = color, fontSize = 14.sp)
+            Text(text = "$count", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = color)
         }
         Spacer(modifier = Modifier.height(4.dp))
-        Text(text = "$count", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = TextPrimary)
         Text(text = label, fontSize = 11.sp, color = TextSecondary)
     }
 }
 
 @Composable
-private fun ResultQuestionRow(
-    detected: DetectedAnswer,
-    correctKey: String
-) {
-    val statusColor = when {
-        detected.isCorrect -> SuccessGreen
-        detected.detectedAnswer.equals("unanswered", ignoreCase = true) -> TextSecondary
-        detected.detectedAnswer.equals("ambiguous", ignoreCase = true) -> WarningAmber
-        else -> ErrorRed
-    }
+private fun ResultQuestionRow(detected: DetectedAnswer, correctKey: String) {
+    val isMultiple = detected.detectedAnswer.equals("multiple", ignoreCase = true)
+    val isAmbiguous = detected.detectedAnswer.equals("ambiguous", ignoreCase = true)
+    val isUnanswered = detected.detectedAnswer.equals("unanswered", ignoreCase = true)
+    val isCorrect = detected.isCorrect
 
-    val statusIcon = when {
-        detected.isCorrect -> "✓"
-        detected.detectedAnswer.equals("unanswered", ignoreCase = true) -> "—"
-        detected.detectedAnswer.equals("ambiguous", ignoreCase = true) -> "?"
-        else -> "✗"
+    val statusColor = when {
+        isCorrect -> SuccessGreen
+        isMultiple -> WarningAmber
+        isAmbiguous -> PurpleAccent
+        isUnanswered -> TextSecondary
+        else -> ErrorRed
     }
 
     LiquidGlassCard(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(18.dp),
         fillColor = GlassFill,
         showSpecular = false,
         elevation = 2.dp
@@ -362,56 +365,60 @@ private fun ResultQuestionRow(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 14.dp, vertical = 12.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+                .padding(14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(
                     modifier = Modifier
-                        .size(30.dp)
+                        .size(32.dp)
                         .clip(CircleShape)
                         .background(GlassFillElevated)
-                        .border(1.dp, statusColor.copy(alpha = 0.6f), CircleShape),
+                        .border(1.dp, GlassBorderBright, CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = statusIcon,
+                        text = "${detected.questionNumber}",
                         fontWeight = FontWeight.Bold,
-                        color = statusColor,
-                        fontSize = 13.sp
+                        fontSize = 12.sp,
+                        color = TextPrimary
                     )
                 }
-
                 Spacer(modifier = Modifier.width(12.dp))
                 Column {
                     Text(
-                        text = "Question #${detected.questionNumber}",
+                        text = "Q#${detected.questionNumber}",
                         fontWeight = FontWeight.SemiBold,
                         fontSize = 14.sp,
                         color = TextPrimary
                     )
                     Text(
-                        text = if (correctKey.isNotBlank()) "Correct Key: $correctKey" else "",
-                        fontSize = 11.sp,
+                        text = "Student: ${detected.detectedAnswer.ifBlank { "—" }}  •  Key: $correctKey",
+                        fontSize = 12.sp,
                         color = TextSecondary
                     )
                 }
             }
 
-            // Student Answer Tag
             Box(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(if (detected.isCorrect) SuccessGreenBg else GlassFillElevated)
-                    .border(1.dp, if (detected.isCorrect) SuccessGreenBorder else GlassBorderSubtle, RoundedCornerShape(8.dp))
-                    .padding(horizontal = 10.dp, vertical = 5.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(statusColor.copy(alpha = 0.15f))
+                    .border(1.dp, statusColor.copy(alpha = 0.4f), RoundedCornerShape(10.dp))
+                    .padding(horizontal = 10.dp, vertical = 4.dp)
             ) {
                 Text(
-                    text = "Answer: ${detected.detectedAnswer.uppercase()}",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 12.sp,
-                    color = if (detected.isCorrect) SuccessGreen else TextPrimary
+                    text = when {
+                        isCorrect -> "Correct"
+                        isMultiple -> "Multiple"
+                        isAmbiguous -> "Ambiguous"
+                        isUnanswered -> "Blank"
+                        else -> "Wrong"
+                    },
+                    color = statusColor,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold
                 )
             }
         }

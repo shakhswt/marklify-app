@@ -6,7 +6,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -22,16 +21,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.R
 import com.example.data.entity.Topic
 import com.example.ui.components.GlassButtonVariant
 import com.example.ui.components.LiquidGlassBackdrop
 import com.example.ui.components.LiquidGlassButton
 import com.example.ui.components.LiquidGlassCard
+import com.example.ui.components.LiquidGlassDialog
+import com.example.ui.components.LiquidGlassEmptyState
+import com.example.ui.components.LiquidGlassFAB
+import com.example.ui.components.LiquidGlassTextField
 import com.example.ui.components.LiquidGlassTopAppBar
-import com.example.ui.components.liquidGlassSurface
 import com.example.ui.theme.*
 import com.example.ui.viewmodel.MarklifyViewModel
 import java.text.SimpleDateFormat
@@ -54,12 +58,12 @@ fun TopicsScreen(
         Scaffold(
             topBar = {
                 LiquidGlassTopAppBar(
-                    title = { Text("Topics & Subjects", fontWeight = FontWeight.Bold) },
+                    title = { Text(stringResource(R.string.topics_and_subjects), fontWeight = FontWeight.Bold) },
                     navigationIcon = {
                         IconButton(onClick = onNavigateBack) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = "Back",
+                                contentDescription = stringResource(R.string.back),
                                 tint = TextPrimary
                             )
                         }
@@ -71,7 +75,7 @@ fun TopicsScreen(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Add,
-                                contentDescription = "Add Topic",
+                                contentDescription = stringResource(R.string.create_topic),
                                 tint = TextPrimary
                             )
                         }
@@ -79,35 +83,12 @@ fun TopicsScreen(
                 )
             },
             floatingActionButton = {
-                Box(
-                    modifier = Modifier
-                        .liquidGlassSurface(
-                            shape = RoundedCornerShape(22.dp),
-                            fillColor = GlassFillElevated,
-                            showSpecular = true,
-                            elevation = 8.dp
-                        )
-                        .clickable { showCreateDialog = true }
-                        .testTag("add_topic_button")
-                        .padding(horizontal = 20.dp, vertical = 14.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Default.Add,
-                            contentDescription = null,
-                            tint = TextPrimary,
-                            modifier = Modifier.size(20.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = "New Topic",
-                            color = TextPrimary,
-                            fontWeight = FontWeight.SemiBold,
-                            fontSize = 14.sp
-                        )
-                    }
-                }
+                LiquidGlassFAB(
+                    icon = Icons.Default.Add,
+                    onClick = { showCreateDialog = true },
+                    modifier = Modifier.testTag("add_topic_button"),
+                    contentDescription = stringResource(R.string.new_topic)
+                )
             },
             containerColor = Color.Transparent
         ) { padding ->
@@ -115,41 +96,15 @@ fun TopicsScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(padding),
+                        .padding(padding)
+                        .padding(16.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    LiquidGlassCard(
-                        modifier = Modifier
-                            .padding(24.dp)
-                            .fillMaxWidth(),
-                        shape = RoundedCornerShape(24.dp),
-                        fillColor = GlassFill
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(32.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(56.dp)
-                                    .clip(CircleShape)
-                                    .background(GlassFillElevated)
-                                    .border(1.dp, GlassBorderBright, CircleShape),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Folder,
-                                    contentDescription = null,
-                                    tint = TextSecondary,
-                                    modifier = Modifier.size(28.dp)
-                                )
-                            }
-                            Spacer(modifier = Modifier.height(14.dp))
-                            Text("No topics yet", color = TextPrimary, fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
-                            Spacer(modifier = Modifier.height(6.dp))
-                            Text("Tap + to add your first subject or topic.", color = TextSecondary, fontSize = 13.sp)
-                        }
-                    }
+                    LiquidGlassEmptyState(
+                        icon = Icons.Default.Folder,
+                        title = stringResource(R.string.no_topics_title),
+                        description = stringResource(R.string.no_topics_hint)
+                    )
                 }
             } else {
                 LazyColumn(
@@ -209,7 +164,7 @@ fun TopicsScreen(
                                             color = TextPrimary
                                         )
                                         Text(
-                                            text = "Created $dateStr",
+                                            text = stringResource(R.string.created_date, dateStr),
                                             fontSize = 12.sp,
                                             color = TextSecondary
                                         )
@@ -220,20 +175,20 @@ fun TopicsScreen(
                                     IconButton(onClick = { topicToRename = topic }) {
                                         Icon(
                                             imageVector = Icons.Default.Edit,
-                                            contentDescription = "Rename Topic",
+                                            contentDescription = stringResource(R.string.rename_topic),
                                             tint = TextSecondary
                                         )
                                     }
                                     IconButton(onClick = { topicToDelete = topic }) {
                                         Icon(
                                             imageVector = Icons.Default.Delete,
-                                            contentDescription = "Delete Topic",
+                                            contentDescription = stringResource(R.string.delete_topic),
                                             tint = ErrorRed
                                         )
                                     }
                                     Icon(
                                         imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                                        contentDescription = "Open",
+                                        contentDescription = null,
                                         tint = TextSecondary,
                                         modifier = Modifier.size(16.dp)
                                     )
@@ -249,24 +204,39 @@ fun TopicsScreen(
 
     if (showCreateDialog) {
         var newName by remember { mutableStateOf("") }
-        AlertDialog(
-            onDismissRequest = { showCreateDialog = false },
-            containerColor = FrostedBarBackground,
-            shape = RoundedCornerShape(24.dp),
-            title = { Text("Create New Topic", color = TextPrimary, fontWeight = FontWeight.Bold) },
-            text = {
-                OutlinedTextField(
-                    value = newName,
-                    onValueChange = { newName = it },
-                    label = { Text("Topic / Subject Name") },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            },
-            confirmButton = {
+        LiquidGlassDialog(
+            onDismissRequest = { showCreateDialog = false }
+        ) {
+            Text(
+                text = stringResource(R.string.create_topic_dialog_title),
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp,
+                color = TextPrimary
+            )
+            Spacer(modifier = Modifier.height(14.dp))
+            LiquidGlassTextField(
+                value = newName,
+                onValueChange = { newName = it },
+                label = stringResource(R.string.topic_name_label),
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(18.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
                 LiquidGlassButton(
-                    text = "Create",
+                    text = stringResource(R.string.cancel),
+                    variant = GlassButtonVariant.Neutral,
+                    modifier = Modifier.weight(1f),
+                    onClick = { showCreateDialog = false }
+                )
+                LiquidGlassButton(
+                    text = stringResource(R.string.create_topic),
+                    variant = GlassButtonVariant.Primary,
                     enabled = newName.isNotBlank(),
+                    modifier = Modifier.weight(1f),
                     onClick = {
                         if (newName.isNotBlank()) {
                             viewModel.createTopic(newName) {
@@ -275,60 +245,85 @@ fun TopicsScreen(
                         }
                     }
                 )
-            },
-            dismissButton = {
-                TextButton(onClick = { showCreateDialog = false }) {
-                    Text("Cancel", color = TextSecondary)
-                }
             }
-        )
+        }
     }
 
     topicToDelete?.let { topic ->
-        AlertDialog(
-            onDismissRequest = { topicToDelete = null },
-            containerColor = FrostedBarBackground,
-            shape = RoundedCornerShape(24.dp),
-            title = { Text("Delete Topic?", color = TextPrimary, fontWeight = FontWeight.Bold) },
-            text = { Text("Deleting '${topic.name}' will also delete all tests and questions inside it.", color = TextSecondary) },
-            confirmButton = {
+        LiquidGlassDialog(
+            onDismissRequest = { topicToDelete = null }
+        ) {
+            Text(
+                text = stringResource(R.string.delete_topic_title),
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp,
+                color = TextPrimary
+            )
+            Spacer(modifier = Modifier.height(10.dp))
+            Text(
+                text = stringResource(R.string.delete_topic_message, topic.name),
+                color = TextSecondary,
+                fontSize = 14.sp
+            )
+            Spacer(modifier = Modifier.height(18.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
                 LiquidGlassButton(
-                    text = "Delete",
+                    text = stringResource(R.string.cancel),
+                    variant = GlassButtonVariant.Neutral,
+                    modifier = Modifier.weight(1f),
+                    onClick = { topicToDelete = null }
+                )
+                LiquidGlassButton(
+                    text = stringResource(R.string.delete),
                     variant = GlassButtonVariant.Danger,
+                    modifier = Modifier.weight(1f),
                     onClick = {
                         viewModel.deleteTopic(topic)
                         topicToDelete = null
                     }
                 )
-            },
-            dismissButton = {
-                TextButton(onClick = { topicToDelete = null }) {
-                    Text("Cancel", color = TextSecondary)
-                }
             }
-        )
+        }
     }
 
     topicToRename?.let { topic ->
         var renameText by remember(topic) { mutableStateOf(topic.name) }
-        AlertDialog(
-            onDismissRequest = { topicToRename = null },
-            containerColor = FrostedBarBackground,
-            shape = RoundedCornerShape(24.dp),
-            title = { Text("Rename Topic", color = TextPrimary, fontWeight = FontWeight.Bold) },
-            text = {
-                OutlinedTextField(
-                    value = renameText,
-                    onValueChange = { renameText = it },
-                    label = { Text("New Topic Name") },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            },
-            confirmButton = {
+        LiquidGlassDialog(
+            onDismissRequest = { topicToRename = null }
+        ) {
+            Text(
+                text = stringResource(R.string.rename_topic),
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp,
+                color = TextPrimary
+            )
+            Spacer(modifier = Modifier.height(14.dp))
+            LiquidGlassTextField(
+                value = renameText,
+                onValueChange = { renameText = it },
+                label = stringResource(R.string.new_topic_name_label),
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(18.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
                 LiquidGlassButton(
-                    text = "Rename",
+                    text = stringResource(R.string.cancel),
+                    variant = GlassButtonVariant.Neutral,
+                    modifier = Modifier.weight(1f),
+                    onClick = { topicToRename = null }
+                )
+                LiquidGlassButton(
+                    text = stringResource(R.string.rename),
+                    variant = GlassButtonVariant.Primary,
                     enabled = renameText.isNotBlank(),
+                    modifier = Modifier.weight(1f),
                     onClick = {
                         if (renameText.isNotBlank()) {
                             viewModel.renameTopic(topic.id, renameText)
@@ -336,12 +331,7 @@ fun TopicsScreen(
                         }
                     }
                 )
-            },
-            dismissButton = {
-                TextButton(onClick = { topicToRename = null }) {
-                    Text("Cancel", color = TextSecondary)
-                }
             }
-        )
+        }
     }
 }

@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App & General -->
+    <string name="app_name">Marklify</string>
+    <string name="app_tagline">OMR Blankalarni yaratish va avtomatik tekshirish</string>
+    <string name="back">Orqaga</string>
+    <string name="close">Yopish</string>
+    <string name="cancel">Bekor qilish</string>
+    <string name="save">Saqlash</string>
+    <string name="done">Tayyor</string>
+    <string name="delete">O‘chirish</string>
+    <string name="edit">Tahrirlash</string>
+    <string name="rename">Nomini o‘zgartirish</string>
+    <string name="retry">Qayta urinish</string>
+    <string name="search">Qidirish</string>
+    <string name="search_hint">O‘quvchi ismi yoki test bo‘yicha qidirish…</string>
+    <string name="filter">Saralash</string>
+    <string name="sort">Tartiblash</string>
+    <string name="export">Eksport</string>
+    <string name="confirm">Tasdiqlash</string>
+    <string name="details">Tafsilotlar</string>
+    <string name="success">Muvaffaqiyatli</string>
+    <string name="error">Xatolik</string>
+    <string name="loading">Yuklanmoqda…</string>
+    <string name="share">Ulashish</string>
+    <string name="print">Chop etish</string>
+
+    <!-- Dashboard -->
+    <string name="dashboard_topics">Mavzular</string>
+    <string name="dashboard_tests">Testlar</string>
+    <string name="dashboard_graded_sheets">Tekshirilganlar</string>
+    <string name="quick_actions">Tezkor amallar</string>
+    <string name="create_topic">Mavzu yaratish</string>
+    <string name="create_topic_desc">Fan yoki toifani qo‘shish</string>
+    <string name="create_test">Test yaratish</string>
+    <string name="create_test_desc">Javoblar kaliti bilan yangi imtihon</string>
+    <string name="generate_sheet">Blanka yaratish</string>
+    <string name="generate_sheet_desc">Chop etish uchun javoblar varaqasi</string>
+    <string name="scan_sheet">Blankani skanerlash</string>
+    <string name="scan_sheet_desc">Kamera orqali tekshirish va baholash</string>
+    <string name="recent_scans">So‘nggi tekshirilgan varaqalar</string>
+    <string name="view_all_history">Barcha tarixni ko‘rish</string>
+    <string name="no_recent_scans">Hozircha tekshirilgan testlar yo‘q</string>
+    <string name="no_recent_scans_desc">Kamera orqali o‘quvchilar javob varaqasini skanerlang va natijalarni darhol bu yerda ko‘ring.</string>
+    <string name="create_topic_dialog_title">Yangi mavzu yaratish</string>
+    <string name="topic_name_label">Mavzu nomi (masalan: Matematika, Biologiya)</string>
+    <string name="create_test_dialog_title">Yangi test yaratish</string>
+    <string name="select_topic_label">Mavzuni tanlang</string>
+    <string name="test_name_label">Test nomi (masalan: Oraliq nazorat 2026)</string>
+    <string name="question_count_label">Savollar soni (1–100)</string>
+    <string name="select_test_for_sheet">OMR blanka uchun testni tanlang</string>
+    <string name="select_test_for_scan">Skanerlash uchun testni tanlang</string>
+    <string name="no_tests_found">Testlar topilmadi. Avval test yarating.</string>
+    <string name="questions_count">%1$d ta savol</string>
+    <string name="final_score_summary">Yakuniy ball: %1$d/%2$d  •  ✓ %3$d  ✗ %4$d  — %5$d</string>
+
+    <!-- Topics & Topic Detail -->
+    <string name="topics_title">Fanlar va mavzular</string>
+    <string name="no_topics_title">Hozircha mavzular yo‘q</string>
+    <string name="no_topics_desc">Imtihonlar va javoblar kalitini tartibga solish uchun fan yoki toifa yarating.</string>
+    <string name="rename_topic">Nomini o‘zgartirish</string>
+    <string name="delete_topic">Mavzuni o‘chirish</string>
+    <string name="delete_topic_confirm">\"%1$s\" mavzusini o‘chirishni xohlaysizmi? Bu mavzudagi barcha testlar va tekshirish natijalari ham o‘chiriladi.</string>
+    <string name="tests_in_topic">%1$d ta test</string>
+
+    <!-- Tests & Test Detail & Editor -->
+    <string name="test_detail_title">Test tafsilotlari</string>
+    <string name="edit_test">Testni tahrirlash</string>
+    <string name="delete_test">Testni o‘chirish</string>
+    <string name="delete_test_confirm">\"%1$s\" testini o‘chirishni xohlaysizmi? Ushbu test bo‘yicha barcha natijalar ham o‘chiriladi.</string>
+    <string name="answer_key">Javoblar kaliti</string>
+    <string name="edit_key">Kalitni tahrirlash</string>
+    <string name="question_number">%1$d-savol</string>
+    <string name="correct_answer">To‘g‘ri javob: %1$s</string>
+    <string name="save_key">Javoblar kalitini saqlash</string>
+    <string name="key_saved_toast">Javoblar kaliti muvaffaqiyatli yangilandi</string>
+
+    <!-- Scanner -->
+    <string name="scanner_title">Blankani skanerlash</string>
+    <string name="scanner_subtitle">%1$d ta savol • 4 burchak belgisini to‘g‘rilang</string>
+    <string name="looking_for_sheet">Blanka qidirilmoqda…</string>
+    <string name="hold_steady">Blanka aniqlandi! Qimirlatmang…</string>
+    <string name="capturing_photo">Yuqori aniqlikdagi surat olinmoqda…</string>
+    <string name="reading_bubbles">Belgilar o‘qilmoqda…</string>
+    <string name="sheet_not_found">Blanka belgilari aniqlanmadi. Yoritish yetarli ekaniga ishonch hosil qiling.</string>
+    <string name="failed_perspective">Blanka burchaklarini to‘g‘rilab bo‘lmadi. Kamerani barqaror ushlang.</string>
+    <string name="manual_capture">Suratga olish</string>
+    <string name="pick_photo">Galereyadan tanlash</string>
+    <string name="scanning_from_photo">Suratdan skanerlanmoqda…</string>
+    <string name="opencv_unavailable_title">OpenCV mavjud emas</string>
+    <string name="opencv_unavailable_desc">Ushbu qurilmada OpenCV ishga tushmadi. Skanerlash va kompyuter ko‘rish imkoniyatlari vaqtincha ishlamaydi.</string>
+    <string name="retry_opencv">OpenCV-ni qayta ishga tushirish</string>
+    <string name="go_back">Orqaga qaytish</string>
+    <string name="opencv_retry_success">OpenCV muvaffaqiyatli ishga tushdi!</string>
+    <string name="opencv_retry_failed">OpenCV-ni qayta ishga tushirib bo‘lmadi. Ilovani qayta ishga tushiring.</string>
+    <string name="camera_permission_required">Kameraga ruxsat zarur</string>
+    <string name="camera_permission_desc">Marklify javob varaqalarini skanerlash va baholash uchun kameraga ruxsat talab qiladi.</string>
+    <string name="grant_camera_permission">Kameraga ruxsat berish</string>
+
+    <!-- Review -->
+    <string name="review_title">Aniqlangan javoblarni tekshirish</string>
+    <string name="all_clean">Barcha javoblar aniq belgilangan</string>
+    <string name="flagged_count">%1$d ta javob o‘qituvchi tekshiruviga ajratildi</string>
+    <string name="student_details">O‘quvchi ma’lumotlari</string>
+    <string name="student_name_label">O‘quvchi F.I.Sh.</string>
+    <string name="student_id_label">O‘quvchi ID raqami</string>
+    <string name="view_scanned_sheet">Skanerlangan blankani ko‘rish</string>
+    <string name="confirm_and_score">Tasdiqlash va baholash</string>
+    <string name="answered_ratio">%1$d / %2$d ta belgilangan</string>
+    <string name="student_anonymous">Noma’lum o‘quvchi</string>
+    <string name="student_prefix">O‘quvchi: %1$s</string>
+    <string name="flagged_for_review">QAYTA TEKSHIRISH</string>
+    <string name="multiple_marked_flag">Bir nechta belgilangan</string>
+    <string name="ambiguous_flag">Noaniq / Xira belgilangan</string>
+    <string name="unanswered_flag">Belgilanmagan</string>
+    <string name="single_answer">Yagona javob: %1$s</string>
+
+    <!-- Results & Result Detail -->
+    <string name="results_title">Baholash natijalari</string>
+    <string name="student_score">Natija: %1$d/%2$d (%3$.0f%%)</string>
+    <string name="passed">O‘tdi</string>
+    <string name="needs_improvement">Qayta ko‘rib chiqish</string>
+    <string name="failed">Yiqildi</string>
+    <string name="correct_answers">To‘g‘ri</string>
+    <string name="wrong_answers">Noto‘g‘ri</string>
+    <string name="unanswered_answers">Belgilanmagan</string>
+    <string name="multiple_answers">Bir nechta</string>
+    <string name="export_csv">CSV formatida yuklash</string>
+    <string name="question_analysis">Savollar tahlili</string>
+
+    <!-- History -->
+    <string name="history_title">Baholash tarixi</string>
+    <string name="all_records">Barcha tekshirilgan natijalar</string>
+    <string name="filter_by_test">Test bo‘yicha saralash</string>
+    <string name="no_history_title">Hozircha tarix mavjud emas</string>
+    <string name="no_history_desc">Tekshirilgan barcha imtihonlar va baholar bu yerda saqlanadi.</string>
+    <string name="export_all_csv">Barcha natijalarni CSV-ga yuklash</string>
+
+    <!-- Sheet Generator -->
+    <string name="sheet_generator_title">OMR blanka yaratish</string>
+    <string name="sheet_format">Qog‘oz o‘lchami</string>
+    <string name="format_a4">A4 (210 × 297 mm)</string>
+    <string name="format_letter">US Letter (8.5 × 11\")</string>
+    <string name="save_pdf">PDF yuklab olish</string>
+    <string name="print_sheet">Blankani chop etish</string>
+    <string name="generating_pdf">PDF tayyorlanmoqda…</string>
+    <string name="sheet_generated">OMR blanka muvaffaqiyatli yaratildi</string>
+    <string name="preview_sheet">Blanka ko‘rinishi</string>
+
+    <!-- Settings & Calibration -->
+    <string name="settings_title">Sozlamalar va kalibrlash</string>
+    <string name="language_section">Ilova tili</string>
+    <string name="language_en">English</string>
+    <string name="language_uz">O‘zbekcha (Lotin)</string>
+    <string name="language_ru">Русский</string>
+    <string name="haptics_section">Taktil vibratsiya javobi</string>
+    <string name="haptics_desc">Belgilarni aniqlashda mayin tebranish va natijalarni saqlashda tasdiqlovchi vibratsiya.</string>
+    <string name="haptics_toggle">Taktil tebranish</string>
+    <string name="calibration_section">OMR sezgirligini kalibrlash</string>
+    <string name="calibration_desc">Qalam to‘qligi, ruchka qalinligi yoki xona yorug‘ligiga moslashish uchun sezgirlik chegaralarini sozlang.</string>
+    <string name="fill_threshold">Belgilanganlik chegarasi</string>
+    <string name="fill_threshold_desc">Doirachani belgilangan deb hisoblash uchun minimal to‘ldirilganlik foizi.</string>
+    <string name="unanswered_threshold">Bo‘sh doiralar chegarasi</string>
+    <string name="unanswered_threshold_desc">Ushbu foizdan past to‘ldirilgan doiralar butunlay bo‘sh deb hisoblanadi.</string>
+    <string name="multiple_diff">Bir nechta belgilash oraliq farqi</string>
+    <string name="multiple_diff_desc">Agar ikki doiraning farqi ushbu oraliqda bo‘lsa, bir nechta belgilangan deb topiladi.</string>
+    <string name="ambiguous_diff">Noaniqlik / Qayta tekshirish farqi</string>
+    <string name="ambiguous_diff_desc">Birinchi va ikkinchi natija oraliq farqi ushbu qiymatda bo‘lsa, qayta tekshirishga ajratiladi.</string>
+    <string name="live_calibration">Jonli kalibrlash testi namunasi</string>
+    <string name="live_calibration_desc">Joriy sozlamalaringiz 4 xil javob holatini qanday aniqlashini real vaqtda ko‘ring:</string>
+    <string name="simulated_sample">Simulyatsiya namunasi</string>
+    <string name="default_page_size">Standart blanka qog‘oz o‘lchami</string>
+    <string name="save_settings">Sozlamalar va chegaralarni saqlash</string>
+    <string name="settings_saved_toast">Sozlamalar va chegaralar muvaffaqiyatli saqlandi</string>
+    <string name="reset_thresholds">Boshlang‘ich holatga qaytarish</string>
+    <string name="reset_thresholds_toast">Chegaralar standart holatga qaytarildi</string>
+    <string name="backup_section">Ma’lumotlar bazasini zaxiralash va tiklash</string>
+    <string name="backup_desc">Barcha mavzular, testlar, kalitlar va natijalarni oflayn JSON faylga yuklang yoki yangi qurilmada tiklang.</string>
+    <string name="export_json">JSON eksport qilish</string>
+    <string name="restore_json">JSON orqali tiklash</string>
+    <string name="export_backup_chooser">Marklify ma’lumotlar zaxirasini yuklash</string>
+    <string name="backup_restored_title">Zaxira nusxa tiklandi</string>
+    <string name="backup_restored_summary">Muvaffaqiyatli tiklandi:\n• %1$d ta mavzu\n• %2$d ta test\n• %3$d ta savol\n• %4$d ta tekshiruv qaydlari</string>
+    <string name="backup_empty">Tanlangan zaxira fayli bo‘sh</string>
+    <string name="backup_read_failed">Zaxirani o‘qishda xatolik: %1$s</string>
+
+    <!-- Additional Screen Strings -->
+    <string name="topics_and_subjects">Mavzular va fanlar</string>
+    <string name="new_topic">Yangi mavzu</string>
+    <string name="no_topics_hint">Birinchi mavzu yoki fanni qo‘shish uchun + tugmasini bosing.</string>
+    <string name="created_date">Yaratilgan sana: %1$s</string>
+    <string name="new_topic_name_label">Yangi mavzu nomi</string>
+    <string name="delete_topic_title">Mavzuni o‘chirish?</string>
+    <string name="delete_topic_message">\"%1$s\" o‘chirilsa, uning ichidagi barcha testlar va savollar ham o‘chiriladi.</string>
+    <string name="topic_tests_title">Mavzu testlari</string>
+    <string name="no_tests_in_topic">Ushbu mavzuda hali testlar mavjud emas</string>
+    <string name="no_tests_in_topic_hint">Test qo‘shish va to‘g‘ri javoblarni sozlash uchun + tugmasini bosing.</string>
+    <string name="questions_and_date">%1$d ta savol  •  %2$s</string>
+    <string name="sheet_pdf">Blanka PDF</string>
+    <string name="create_test_dialog">Test yaratish</string>
+    <string name="test_name_hint">Test nomi (masalan: 3-bob testi)</string>
+    <string name="delete_test_title">Testni o‘chirish?</string>
+    <string name="delete_test_message">\"%1$s\" va unga tegishli barcha savollar hamda skanerlash tarixini o‘chirishni xohlaysizmi?</string>
+    <string name="rename_test_title">Test nomini o‘zgartirish</string>
+    <string name="new_test_name_label">Yangi test nomi</string>
+    <string name="edit_questions_title">Savollarni tahrirlash</string>
+    <string name="questions_count_range">%1$d ta savol (1–100)</string>
+    <string name="questions_saved_toast">Barcha savollar va javoblar kaliti muvaffaqiyatli saqlandi!</string>
+    <string name="quick_adjust_items">Savollar sonini tez sozlash</string>
+    <string name="question_text_label">Savol matni (ixtiyoriy)</string>
+    <string name="option_a_label">A varianti</string>
+    <string name="option_b_label">B varianti</string>
+    <string name="option_c_label">C varianti</string>
+    <string name="option_d_label">D varianti</string>
+    <string name="key_label">Kalit:</string>
+    <string name="four_options_desc">%1$d ta savol  •  4 ta variant (A, B, C, D)</string>
+    <string name="edit_keys">Kalitlarni tahrirlash</string>
+    <string name="blank_sheet">Bo‘sh blanka</string>
+    <string name="questions_keys_count">Savollar va javoblar kaliti (%1$d)</string>
+    <string name="view_results">Natijalarni ko‘rish</string>
+    <string name="graded_sheets_count">%1$d ta tekshirilgan blanka</string>
+    <string name="class_performance_overview">Sinf umumiy ko‘rsatkichlari</string>
+    <string name="students_count">%1$d ta o‘quvchi</string>
+    <string name="average_label">O‘rtacha</string>
+    <string name="no_scans_yet">Ushbu test uchun hali skanerlashlar yo‘q</string>
+    <string name="no_scans_hint">O‘quvchilar blankalarini skanerlash va avto-baholash uchun skanerlash tugmasini bosing.</string>
+    <string name="delete_result_title">Natijani o‘chirish?</string>
+    <string name="delete_result_message">\"%1$s\" uchun baholash natijasini o‘chirishni xohlaysizmi?</string>
+    <string name="grading_report">Baholash hisoboti</string>
+    <string name="captured_sheet_image">Skanerlangan blanka tasviri</string>
+    <string name="tap_to_view_scanned_paper">To‘liq qog‘ozni ko‘rish uchun bosing</string>
+    <string name="question_breakdown_title">Savollar bo‘yicha batafsil tahlil</string>
+    <string name="overall_performance">Umumiy samaradorlik</string>
+    <string name="pass_rate_badge">%1$d%% O‘tish ko‘rsatkichi</string>
+    <string name="highest_label">Eng yuqori</string>
+    <string name="search_history_placeholder">O‘quvchi ismi, ID yoki test nomi bo‘yicha qidiruv…</string>
+    <string name="no_matching_graded_tests">Mos keluvchi tekshirilgan testlar topilmadi</string>
+    <string name="no_matching_hint">Qidiruvni tozalang yoki filtrlash parametrlarini o‘zgartiring.</string>
+    <string name="tips_scanning_title">Aniqroq skanerlash uchun tavsiyalar:</string>
+    <string name="tip_scale">• Standart oq qog‘ozga (%1$s) 100%% masshtabda chop eting (Sahifaga moslashtirmang).</string>
+    <string name="tip_markers">• Burchaklardagi 4 ta qora kvadrat to‘liq chop etilganligiga ishonch hosil qiling.</string>
+    <string name="tip_shading">• O‘quvchilarga doiralarni qora yoki to‘q ko‘k ruchka bilan qat’iy bo‘yashni ayting.</string>
+    <string name="scanned_sheet_capture">Skanerlangan blanka tasviri</string>
+    <string name="top_down_perspective">Tepa tomondan to‘g‘rilangan tasvir</string>
+    <string name="tap_to_enlarge">Kattalashtirish uchun bosing</string>
+    <string name="verify_answers_hint">Javoblarni tekshiring (O‘zgartirish uchun harfni bosing):</string>
+    <string name="key_prefix">(To‘g‘ri javob: %1$s)</string>
+    <string name="detected_answer_badge">Aniqlangan: %1$s</string>
+    <string name="none_answer">Yo‘q</string>
+</resources>

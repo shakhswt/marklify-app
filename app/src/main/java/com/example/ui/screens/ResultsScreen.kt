@@ -24,9 +24,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.R
 import com.example.data.backup.DataBackupManager
 import com.example.data.entity.ScanResult
 import com.example.data.entity.TestEntity
@@ -34,8 +36,10 @@ import com.example.ui.components.GlassButtonVariant
 import com.example.ui.components.LiquidGlassBackdrop
 import com.example.ui.components.LiquidGlassButton
 import com.example.ui.components.LiquidGlassCard
+import com.example.ui.components.LiquidGlassDialog
+import com.example.ui.components.LiquidGlassEmptyState
+import com.example.ui.components.LiquidGlassFAB
 import com.example.ui.components.LiquidGlassTopAppBar
-import com.example.ui.components.liquidGlassSurface
 import com.example.ui.theme.*
 import com.example.ui.viewmodel.MarklifyViewModel
 import java.text.SimpleDateFormat
@@ -67,15 +71,15 @@ fun ResultsScreen(
                 LiquidGlassTopAppBar(
                     title = {
                         Column {
-                            Text(test?.name ?: "Grading Results", fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                            Text("${results.size} Graded Sheets", fontSize = 11.sp, color = TextSecondary)
+                            Text(test?.name ?: stringResource(R.string.results_title), fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                            Text(stringResource(R.string.graded_sheets_count, results.size), fontSize = 11.sp, color = TextSecondary)
                         }
                     },
                     navigationIcon = {
                         IconButton(onClick = onNavigateBack) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = "Back",
+                                contentDescription = stringResource(R.string.back),
                                 tint = TextPrimary
                             )
                         }
@@ -107,7 +111,7 @@ fun ResultsScreen(
                                 } else {
                                     Icon(
                                         imageVector = Icons.Default.FileDownload,
-                                        contentDescription = "Export CSV",
+                                        contentDescription = stringResource(R.string.export_csv),
                                         tint = TextPrimary
                                     )
                                 }
@@ -121,35 +125,22 @@ fun ResultsScreen(
                                 }
                             }
                         ) {
-                            Icon(imageVector = Icons.Default.CameraAlt, contentDescription = "Scan Another", tint = SuccessGreen)
+                            Icon(imageVector = Icons.Default.CameraAlt, contentDescription = stringResource(R.string.scan_sheet), tint = SuccessGreen)
                         }
                     }
                 )
             },
             floatingActionButton = {
-                Box(
-                    modifier = Modifier
-                        .liquidGlassSurface(
-                            shape = RoundedCornerShape(22.dp),
-                            fillColor = GlassFillElevated,
-                            showSpecular = true,
-                            elevation = 8.dp
-                        )
-                        .clickable {
-                            viewModel.loadTestForScan(testId) {
-                                onNavigateToScanner(testId)
-                            }
+                LiquidGlassFAB(
+                    icon = Icons.Default.CameraAlt,
+                    onClick = {
+                        viewModel.loadTestForScan(testId) {
+                            onNavigateToScanner(testId)
                         }
-                        .testTag("scan_another_fab")
-                        .padding(horizontal = 20.dp, vertical = 14.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(imageVector = Icons.Default.CameraAlt, contentDescription = null, tint = SuccessGreen, modifier = Modifier.size(20.dp))
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Scan Sheet", color = TextPrimary, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
-                    }
-                }
+                    },
+                    modifier = Modifier.testTag("scan_another_fab"),
+                    contentDescription = stringResource(R.string.scan_sheet)
+                )
             },
             containerColor = Color.Transparent
         ) { padding ->
@@ -157,41 +148,15 @@ fun ResultsScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(padding),
+                        .padding(padding)
+                        .padding(16.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    LiquidGlassCard(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(24.dp),
-                        shape = RoundedCornerShape(24.dp),
-                        fillColor = GlassFill
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(32.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(56.dp)
-                                    .clip(CircleShape)
-                                    .background(GlassFillElevated)
-                                    .border(1.dp, GlassBorderBright, CircleShape),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Grading,
-                                    contentDescription = null,
-                                    tint = TextSecondary,
-                                    modifier = Modifier.size(28.dp)
-                                )
-                            }
-                            Spacer(modifier = Modifier.height(14.dp))
-                            Text("No scans for this test yet", color = TextPrimary, fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
-                            Spacer(modifier = Modifier.height(6.dp))
-                            Text("Tap the scan button to scan and auto-grade student sheets.", color = TextSecondary, fontSize = 13.sp)
-                        }
-                    }
+                    LiquidGlassEmptyState(
+                        icon = Icons.Default.Grading,
+                        title = stringResource(R.string.no_scans_yet),
+                        description = stringResource(R.string.no_scans_hint)
+                    )
                 }
             } else {
                 val avgPercentage = remember(results) {
@@ -228,7 +193,7 @@ fun ResultsScreen(
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Text(
-                                        text = "Class Performance Overview",
+                                        text = stringResource(R.string.class_performance_overview),
                                         fontWeight = FontWeight.Bold,
                                         fontSize = 15.sp,
                                         color = TextPrimary
@@ -241,7 +206,7 @@ fun ResultsScreen(
                                             .padding(horizontal = 10.dp, vertical = 4.dp)
                                     ) {
                                         Text(
-                                            text = "${results.size} Students",
+                                            text = stringResource(R.string.students_count, results.size),
                                             fontWeight = FontWeight.Medium,
                                             fontSize = 12.sp,
                                             color = TextPrimary
@@ -260,7 +225,7 @@ fun ResultsScreen(
                                             fontSize = 22.sp,
                                             color = if (avgPercentage >= 70f) SuccessGreen else WarningAmber
                                         )
-                                        Text("Average", fontSize = 11.sp, color = TextSecondary)
+                                        Text(stringResource(R.string.average_label), fontSize = 11.sp, color = TextSecondary)
                                     }
                                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                         Text(
@@ -269,7 +234,7 @@ fun ResultsScreen(
                                             fontSize = 22.sp,
                                             color = WarningAmber
                                         )
-                                        Text("Multiple Marked", fontSize = 11.sp, color = TextSecondary)
+                                        Text(stringResource(R.string.multiple_marked_flag), fontSize = 11.sp, color = TextSecondary)
                                     }
                                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                         Text(
@@ -278,7 +243,7 @@ fun ResultsScreen(
                                             fontSize = 22.sp,
                                             color = TextSecondary
                                         )
-                                        Text("Unanswered", fontSize = 11.sp, color = TextSecondary)
+                                        Text(stringResource(R.string.unanswered_flag), fontSize = 11.sp, color = TextSecondary)
                                     }
                                 }
                             }
@@ -358,7 +323,7 @@ fun ResultsScreen(
                                             color = TextSecondary
                                         )
                                         Text(
-                                            text = "Final Score: ${scan.finalScore.toInt()}/${scan.totalQuestions}  •  Wrong: ${scan.wrong}  •  Multiple: ${scan.multipleMarked}  •  Blank: ${scan.unanswered}",
+                                            text = "Score: ${scan.finalScore.toInt()}/${scan.totalQuestions}  •  ✓ ${scan.correct}  ✗ ${scan.wrong}  — ${scan.unanswered}",
                                             fontSize = 11.sp,
                                             color = TextSecondary
                                         )
@@ -369,14 +334,14 @@ fun ResultsScreen(
                                     IconButton(onClick = { resultToDelete = scan }) {
                                         Icon(
                                             imageVector = Icons.Default.Delete,
-                                            contentDescription = "Delete",
+                                            contentDescription = stringResource(R.string.delete),
                                             tint = ErrorRed,
                                             modifier = Modifier.size(18.dp)
                                         )
                                     }
                                     Icon(
                                         imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                                        contentDescription = "Open",
+                                        contentDescription = null,
                                         tint = TextSecondary,
                                         modifier = Modifier.size(16.dp)
                                     )
@@ -392,27 +357,42 @@ fun ResultsScreen(
     }
 
     resultToDelete?.let { scan ->
-        AlertDialog(
-            onDismissRequest = { resultToDelete = null },
-            containerColor = FrostedBarBackground,
-            shape = RoundedCornerShape(24.dp),
-            title = { Text("Delete Result?", color = TextPrimary, fontWeight = FontWeight.Bold) },
-            text = { Text("Are you sure you want to delete the grading result for '${scan.studentName}'?", color = TextSecondary) },
-            confirmButton = {
+        LiquidGlassDialog(
+            onDismissRequest = { resultToDelete = null }
+        ) {
+            Text(
+                text = stringResource(R.string.delete_result_title),
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp,
+                color = TextPrimary
+            )
+            Spacer(modifier = Modifier.height(10.dp))
+            Text(
+                text = stringResource(R.string.delete_result_message, scan.studentName),
+                color = TextSecondary,
+                fontSize = 14.sp
+            )
+            Spacer(modifier = Modifier.height(18.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
                 LiquidGlassButton(
-                    text = "Delete",
+                    text = stringResource(R.string.cancel),
+                    variant = GlassButtonVariant.Neutral,
+                    modifier = Modifier.weight(1f),
+                    onClick = { resultToDelete = null }
+                )
+                LiquidGlassButton(
+                    text = stringResource(R.string.delete),
                     variant = GlassButtonVariant.Danger,
+                    modifier = Modifier.weight(1f),
                     onClick = {
                         viewModel.deleteScanResult(scan)
                         resultToDelete = null
                     }
                 )
-            },
-            dismissButton = {
-                TextButton(onClick = { resultToDelete = null }) {
-                    Text("Cancel", color = TextSecondary)
-                }
             }
-        )
+        }
     }
 }

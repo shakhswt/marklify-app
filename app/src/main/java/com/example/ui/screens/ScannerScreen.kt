@@ -70,6 +70,9 @@ import com.example.ui.viewmodel.MarklifyViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import androidx.compose.ui.res.stringResource
+import com.example.R
+import com.example.util.HapticManager
 import java.io.InputStream
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -91,6 +94,10 @@ fun ScannerScreen(
 
     val test by viewModel.selectedTest.collectAsState()
     val questions by viewModel.selectedQuestions.collectAsState()
+
+    val appSettings by viewModel.appSettings.collectAsState()
+    val wasStable = remember { AtomicBoolean(false) }
+    val isAnalyzing = remember { AtomicBoolean(false) }
 
     var hasCameraPermission by remember {
         mutableStateOf(
@@ -172,85 +179,46 @@ fun ScannerScreen(
         }
     }
 
-    // Check OpenCV Initialization State (Requirement 6)
+    // Check OpenCV Initialization State
     if (!isOpenCvInitialized) {
-        Scaffold(
-            topBar = {
-                TopAppBar(
-                    title = { Text("OpenCV Unavailable", fontWeight = FontWeight.Bold) },
-                    navigationIcon = {
-                        IconButton(onClick = onNavigateBack) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = "Back",
-                                tint = TextPrimary
-                            )
+        LiquidGlassBackdrop {
+            Scaffold(
+                topBar = {
+                    LiquidGlassTopAppBar(
+                        title = { Text(stringResource(R.string.opencv_unavailable_title), fontWeight = FontWeight.Bold) },
+                        navigationIcon = {
+                            IconButton(onClick = onNavigateBack) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                    contentDescription = stringResource(R.string.back),
+                                    tint = TextPrimary
+                                )
+                            }
                         }
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(containerColor = MidnightDark)
-                )
-            },
-            containerColor = MidnightDark
-        ) { padding ->
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-                    .padding(24.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Card(
-                    colors = CardDefaults.cardColors(containerColor = MidnightSurface),
-                    shape = RoundedCornerShape(16.dp),
-                    modifier = Modifier.fillMaxWidth()
+                    )
+                },
+                containerColor = Color.Transparent
+            ) { padding ->
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(padding)
+                        .padding(24.dp),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Column(
-                        modifier = Modifier.padding(24.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Warning,
-                            contentDescription = null,
-                            tint = ErrorRed,
-                            modifier = Modifier.size(56.dp)
-                        )
-                        Text(
-                            text = "OpenCV Failed to Initialize",
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 18.sp,
-                            color = TextPrimary,
-                            textAlign = TextAlign.Center
-                        )
-                        Text(
-                            text = "OpenCV failed to initialize on this device. Scanning and computer vision features are unavailable.",
-                            fontSize = 14.sp,
-                            color = TextSecondary,
-                            textAlign = TextAlign.Center
-                        )
-                        Button(
-                            onClick = {
-                                val success = OpenCVState.initialize()
-                                if (success) {
-                                    Toast.makeText(context, "OpenCV successfully initialized!", Toast.LENGTH_SHORT).show()
-                                } else {
-                                    Toast.makeText(context, "OpenCV retry failed. Please restart app.", Toast.LENGTH_LONG).show()
-                                }
-                            },
-                            colors = ButtonDefaults.buttonColors(containerColor = IndigoAccent),
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Icon(imageVector = Icons.Default.Refresh, contentDescription = null)
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text("Retry OpenCV Initialization")
+                    LiquidGlassErrorCard(
+                        title = stringResource(R.string.opencv_unavailable_title),
+                        message = stringResource(R.string.opencv_unavailable_desc),
+                        retryText = stringResource(R.string.retry_opencv),
+                        onRetry = {
+                            val success = OpenCVState.initialize()
+                            if (success) {
+                                Toast.makeText(context, context.getString(R.string.opencv_retry_success), Toast.LENGTH_SHORT).show()
+                            } else {
+                                Toast.makeText(context, context.getString(R.string.opencv_retry_failed), Toast.LENGTH_LONG).show()
+                            }
                         }
-                        OutlinedButton(
-                            onClick = onNavigateBack,
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text("Go Back")
-                        }
-                    }
+                    )
                 }
             }
         }
@@ -262,26 +230,25 @@ fun ScannerScreen(
             LiquidGlassTopAppBar(
                 title = {
                     Column {
-                        Text(test?.name ?: "Scan Sheet", fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                        Text("${questions.size} Questions • Align 4 Corner Markers", fontSize = 11.sp, color = TextSecondary)
+                        Text(test?.name ?: stringResource(R.string.scanner_title), fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                        Text(stringResource(R.string.scanner_subtitle, questions.size), fontSize = 11.sp, color = TextSecondary)
                     }
                 },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
+                            contentDescription = stringResource(R.string.back),
                             tint = TextPrimary
                         )
                     }
                 },
                 actions = {
-                    // Fallback to gallery
                     IconButton(
                         onClick = { galleryLauncher.launch("image/*") },
                         modifier = Modifier.testTag("gallery_picker_button")
                     ) {
-                        Icon(imageVector = Icons.Default.PhotoLibrary, contentDescription = "Pick Photo", tint = TextPrimary)
+                        Icon(imageVector = Icons.Default.PhotoLibrary, contentDescription = stringResource(R.string.pick_photo), tint = TextPrimary)
                     }
                 }
             )
@@ -320,6 +287,10 @@ fun ScannerScreen(
                                     imageProxy.close()
                                     return@setAnalyzer
                                 }
+                                if (!isAnalyzing.compareAndSet(false, true)) {
+                                    imageProxy.close()
+                                    return@setAnalyzer
+                                }
 
                                 try {
                                     val bitmap = imageProxyToBitmap(imageProxy)
@@ -329,6 +300,12 @@ fun ScannerScreen(
                                         val scaleFactor = bitmap.width.toFloat() / downscaled.width.toFloat()
 
                                         val markerResult = viewModel.omrEngine.detectFrame(downscaled)
+
+                                        if (markerResult.isStable && !wasStable.getAndSet(true)) {
+                                            HapticManager.performBubbleDetectedTick(context, appSettings.hapticsEnabled)
+                                        } else if (!markerResult.isStable) {
+                                            wasStable.set(false)
+                                        }
 
                                         // Update UI status
                                         coroutineScope.launch(Dispatchers.Main) {
@@ -442,6 +419,7 @@ fun ScannerScreen(
                                 } catch (e: Throwable) {
                                     Log.e("ScannerScreen", "Analyzer error: ${e.message}")
                                 } finally {
+                                    isAnalyzing.set(false)
                                     imageProxy.close()
                                 }
                             }
@@ -474,44 +452,69 @@ fun ScannerScreen(
                 )
 
             } else {
-                // Permission Denied View
+                // Permission Denied View in Liquid Glass
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(32.dp),
+                        .padding(24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.CameraAlt,
-                        contentDescription = null,
-                        tint = ErrorRed,
-                        modifier = Modifier.size(64.dp)
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text(
-                        text = "Camera Permission Required",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp,
-                        color = Color.White
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "Marklify needs camera access to scan OMR answer sheets in real-time.",
-                        color = TextSecondary,
-                        textAlign = TextAlign.Center,
-                        fontSize = 14.sp
-                    )
-                    Spacer(modifier = Modifier.height(20.dp))
-                    Button(
-                        onClick = { permissionLauncher.launch(Manifest.permission.CAMERA) },
-                        colors = ButtonDefaults.buttonColors(containerColor = IndigoAccent)
+                    LiquidGlassCard(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(24.dp),
+                        fillColor = GlassFill,
+                        showSpecular = true
                     ) {
-                        Text("Grant Camera Permission")
-                    }
-                    Spacer(modifier = Modifier.height(12.dp))
-                    OutlinedButton(onClick = { galleryLauncher.launch("image/*") }) {
-                        Text("Choose from Gallery Instead")
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(26.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(14.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(60.dp)
+                                    .clip(CircleShape)
+                                    .background(GlassFillElevated)
+                                    .border(1.dp, GlassBorderBright, CircleShape),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.CameraAlt,
+                                    contentDescription = null,
+                                    tint = ErrorRed,
+                                    modifier = Modifier.size(30.dp)
+                                )
+                            }
+                            Text(
+                                text = stringResource(R.string.camera_permission_required),
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 18.sp,
+                                color = TextPrimary,
+                                textAlign = TextAlign.Center
+                            )
+                            Text(
+                                text = stringResource(R.string.camera_permission_desc),
+                                color = TextSecondary,
+                                textAlign = TextAlign.Center,
+                                fontSize = 13.sp
+                            )
+                            Spacer(modifier = Modifier.height(6.dp))
+                            LiquidGlassButton(
+                                text = stringResource(R.string.grant_camera_permission),
+                                onClick = { permissionLauncher.launch(Manifest.permission.CAMERA) },
+                                variant = GlassButtonVariant.Primary,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                            LiquidGlassButton(
+                                text = stringResource(R.string.pick_photo),
+                                onClick = { galleryLauncher.launch("image/*") },
+                                variant = GlassButtonVariant.Neutral,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
                     }
                 }
             }
