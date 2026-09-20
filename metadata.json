@@ -1,0 +1,7 @@
+{
+  "name": "Marklify",
+  "description": "Offline-first OMR sheet generator and scanner for automatic test grading.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+
