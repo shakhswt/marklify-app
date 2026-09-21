@@ -68,6 +68,8 @@ class MarkerDetector {
             Core.meanStdDev(laplacian, mean, stddev)
             val variance = stddev.toArray()[0] * stddev.toArray()[0]
             laplacian.release()
+            mean.release()
+            stddev.release()
 
             if (variance < MIN_LAPLACIAN_VARIANCE) {
                 resetStability()

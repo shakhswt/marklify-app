@@ -45,20 +45,26 @@ fun ResultDetailScreen(
     viewModel: MarklifyViewModel,
     onNavigateBack: () -> Unit
 ) {
+    var currentResultId by remember { mutableLongStateOf(resultId) }
     var scanResult by remember { mutableStateOf<ScanResult?>(null) }
     var test by remember { mutableStateOf<TestEntity?>(null) }
-    val detectedAnswers by viewModel.getDetectedAnswersForScan(resultId).collectAsState(initial = emptyList())
+    val detectedAnswers by viewModel.getDetectedAnswersForScan(currentResultId).collectAsState(initial = emptyList())
     var testQuestions by remember { mutableStateOf<List<Question>>(emptyList()) }
     var showFullImageDialog by remember { mutableStateOf(false) }
 
-    LaunchedEffect(resultId) {
-        val result = viewModel.getScanResultById(resultId)
+    LaunchedEffect(currentResultId) {
+        val result = viewModel.getScanResultById(currentResultId)
         scanResult = result
         if (result != null) {
             val t = viewModel.getTestById(result.testId)
             test = t
             testQuestions = viewModel.getQuestionsListForTest(result.testId)
         }
+    }
+
+    val allResultsForTest by viewModel.getScanResultsForTest(scanResult?.testId ?: 0L).collectAsState(initial = emptyList())
+    val currentIndex = remember(allResultsForTest, currentResultId) {
+        allResultsForTest.indexOfFirst { it.id == currentResultId }.coerceAtLeast(0)
     }
 
     val sheetBitmap = remember(scanResult?.imagePath) {
@@ -73,7 +79,7 @@ fun ResultDetailScreen(
     Scaffold(
         topBar = {
             MarklifyTopAppBar(
-                title = { Text("Roll No : ${scanResult?.studentId ?: "90"}", fontWeight = FontWeight.Bold) },
+                title = { Text("Roll No : ${scanResult?.studentId ?: "N/A"}", fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
@@ -114,9 +120,35 @@ fun ResultDetailScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("<", fontWeight = FontWeight.Bold, fontSize = 18.sp, modifier = Modifier.clickable { })
-                    Text("Report 1/15", fontWeight = FontWeight.Bold, fontSize = 14.sp)
-                    Text(">", fontWeight = FontWeight.Bold, fontSize = 18.sp, modifier = Modifier.clickable { })
+                    val prevResult = allResultsForTest.getOrNull(currentIndex - 1)
+                    val nextResult = allResultsForTest.getOrNull(currentIndex + 1)
+
+                    Text(
+                        text = "‹ Previous",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 14.sp,
+                        color = if (prevResult != null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
+                        modifier = Modifier.clickable(enabled = prevResult != null) {
+                            if (prevResult != null) currentResultId = prevResult.id
+                        }
+                    )
+
+                    Text(
+                        text = "Report ${if (allResultsForTest.isNotEmpty()) currentIndex + 1 else 0} / ${allResultsForTest.size}",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+
+                    Text(
+                        text = "Next ›",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 14.sp,
+                        color = if (nextResult != null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
+                        modifier = Modifier.clickable(enabled = nextResult != null) {
+                            if (nextResult != null) currentResultId = nextResult.id
+                        }
+                    )
                 }
             }
         },
@@ -141,7 +173,6 @@ fun ResultDetailScreen(
                 item {
                     MarklifyCard(modifier = Modifier.fillMaxWidth()) {
                         Column(modifier = Modifier.padding(16.dp)) {
-                            // Table Header Row
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -152,13 +183,11 @@ fun ResultDetailScreen(
                                 Text("Score", fontWeight = FontWeight.Bold, fontSize = 13.sp, modifier = Modifier.weight(1f))
                                 Text("Percentage", fontWeight = FontWeight.Bold, fontSize = 13.sp, modifier = Modifier.weight(1.2f))
                                 Text("Correct", fontWeight = FontWeight.Bold, fontSize = 13.sp, modifier = Modifier.weight(1f))
-                                Text("Rank", fontWeight = FontWeight.Bold, fontSize = 13.sp, modifier = Modifier.weight(1f))
                             }
 
                             HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
                             Spacer(modifier = Modifier.height(8.dp))
 
-                            // Section 1 Row
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -166,30 +195,14 @@ fun ResultDetailScreen(
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
                                 Text("Section 1", fontSize = 13.sp, modifier = Modifier.weight(1.5f))
-                                Text("4.0", fontSize = 13.sp, modifier = Modifier.weight(1f))
-                                Text("80.0%", fontSize = 13.sp, modifier = Modifier.weight(1.2f))
-                                Text("4", fontSize = 13.sp, modifier = Modifier.weight(1f))
-                                Text("1", fontSize = 13.sp, modifier = Modifier.weight(1f))
-                            }
-
-                            // Section 2 Row
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 4.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Text("Section 2", fontSize = 13.sp, modifier = Modifier.weight(1.5f))
-                                Text("1.0", fontSize = 13.sp, modifier = Modifier.weight(1f))
-                                Text("20.0%", fontSize = 13.sp, modifier = Modifier.weight(1.2f))
-                                Text("1", fontSize = 13.sp, modifier = Modifier.weight(1f))
-                                Text("4", fontSize = 13.sp, modifier = Modifier.weight(1f))
+                                Text("${result.finalScore}", fontSize = 13.sp, modifier = Modifier.weight(1f))
+                                Text(String.format(Locale.US, "%.1f%%", result.percentage), fontSize = 13.sp, modifier = Modifier.weight(1.2f))
+                                Text("${result.correct}", fontSize = 13.sp, modifier = Modifier.weight(1f))
                             }
 
                             HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
                             Spacer(modifier = Modifier.height(8.dp))
 
-                            // Total Marks Row
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -198,9 +211,8 @@ fun ResultDetailScreen(
                             ) {
                                 Text("Total Marks", fontWeight = FontWeight.Bold, fontSize = 13.sp, modifier = Modifier.weight(1.5f))
                                 Text("${result.finalScore}", fontWeight = FontWeight.Bold, fontSize = 13.sp, modifier = Modifier.weight(1f))
-                                Text(String.format(Locale.US, "%.2f%%", result.percentage), fontWeight = FontWeight.Bold, fontSize = 13.sp, modifier = Modifier.weight(1.2f))
+                                Text(String.format(Locale.US, "%.1f%%", result.percentage), fontWeight = FontWeight.Bold, fontSize = 13.sp, modifier = Modifier.weight(1.2f))
                                 Text("${result.correct}", fontWeight = FontWeight.Bold, fontSize = 13.sp, modifier = Modifier.weight(1f))
-                                Text("1", fontWeight = FontWeight.Bold, fontSize = 13.sp, modifier = Modifier.weight(1f))
                             }
                         }
                     }
@@ -238,7 +250,6 @@ fun ResultDetailScreen(
                     }
                 }
 
-                // Per Question breakdown
                 item {
                     Text("Question Details", fontWeight = FontWeight.Bold, fontSize = 15.sp)
                 }

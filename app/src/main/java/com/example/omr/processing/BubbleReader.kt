@@ -5,10 +5,7 @@ import android.util.Log
 import com.example.omr.spec.BubbleLocation
 import com.example.omr.spec.SheetSpec
 import org.opencv.android.Utils
-import org.opencv.core.Core
 import org.opencv.core.Mat
-import org.opencv.core.Point
-import org.opencv.core.Scalar
 import org.opencv.core.Size
 import org.opencv.imgproc.Imgproc
 import kotlin.math.roundToInt
@@ -83,25 +80,46 @@ class BubbleReader {
         // Evaluate inner 80% to avoid counting the printed circular border
         val r = (bubble.radius * 0.80f).roundToInt().coerceAtLeast(3)
 
-        var darkPixelCount = 0
-        var totalSampledPixels = 0
-
         val minX = (cx - r).coerceAtLeast(0)
         val maxX = (cx + r).coerceAtMost(binaryMat.cols() - 1)
         val minY = (cy - r).coerceAtLeast(0)
         val maxY = (cy + r).coerceAtMost(binaryMat.rows() - 1)
 
+        val subWidth = maxX - minX + 1
+        val subHeight = maxY - minY + 1
+
+        if (subWidth <= 0 || subHeight <= 0) {
+            return BubbleReading(
+                questionNumber = bubble.questionNumber,
+                optionIndex = bubble.optionIndex,
+                optionLetter = bubble.optionLetter,
+                fillRatio = 0f,
+                darkPixels = 0,
+                totalPixels = 0
+            )
+        }
+
+        var darkPixelCount = 0
+        var totalSampledPixels = 0
         val rSquared = r * r
 
-        // Sample pixels inside the circle
-        for (y in minY..maxY) {
+        // Bulk-read submat bytes into Kotlin memory to avoid per-pixel JNI calls
+        val subMat = binaryMat.submat(minY, maxY + 1, minX, maxX + 1)
+        val bytes = ByteArray(subWidth * subHeight)
+        subMat.get(0, 0, bytes)
+        subMat.release()
+
+        for (yIdx in 0 until subHeight) {
+            val y = minY + yIdx
             val dy = y - cy
-            for (x in minX..maxX) {
+            val rowOffset = yIdx * subWidth
+            for (xIdx in 0 until subWidth) {
+                val x = minX + xIdx
                 val dx = x - cx
                 if (dx * dx + dy * dy <= rSquared) {
                     totalSampledPixels++
-                    val pixelValue = binaryMat.get(y, x)?.get(0) ?: 0.0
-                    if (pixelValue > 127.0) { // Inverted binary: >127 means dark mark
+                    val pixelVal = bytes[rowOffset + xIdx].toInt() and 0xFF
+                    if (pixelVal > 127) { // Inverted binary: >127 means dark mark
                         darkPixelCount++
                     }
                 }

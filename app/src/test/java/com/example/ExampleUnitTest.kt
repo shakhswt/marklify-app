@@ -71,6 +71,25 @@ class ExampleUnitTest {
   }
 
   @Test
+  fun testAnswerDetectorAmbiguousMarginBetween015And020() {
+    val detector = AnswerDetector() // multipleDiffMargin = 0.15, ambiguousDiffMargin = 0.20
+    val map: Map<Int, List<BubbleReading>> = mapOf(
+      1 to listOf(
+        BubbleReading(1, 0, "A", 0.60f, 60, 100),
+        BubbleReading(1, 1, "B", 0.43f, 43, 100), // top1 - top2 = 0.17 (between 0.15 and 0.20)
+        BubbleReading(1, 2, "C", 0.05f, 5, 100),
+        BubbleReading(1, 3, "D", 0.05f, 5, 100)
+      )
+    )
+
+    val results = detector.detectAnswers(map)
+    assertEquals(1, results.size)
+    assertEquals("ambiguous", results[0].detectedAnswer)
+    assertTrue(results[0].isAmbiguous)
+    assertFalse(results[0].isMultiple)
+  }
+
+  @Test
   fun testAnswerDetectorUnanswered() {
     val detector = AnswerDetector()
     val map: Map<Int, List<BubbleReading>> = mapOf(

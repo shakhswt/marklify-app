@@ -79,4 +79,31 @@ class DatabaseMigrationTest {
         assertEquals(4, AppDatabase.MIGRATION_4_5.startVersion)
         assertEquals(5, AppDatabase.MIGRATION_4_5.endVersion)
     }
+
+    @Test
+    fun testMigration5To6ExecutesAlterStatements() {
+        val executedQueries = mutableListOf<String>()
+
+        val invocationHandler = InvocationHandler { _, method: Method, args: Array<out Any>? ->
+            if (method.name == "execSQL" && args != null && args.isNotEmpty()) {
+                executedQueries.add(args[0] as String)
+            }
+            null
+        }
+
+        val mockDb = Proxy.newProxyInstance(
+            SupportSQLiteDatabase::class.java.classLoader,
+            arrayOf(SupportSQLiteDatabase::class.java),
+            invocationHandler
+        ) as SupportSQLiteDatabase
+
+        AppDatabase.MIGRATION_5_6.migrate(mockDb)
+
+        assertTrue(executedQueries.any { it.contains("CREATE TABLE IF NOT EXISTS answer_key_sets") })
+        assertTrue(executedQueries.any { it.contains("ALTER TABLE scan_results ADD COLUMN examSet") })
+        assertTrue(executedQueries.any { it.contains("CREATE TABLE IF NOT EXISTS subjects") })
+        assertTrue(executedQueries.any { it.contains("CREATE TABLE IF NOT EXISTS section_configs") })
+        assertEquals(5, AppDatabase.MIGRATION_5_6.startVersion)
+        assertEquals(6, AppDatabase.MIGRATION_5_6.endVersion)
+    }
 }

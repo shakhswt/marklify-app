@@ -35,6 +35,17 @@ class AnswerDetector(
         ambiguousDiffMargin = ambiguousDiff
     }
 
+    /**
+     * Classifies OMR bubble readings into detected answers ("A", "B", "C", "D", "unanswered", "multiple", "ambiguous").
+     *
+     * Threshold Relationship & Margin Interaction:
+     * - [multipleDiffMargin] (default 0.15): Evaluated when both top1 and top2 exceed [fillThreshold]. If (top1 - top2) < 0.15,
+     *   the student explicitly shaded two or more options with strong fill, so the question is marked as "multiple".
+     * - [ambiguousDiffMargin] (default 0.20): Evaluated when top1 exceeds [unansweredThreshold]. If (top1 - top2) falls
+     *   between 0.15 and 0.20, or if top1 is between [unansweredThreshold] and [fillThreshold], the mark distinction is weak
+     *   (e.g., incomplete erasure, faint mark, or smudge). The question is classified as "ambiguous" for teacher review.
+     * - Clear single answer: Requires top1 >= [fillThreshold] AND (top1 - top2) >= [ambiguousDiffMargin] (0.20).
+     */
     fun detectAnswers(bubbleMap: Map<Int, List<BubbleReading>>): List<DetectedQuestionAnswer> {
         val resultList = mutableListOf<DetectedQuestionAnswer>()
 

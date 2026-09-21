@@ -71,6 +71,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import androidx.compose.ui.res.stringResource
+import com.example.BuildConfig
 import com.example.R
 import com.example.util.HapticManager
 import java.io.InputStream
@@ -155,6 +156,9 @@ fun ScannerScreen(
 
                             withContext(Dispatchers.Main) {
                                 if (result.success && result.warpedBitmap != null) {
+                                    if (!result.detectedRollNumber.isNullOrBlank()) {
+                                        viewModel.studentId.value = result.detectedRollNumber
+                                    }
                                     viewModel.setScanSuccess(result.warpedBitmap, result.detectedAnswers)
                                     onNavigateToReview()
                                 } else {
@@ -382,9 +386,14 @@ fun ScannerScreen(
                                                                 if (warped != null) {
                                                                     val bubbleMap = viewModel.omrEngine.bubbleReader.readBubbles(warped, spec)
                                                                     val detectedAnswers = viewModel.omrEngine.answerDetector.detectAnswers(bubbleMap)
+                                                                    val rollNumber = viewModel.omrEngine.extractRollNumber(detectedAnswers)
+                                                                    val questionAnswers = detectedAnswers.filter { it.questionNumber > 0 }
 
                                                                     withContext(Dispatchers.Main) {
-                                                                        viewModel.setScanSuccess(warped, detectedAnswers)
+                                                                        if (!rollNumber.isNullOrBlank()) {
+                                                                            viewModel.studentId.value = rollNumber
+                                                                        }
+                                                                        viewModel.setScanSuccess(warped, questionAnswers)
                                                                         onNavigateToReview()
                                                                     }
                                                                 } else {
@@ -626,6 +635,9 @@ fun ScannerScreen(
                                                                 isProcessingAutoCapture = false
                                                                 isCapturing.set(false)
                                                                 if (result.success && result.warpedBitmap != null) {
+                                                                    if (!result.detectedRollNumber.isNullOrBlank()) {
+                                                                        viewModel.studentId.value = result.detectedRollNumber
+                                                                    }
                                                                     viewModel.setScanSuccess(result.warpedBitmap, result.detectedAnswers)
                                                                     onNavigateToReview()
                                                                 } else {
@@ -680,39 +692,44 @@ fun ScannerScreen(
                         }
                     }
 
-                    // Test Sheet (allows instant simulated grading of an on-screen generated sheet for testing!)
-                    LiquidGlassButton(
-                        onClick = {
-                            val currentTest = test ?: return@LiquidGlassButton
-                            val currentQuestions = questions
-                            coroutineScope.launch(Dispatchers.Default) {
-                                isProcessingAutoCapture = true
-                                val spec = SheetSpec(questionCount = currentTest.questionCount)
-                                val bmp = OmrSheetGenerator.generateBitmap(
-                                    spec = spec,
-                                    testName = currentTest.name,
-                                    topicName = "General"
-                                )
-                                val result = viewModel.omrEngine.processFullSheet(
-                                    sourceBitmap = bmp,
-                                    questionCount = currentTest.questionCount,
-                                    questions = currentQuestions
-                                )
-                                withContext(Dispatchers.Main) {
-                                    isProcessingAutoCapture = false
-                                    if (result.success && result.warpedBitmap != null) {
-                                        viewModel.setScanSuccess(result.warpedBitmap, result.detectedAnswers)
-                                        onNavigateToReview()
-                                    } else {
-                                        lastErrorMessage = result.errorMessage ?: "Test scan failed"
+                    if (BuildConfig.DEBUG) {
+                        // Test Sheet (allows instant simulated grading of an on-screen generated sheet for testing!)
+                        LiquidGlassButton(
+                            onClick = {
+                                val currentTest = test ?: return@LiquidGlassButton
+                                val currentQuestions = questions
+                                coroutineScope.launch(Dispatchers.Default) {
+                                    isProcessingAutoCapture = true
+                                    val spec = SheetSpec(questionCount = currentTest.questionCount, questions = currentQuestions)
+                                    val bmp = OmrSheetGenerator.generateBitmap(
+                                        spec = spec,
+                                        testName = currentTest.name,
+                                        topicName = "General"
+                                    )
+                                    val result = viewModel.omrEngine.processFullSheet(
+                                        sourceBitmap = bmp,
+                                        questionCount = currentTest.questionCount,
+                                        questions = currentQuestions
+                                    )
+                                    withContext(Dispatchers.Main) {
+                                        isProcessingAutoCapture = false
+                                        if (result.success && result.warpedBitmap != null) {
+                                            if (!result.detectedRollNumber.isNullOrBlank()) {
+                                                viewModel.studentId.value = result.detectedRollNumber
+                                            }
+                                            viewModel.setScanSuccess(result.warpedBitmap, result.detectedAnswers)
+                                            onNavigateToReview()
+                                        } else {
+                                            lastErrorMessage = result.errorMessage ?: "Test scan failed"
+                                        }
                                     }
                                 }
-                            }
-                        },
-                        modifier = Modifier.testTag("test_simulate_button"),
-                        variant = GlassButtonVariant.Neutral,
-                        text = "Test Sample"
-                    )
+                            },
+                            modifier = Modifier.testTag("test_simulate_button"),
+                            variant = GlassButtonVariant.Neutral,
+                            text = "Test Sample"
+                        )
+                    }
                 }
             }
         }

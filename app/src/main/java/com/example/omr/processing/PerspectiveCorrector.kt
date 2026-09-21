@@ -30,13 +30,15 @@ class PerspectiveCorrector {
         var srcMat: Mat? = null
         var dstMat: Mat? = null
         var transformMatrix: Mat? = null
+        var srcPoints: MatOfPoint2f? = null
+        var dstPoints: MatOfPoint2f? = null
 
         return try {
             srcMat = Mat()
             Utils.bitmapToMat(sourceBitmap, srcMat)
 
             // Source points from detected corners
-            val srcPoints = MatOfPoint2f(
+            srcPoints = MatOfPoint2f(
                 Point(detectedCorners[0].x.toDouble(), detectedCorners[0].y.toDouble()),
                 Point(detectedCorners[1].x.toDouble(), detectedCorners[1].y.toDouble()),
                 Point(detectedCorners[2].x.toDouble(), detectedCorners[2].y.toDouble()),
@@ -44,7 +46,7 @@ class PerspectiveCorrector {
             )
 
             // Destination points from SheetSpec marker centers
-            val dstPoints = MatOfPoint2f(
+            dstPoints = MatOfPoint2f(
                 Point(spec.tlMarker.x.toDouble(), spec.tlMarker.y.toDouble()),
                 Point(spec.trMarker.x.toDouble(), spec.trMarker.y.toDouble()),
                 Point(spec.brMarker.x.toDouble(), spec.brMarker.y.toDouble()),
@@ -77,6 +79,8 @@ class PerspectiveCorrector {
             srcMat?.release()
             dstMat?.release()
             transformMatrix?.release()
+            srcPoints?.release()
+            dstPoints?.release()
         }
     }
 }

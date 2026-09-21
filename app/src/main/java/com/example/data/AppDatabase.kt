@@ -6,18 +6,8 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
-import com.example.data.dao.DetectedAnswerDao
-import com.example.data.dao.QuestionDao
-import com.example.data.dao.ScanResultDao
-import com.example.data.dao.SettingsDao
-import com.example.data.dao.TestDao
-import com.example.data.dao.TopicDao
-import com.example.data.entity.AppSettings
-import com.example.data.entity.DetectedAnswer
-import com.example.data.entity.Question
-import com.example.data.entity.ScanResult
-import com.example.data.entity.TestEntity
-import com.example.data.entity.Topic
+import com.example.data.dao.*
+import com.example.data.entity.*
 
 @Database(
     entities = [
@@ -26,9 +16,12 @@ import com.example.data.entity.Topic
         Question::class,
         ScanResult::class,
         DetectedAnswer::class,
-        AppSettings::class
+        AppSettings::class,
+        AnswerKeySet::class,
+        Subject::class,
+        SectionConfigEntity::class
     ],
-    version = 5,
+    version = 6,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -38,6 +31,9 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun scanResultDao(): ScanResultDao
     abstract fun detectedAnswerDao(): DetectedAnswerDao
     abstract fun settingsDao(): SettingsDao
+    abstract fun answerKeySetDao(): AnswerKeySetDao
+    abstract fun subjectDao(): SubjectDao
+    abstract fun sectionConfigDao(): SectionConfigDao
 
     companion object {
         @Volatile
@@ -75,6 +71,65 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        val MIGRATION_5_6 = object : Migration(5, 6) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                // 1. AnswerKeySets table
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS answer_key_sets (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        testId INTEGER NOT NULL,
+                        setLetter TEXT NOT NULL,
+                        questionNumber INTEGER NOT NULL,
+                        correctAnswer TEXT NOT NULL,
+                        FOREIGN KEY(testId) REFERENCES tests(id) ON DELETE CASCADE
+                    )
+                    """.trimIndent()
+                )
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_answer_key_sets_testId ON answer_key_sets(testId)")
+                db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_answer_key_sets_testId_setLetter_questionNumber ON answer_key_sets(testId, setLetter, questionNumber)")
+
+                // 2. ScanResult examSet column
+                db.execSQL("ALTER TABLE scan_results ADD COLUMN examSet TEXT NOT NULL DEFAULT 'A'")
+
+                // 3. Subjects table
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS subjects (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        testId INTEGER NOT NULL,
+                        name TEXT NOT NULL,
+                        orderIndex INTEGER NOT NULL DEFAULT 0,
+                        FOREIGN KEY(testId) REFERENCES tests(id) ON DELETE CASCADE
+                    )
+                    """.trimIndent()
+                )
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_subjects_testId ON subjects(testId)")
+
+                // 4. SectionConfigs table
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS section_configs (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        subjectId INTEGER NOT NULL,
+                        sectionName TEXT NOT NULL DEFAULT 'Section1',
+                        questionType TEXT NOT NULL DEFAULT 'MCQ4',
+                        questionCount INTEGER NOT NULL DEFAULT 10,
+                        correctMarks REAL NOT NULL DEFAULT 1.0,
+                        negativeMarks REAL NOT NULL DEFAULT 0.0,
+                        allowPartialMarks INTEGER NOT NULL DEFAULT 0,
+                        allowOptionalAttempts INTEGER NOT NULL DEFAULT 0,
+                        numDigits INTEGER NOT NULL DEFAULT 1,
+                        hasNegativeSign INTEGER NOT NULL DEFAULT 0,
+                        hasDecimal INTEGER NOT NULL DEFAULT 0,
+                        FOREIGN KEY(subjectId) REFERENCES subjects(id) ON DELETE CASCADE
+                    )
+                    """.trimIndent()
+                )
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_section_configs_subjectId ON section_configs(subjectId)")
+            }
+        }
+
         fun getDatabase(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
@@ -82,7 +137,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "marklify_database"
                 )
-                    .addMigrations(MIGRATION_3_4, MIGRATION_4_5)
+                    .addMigrations(MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
                     .build()
                 INSTANCE = instance
                 instance

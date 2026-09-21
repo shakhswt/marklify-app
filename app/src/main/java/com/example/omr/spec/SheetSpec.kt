@@ -89,7 +89,7 @@ class SheetSpec(
                 val cy = rollNoStartY + 35f + row * rollNoRowHeight
                 list.add(
                     BubbleLocation(
-                        questionNumber = -1, // -1 denotes Roll No
+                        questionNumber = -100 - col, // Each digit column has unique key (-100 to -104)
                         optionIndex = row,
                         optionLetter = DIGITS[row],
                         centerX = cx,

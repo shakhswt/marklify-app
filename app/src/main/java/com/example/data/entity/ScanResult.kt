@@ -36,5 +36,6 @@ data class ScanResult(
     val ambiguous: Int = 0,
     val percentage: Float,
     val finalScore: Float = correct.toFloat(),
-    val imagePath: String? = null
+    val imagePath: String? = null,
+    val examSet: String = "A"
 )
