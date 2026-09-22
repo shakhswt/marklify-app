@@ -391,4 +391,14 @@
     <string name="role_grade_label">Role / Grade</string>
     <string name="name_label">Name</string>
     <string name="email_label">Email</string>
+
+    <string name="exam_link_shared">Exam Link Shared</string>
+    <string name="archive">Archive</string>
+    <string name="record_deleted_toast">Graded test record deleted</string>
+    <string name="error_generating_pdf">Error generating PDF: %1$s</string>
+    <string name="error_opening_share_dialog">Could not open share dialog: %1$s</string>
+    <string name="capture_high_res_photo">Capture High-Res Photo</string>
+    <string name="error_sharing_file">Could not share file: %1$s</string>
+    <string name="printing_unavailable">Printing is not available on this device</string>
+    <string name="exam_type_default">Exam</string>
 </resources>

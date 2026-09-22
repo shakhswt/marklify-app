@@ -153,7 +153,8 @@ fun SheetGeneratorScreen(
                                 )
                                 sharePdf(context, pdfFile)
                             } catch (e: Exception) {
-                                Toast.makeText(context, "Error generating PDF: ${e.message}", Toast.LENGTH_LONG).show()
+                                val errPdfMsg = context.getString(R.string.error_generating_pdf, e.message ?: "")
+                                Toast.makeText(context, errPdfMsg, Toast.LENGTH_LONG).show()
                             }
                         },
                         modifier = Modifier
@@ -293,6 +294,7 @@ private fun sharePdf(context: Context, file: File) {
         }
         context.startActivity(Intent.createChooser(intent, "Share or Print OMR Sheet"))
     } catch (e: Exception) {
-        Toast.makeText(context, "Could not open share dialog: ${e.message}", Toast.LENGTH_LONG).show()
+        val errShareMsg = context.getString(R.string.error_opening_share_dialog, e.message ?: "")
+        Toast.makeText(context, errShareMsg, Toast.LENGTH_LONG).show()
     }
 }

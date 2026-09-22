@@ -78,11 +78,12 @@ fun TestDetailScreen(
                     }
                 },
                 actions = {
+                    val linkSharedToast = stringResource(R.string.exam_link_shared)
                     IconButton(onClick = { showRenameDialog = true }) {
-                        Icon(imageVector = Icons.Default.Archive, contentDescription = "Archive", tint = MaterialTheme.colorScheme.onSurface)
+                        Icon(imageVector = Icons.Default.Archive, contentDescription = stringResource(R.string.archive), tint = MaterialTheme.colorScheme.onSurface)
                     }
                     IconButton(onClick = {
-                        Toast.makeText(context, "Exam Link Shared", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, linkSharedToast, Toast.LENGTH_SHORT).show()
                     }) {
                         Icon(imageVector = Icons.Default.Share, contentDescription = stringResource(R.string.share), tint = MaterialTheme.colorScheme.onSurface)
                     }
@@ -147,13 +148,14 @@ fun TestDetailScreen(
                         Spacer(modifier = Modifier.width(12.dp))
 
                         Column(modifier = Modifier.weight(1f)) {
+                            val defaultExamLabel = stringResource(R.string.exam_type_default)
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
-                                    text = test?.name ?: "Exam",
+                                    text = test?.name ?: defaultExamLabel,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 18.sp,
                                     color = MaterialTheme.colorScheme.onSurface,
@@ -168,7 +170,7 @@ fun TestDetailScreen(
                             }
                             Spacer(modifier = Modifier.height(2.dp))
                             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                                MarklifyBadge(text = test?.examType ?: "Exam", containerColor = MaterialTheme.colorScheme.surfaceVariant, contentColor = MaterialTheme.colorScheme.onSurfaceVariant)
+                                MarklifyBadge(text = test?.examType ?: defaultExamLabel, containerColor = MaterialTheme.colorScheme.surfaceVariant, contentColor = MaterialTheme.colorScheme.onSurfaceVariant)
                                 MarklifyBadge(text = stringResource(R.string.not_synced), containerColor = MaterialTheme.colorScheme.errorContainer, contentColor = MaterialTheme.colorScheme.onErrorContainer)
                             }
 

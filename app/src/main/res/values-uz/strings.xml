@@ -261,7 +261,7 @@
     <string name="save_images">Rasmlarni saqlash</string>
     <string name="save_images_desc">Skanerlangan blanka tasvirini qurilmada saqlash</string>
     <string name="auto_save">Avto saqlash</string>
-    <string name="auto_save_desc">Barqaror skanerlangan blankalarni avotmatik saqlash</string>
+    <string name="auto_save_desc">Barqaror skanerlangan blankalarni avtomatik saqlash</string>
     <string name="delay_seconds">Kutish soniyalari</string>
     <string name="scan_resolution">Skanerlash aniqligi</string>
     <string name="scan_resolution_default_desc">150 tadan kam savollar uchun mos (Tez skanerlash)</string>
@@ -391,4 +391,14 @@
     <string name="role_grade_label">Lavozim / Sinf</string>
     <string name="name_label">Ism</string>
     <string name="email_label">E-pochta</string>
+
+    <string name="exam_link_shared">Imtihon havolasi ulashildi</string>
+    <string name="archive">Arxivlash</string>
+    <string name="record_deleted_toast">Tekshirilgan test natijasi o‘chirildi</string>
+    <string name="error_generating_pdf">PDF yaratishda xatolik: %1$s</string>
+    <string name="error_opening_share_dialog">Ulashish muloqot oynasini ochib bo‘lmadi: %1$s</string>
+    <string name="capture_high_res_photo">Yuqori aniqlikdagi suratga olish</string>
+    <string name="error_sharing_file">Faylni ulashib bo‘lmadi: %1$s</string>
+    <string name="printing_unavailable">Ushbu qurilmada chop etish imkoniyati yo‘q</string>
+    <string name="exam_type_default">Imtihon</string>
 </resources>

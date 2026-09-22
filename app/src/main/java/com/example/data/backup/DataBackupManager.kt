@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
 import androidx.core.content.FileProvider
+import com.example.R
 import com.example.data.entity.DetectedAnswer
 import com.example.data.entity.Question
 import com.example.data.entity.ScanResult
@@ -349,7 +350,8 @@ object DataBackupManager {
             }
             context.startActivity(Intent.createChooser(intent, chooserTitle))
         } catch (e: Exception) {
-            Toast.makeText(context, "Could not share file: ${e.message}", Toast.LENGTH_LONG).show()
+            val errShareMsg = context.getString(R.string.error_sharing_file, e.message ?: "")
+            Toast.makeText(context, errShareMsg, Toast.LENGTH_LONG).show()
         }
     }
 }

@@ -572,7 +572,7 @@ fun ScannerScreen(
                             Spacer(modifier = Modifier.width(10.dp))
                             Text(text = err, color = Color.White, fontSize = 13.sp, modifier = Modifier.weight(1f))
                             IconButton(onClick = { lastErrorMessage = null }) {
-                                Icon(imageVector = Icons.Default.Refresh, contentDescription = "Retry", tint = ElectricBlue)
+                                Icon(imageVector = Icons.Default.Refresh, contentDescription = stringResource(R.string.retry), tint = ElectricBlue)
                             }
                         }
                     }
@@ -694,7 +694,7 @@ fun ScannerScreen(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.CameraAlt,
-                                contentDescription = "Capture High-Res Photo",
+                                contentDescription = stringResource(R.string.capture_high_res_photo),
                                 tint = TextPrimary,
                                 modifier = Modifier.size(24.dp)
                             )

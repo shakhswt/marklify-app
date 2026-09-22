@@ -391,4 +391,14 @@
     <string name="role_grade_label">Роль / Класс</string>
     <string name="name_label">Имя</string>
     <string name="email_label">Email</string>
+
+    <string name="exam_link_shared">Ссылка на экзамен отправлена</string>
+    <string name="archive">Архивировать</string>
+    <string name="record_deleted_toast">Запись проверенного теста удалена</string>
+    <string name="error_generating_pdf">Ошибка генерации PDF: %1$s</string>
+    <string name="error_opening_share_dialog">Не удалось открыть диалог отправки: %1$s</string>
+    <string name="capture_high_res_photo">Сделать снимок в высоком разрешении</string>
+    <string name="error_sharing_file">Не удалось поделиться файлом: %1$s</string>
+    <string name="printing_unavailable">Печать недоступна на этом устройстве</string>
+    <string name="exam_type_default">Экзамен</string>
 </resources>

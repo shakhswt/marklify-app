@@ -388,9 +388,10 @@ fun HistoryScreen(
                             finalScore = record.finalScore,
                             imagePath = record.imagePath
                         )
+                        val deletedToastMsg = context.getString(R.string.record_deleted_toast)
                         viewModel.deleteScanResult(scanResult)
                         recordToDelete = null
-                        Toast.makeText(context, "Graded test record deleted", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, deletedToastMsg, Toast.LENGTH_SHORT).show()
                     }
                 )
             }

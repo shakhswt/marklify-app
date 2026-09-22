@@ -17,6 +17,7 @@ import android.print.PrintDocumentAdapter
 import android.print.PrintDocumentInfo
 import android.print.PrintManager
 import android.widget.Toast
+import com.example.R
 import com.example.omr.spec.SheetSpec
 import java.io.File
 import java.io.FileInputStream
@@ -265,7 +266,8 @@ object OmrSheetGenerator {
     fun printPdf(context: Context, pdfFile: File, jobName: String = "Marklify OMR Sheet") {
         val printManager = context.getSystemService(Context.PRINT_SERVICE) as? PrintManager
         if (printManager == null) {
-            Toast.makeText(context, "Printing is not available on this device", Toast.LENGTH_SHORT).show()
+            val printUnavailMsg = context.getString(R.string.printing_unavailable)
+            Toast.makeText(context, printUnavailMsg, Toast.LENGTH_SHORT).show()
             return
         }
 
