@@ -63,9 +63,9 @@ fun ReviewScreen(
             MarklifyTopAppBar(
                 title = {
                     Column {
-                        Text("Review Scan & Score", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                        Text(stringResource(R.string.review_scan_score), fontWeight = FontWeight.Bold, fontSize = 18.sp)
                         Text(
-                            text = if (flaggedCount > 0) "$flaggedCount items need review" else "All answers clear",
+                            text = if (flaggedCount > 0) stringResource(R.string.flagged_count, flaggedCount) else stringResource(R.string.all_clean),
                             fontSize = 12.sp,
                             color = if (flaggedCount > 0) WarningAmber else SuccessGreen
                         )
@@ -97,13 +97,13 @@ fun ReviewScreen(
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = "Answered: ${reviewAnswers.size} / ${questions.size}",
+                            text = stringResource(R.string.answered_ratio, reviewAnswers.size, questions.size),
                             fontWeight = FontWeight.Bold,
                             fontSize = 14.sp,
                             color = MaterialTheme.colorScheme.onSurface
                         )
                         Text(
-                            text = "Student: ${studentName.ifBlank { "Anonymous" }} (Roll: ${studentId.ifBlank { "N/A" }})",
+                            text = stringResource(R.string.student_prefix, studentName.ifBlank { stringResource(R.string.student_anonymous) }),
                             fontSize = 12.sp,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             maxLines = 1
@@ -111,7 +111,7 @@ fun ReviewScreen(
                     }
 
                     MarklifyButton(
-                        text = "Confirm & Score",
+                        text = stringResource(R.string.confirm_and_score),
                         onClick = {
                             viewModel.confirmAndScore { resultId ->
                                 HapticManager.performSubmissionSuccess(context, appSettings.hapticsEnabled)
@@ -143,7 +143,7 @@ fun ReviewScreen(
                         verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
                         Text(
-                            text = "Student Details",
+                            text = stringResource(R.string.student_details),
                             fontWeight = FontWeight.Bold,
                             fontSize = 15.sp,
                             color = MaterialTheme.colorScheme.onSurface
@@ -155,7 +155,7 @@ fun ReviewScreen(
                             OutlinedTextField(
                                 value = studentName,
                                 onValueChange = { viewModel.studentName.value = it },
-                                label = { Text("Student Name") },
+                                label = { Text(stringResource(R.string.student_name_label)) },
                                 singleLine = true,
                                 modifier = Modifier
                                     .weight(1f)
@@ -164,7 +164,7 @@ fun ReviewScreen(
                             OutlinedTextField(
                                 value = studentId,
                                 onValueChange = { viewModel.studentId.value = it },
-                                label = { Text("Roll Number") },
+                                label = { Text(stringResource(R.string.student_id_label)) },
                                 singleLine = true,
                                 modifier = Modifier
                                     .weight(1f)
@@ -198,25 +198,25 @@ fun ReviewScreen(
                             ) {
                                 Image(
                                     bitmap = warpedBitmap!!.asImageBitmap(),
-                                    contentDescription = "Scanned OMR Sheet",
+                                    contentDescription = stringResource(R.string.captured_sheet_image),
                                     modifier = Modifier.fillMaxSize()
                                 )
                             }
                             Spacer(modifier = Modifier.width(14.dp))
                             Column {
                                 Text(
-                                    text = "Aligned OMR Sheet",
+                                    text = stringResource(R.string.scanned_sheet_capture),
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 15.sp,
                                     color = MaterialTheme.colorScheme.onSurface
                                 )
                                 Text(
-                                    text = "Perspective corrected & verified",
+                                    text = stringResource(R.string.top_down_perspective),
                                     fontSize = 12.sp,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                                 Text(
-                                    text = "Tap to enlarge preview",
+                                    text = stringResource(R.string.tap_to_enlarge),
                                     fontSize = 11.sp,
                                     color = MaterialTheme.colorScheme.primary
                                 )
@@ -228,7 +228,7 @@ fun ReviewScreen(
 
             item {
                 Text(
-                    text = "Verify & Edit Answers",
+                    text = stringResource(R.string.verify_answers_hint),
                     fontWeight = FontWeight.Bold,
                     fontSize = 15.sp,
                     color = MaterialTheme.colorScheme.onSurface
@@ -260,7 +260,7 @@ fun ReviewScreen(
             onDismissRequest = { showFullImageDialog = false }
         ) {
             Text(
-                text = "Scanned OMR Sheet Preview",
+                text = stringResource(R.string.captured_sheet_image),
                 fontWeight = FontWeight.Bold,
                 fontSize = 18.sp,
                 color = MaterialTheme.colorScheme.onSurface
@@ -277,7 +277,7 @@ fun ReviewScreen(
             ) {
                 Image(
                     bitmap = warpedBitmap!!.asImageBitmap(),
-                    contentDescription = "Full Scanned Sheet",
+                    contentDescription = stringResource(R.string.captured_sheet_image),
                     modifier = Modifier.fillMaxSize()
                 )
             }
@@ -327,14 +327,14 @@ private fun ReviewQuestionCard(
                     }
                     Spacer(modifier = Modifier.width(10.dp))
                     Text(
-                        text = "Q#${question.questionNumber}",
+                        text = stringResource(R.string.question_number_short, question.questionNumber),
                         fontWeight = FontWeight.Bold,
                         fontSize = 14.sp,
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
-                        text = "Key: ${question.correctAnswer}",
+                        text = stringResource(R.string.key_prefix, question.correctAnswer),
                         fontSize = 12.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -342,10 +342,10 @@ private fun ReviewQuestionCard(
 
                 if (detected != null) {
                     when {
-                        detected.isMultiple -> MarklifyBadge(text = "Multiple", containerColor = WarningAmberBg, contentColor = WarningAmber)
-                        detected.isAmbiguous -> MarklifyBadge(text = "Ambiguous", containerColor = WarningAmberBg, contentColor = WarningAmber)
-                        detected.isUnanswered -> MarklifyBadge(text = "Blank", containerColor = MaterialTheme.colorScheme.surfaceVariant, contentColor = MaterialTheme.colorScheme.onSurfaceVariant)
-                        else -> MarklifyBadge(text = "Detected: ${detected.detectedAnswer}", containerColor = SuccessGreenBg, contentColor = SuccessGreen)
+                        detected.isMultiple -> MarklifyBadge(text = stringResource(R.string.multiple_marked_flag), containerColor = WarningAmberBg, contentColor = WarningAmber)
+                        detected.isAmbiguous -> MarklifyBadge(text = stringResource(R.string.ambiguous_flag), containerColor = WarningAmberBg, contentColor = WarningAmber)
+                        detected.isUnanswered -> MarklifyBadge(text = stringResource(R.string.unanswered_flag), containerColor = MaterialTheme.colorScheme.surfaceVariant, contentColor = MaterialTheme.colorScheme.onSurfaceVariant)
+                        else -> MarklifyBadge(text = stringResource(R.string.detected_answer_badge, detected.detectedAnswer), containerColor = SuccessGreenBg, contentColor = SuccessGreen)
                     }
                 }
             }
@@ -369,7 +369,7 @@ private fun ReviewQuestionCard(
                 MarklifyChip(
                     selected = isUnanswered,
                     onClick = { onSelectAnswer("unanswered") },
-                    label = "Blank",
+                    label = stringResource(R.string.blank_badge),
                     modifier = Modifier.weight(1.2f)
                 )
             }

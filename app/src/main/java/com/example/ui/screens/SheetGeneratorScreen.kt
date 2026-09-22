@@ -89,7 +89,7 @@ fun SheetGeneratorScreen(
     Scaffold(
         topBar = {
             MarklifyTopAppBar(
-                title = { Text("OMR Answer Sheet", fontWeight = FontWeight.Bold) },
+                title = { Text(stringResource(R.string.sheet_generator_title), fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
@@ -130,14 +130,14 @@ fun SheetGeneratorScreen(
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     MarklifyButton(
-                        text = "Previous",
+                        text = stringResource(R.string.back),
                         onClick = onNavigateBack,
                         modifier = Modifier.weight(1f),
                         variant = MarklifyButtonVariant.Outlined
                     )
 
                     MarklifyButton(
-                        text = "Print / Export",
+                        text = stringResource(R.string.save_pdf),
                         onClick = {
                             val currentTest = test ?: return@MarklifyButton
                             val currentTopic = topic
@@ -187,9 +187,9 @@ fun SheetGeneratorScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text("Layout", fontSize = 14.sp, fontWeight = FontWeight.Medium)
+                        Text(stringResource(R.string.layout_label), fontSize = 14.sp, fontWeight = FontWeight.Medium)
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            MarklifyChip(selected = true, onClick = {}, label = layoutType)
+                            MarklifyChip(selected = true, onClick = {}, label = stringResource(R.string.continuous_layout))
                             Spacer(modifier = Modifier.width(6.dp))
                             Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(16.dp))
                         }
@@ -200,9 +200,9 @@ fun SheetGeneratorScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text("Label", fontSize = 14.sp, fontWeight = FontWeight.Medium)
+                        Text(stringResource(R.string.label_label), fontSize = 14.sp, fontWeight = FontWeight.Medium)
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            MarklifyChip(selected = true, onClick = {}, label = labelType)
+                            MarklifyChip(selected = true, onClick = {}, label = stringResource(R.string.default_option))
                             Spacer(modifier = Modifier.width(6.dp))
                             Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(16.dp))
                         }
@@ -213,9 +213,9 @@ fun SheetGeneratorScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text("Header", fontSize = 14.sp, fontWeight = FontWeight.Medium)
+                        Text(stringResource(R.string.header_label), fontSize = 14.sp, fontWeight = FontWeight.Medium)
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            MarklifyChip(selected = true, onClick = {}, label = headerType)
+                            MarklifyChip(selected = true, onClick = {}, label = stringResource(R.string.default_option))
                             Spacer(modifier = Modifier.width(6.dp))
                             Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(16.dp))
                         }
@@ -223,10 +223,11 @@ fun SheetGeneratorScreen(
 
                     Spacer(modifier = Modifier.height(4.dp))
 
+                    val customToastMsg = stringResource(R.string.custom_answer_sheet)
                     MarklifyButton(
-                        text = "Create custom answer sheet",
+                        text = stringResource(R.string.custom_answer_sheet),
                         onClick = {
-                            Toast.makeText(context, "Custom Answer Sheet Template Created", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, customToastMsg, Toast.LENGTH_SHORT).show()
                         },
                         modifier = Modifier.fillMaxWidth(),
                         variant = MarklifyButtonVariant.Primary
@@ -245,7 +246,7 @@ fun SheetGeneratorScreen(
                         .padding(12.dp)
                 ) {
                     Text(
-                        text = "Printable Answer Sheet Preview",
+                        text = stringResource(R.string.preview_sheet),
                         fontWeight = FontWeight.Bold,
                         fontSize = 14.sp,
                         color = Color.Black

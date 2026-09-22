@@ -75,7 +75,7 @@ fun DashboardScreen(
             MarklifyTopAppBar(
                 title = {
                     Text(
-                        text = "Exams",
+                        text = stringResource(R.string.dashboard_tests),
                         fontWeight = FontWeight.Bold,
                         fontSize = 22.sp
                     )
@@ -84,7 +84,7 @@ fun DashboardScreen(
                     IconButton(onClick = onNavigateToSettings) {
                         Icon(
                             imageVector = Icons.Default.FolderZip,
-                            contentDescription = "Backup/Restore",
+                            contentDescription = stringResource(R.string.backup_section),
                             tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
@@ -108,7 +108,7 @@ fun DashboardScreen(
                     ) {
                         Icon(imageVector = Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text(text = "Add New", fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                        Text(text = stringResource(R.string.create_test), fontWeight = FontWeight.Bold, fontSize = 14.sp)
                     }
                 }
             )
@@ -127,7 +127,7 @@ fun DashboardScreen(
                 value = searchQuery,
                 onValueChange = { searchQuery = it },
                 modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text("Search exams...") },
+                placeholder = { Text(stringResource(R.string.search_hint)) },
                 leadingIcon = { Icon(imageVector = Icons.Default.Search, contentDescription = null) },
                 singleLine = true,
                 shape = RoundedCornerShape(10.dp)
@@ -159,7 +159,7 @@ fun DashboardScreen(
                         )
                         Spacer(modifier = Modifier.width(12.dp))
                         Text(
-                            text = if (showArchivedOnly) "Showing Archived Exams" else "Archived",
+                            text = stringResource(R.string.archived_count_format, archivedCount),
                             fontWeight = FontWeight.SemiBold,
                             fontSize = 15.sp,
                             color = MaterialTheme.colorScheme.onSurface
@@ -190,15 +190,9 @@ fun DashboardScreen(
                         )
                         Spacer(modifier = Modifier.height(12.dp))
                         Text(
-                            text = if (showArchivedOnly) "No archived exams" else "No exams created yet",
+                            text = if (showArchivedOnly) stringResource(R.string.no_tests_found) else stringResource(R.string.no_tests_found),
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSurface
-                        )
-                        Spacer(modifier = Modifier.height(6.dp))
-                        Text(
-                            text = "Tap '+ Add New' to create your first exam",
-                            fontSize = 13.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
@@ -230,7 +224,7 @@ fun DashboardScreen(
             onDismissRequest = { showCreateTopicDialog = false }
         ) {
             Text(
-                text = "Create Category / Subject",
+                text = stringResource(R.string.create_topic_dialog_title),
                 fontWeight = FontWeight.Bold,
                 fontSize = 18.sp,
                 color = MaterialTheme.colorScheme.onSurface
@@ -239,8 +233,7 @@ fun DashboardScreen(
             OutlinedTextField(
                 value = topicName,
                 onValueChange = { topicName = it },
-                label = { Text("Category / Class Name") },
-                placeholder = { Text("e.g. NEET / I PUC") },
+                label = { Text(stringResource(R.string.topic_name_label)) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .testTag("topic_name_input"),
@@ -288,7 +281,7 @@ fun DashboardScreen(
             onDismissRequest = { showCreateTestDialog = false }
         ) {
             Text(
-                text = "Create New Exam",
+                text = stringResource(R.string.create_test_dialog_title),
                 fontWeight = FontWeight.Bold,
                 fontSize = 18.sp,
                 color = MaterialTheme.colorScheme.onSurface
@@ -296,7 +289,7 @@ fun DashboardScreen(
             Spacer(modifier = Modifier.height(14.dp))
 
             Text(
-                text = "Category / Class",
+                text = stringResource(R.string.select_topic_label),
                 fontSize = 12.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontWeight = FontWeight.Medium
@@ -320,8 +313,7 @@ fun DashboardScreen(
             OutlinedTextField(
                 value = testName,
                 onValueChange = { testName = it },
-                label = { Text("Exam Name") },
-                placeholder = { Text("e.g. Neet weekly 43") },
+                label = { Text(stringResource(R.string.test_name_label)) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .testTag("test_name_input"),
@@ -332,8 +324,7 @@ fun DashboardScreen(
             OutlinedTextField(
                 value = questionCountText,
                 onValueChange = { questionCountText = it.filter { char -> char.isDigit() }.take(3) },
-                label = { Text("Total Questions") },
-                placeholder = { Text("50") },
+                label = { Text(stringResource(R.string.question_count_label)) },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
             )
@@ -444,13 +435,13 @@ private fun ExamCardItem(
 
                     if (exam.isPublic) {
                         MarklifyBadge(
-                            text = "🌐 Public",
+                            text = stringResource(R.string.public_chip),
                             containerColor = SuccessGreenBg,
                             contentColor = SuccessGreen
                         )
                     } else {
                         MarklifyBadge(
-                            text = "🔒 Private",
+                            text = stringResource(R.string.private_chip),
                             containerColor = WarningAmberBg,
                             contentColor = WarningAmber
                         )

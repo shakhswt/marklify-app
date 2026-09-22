@@ -61,12 +61,12 @@ fun SettingsScreen(
                         isImportSuccess = false
                     },
                     onComplete = { stats ->
-                        importStatusMessage = "Restored: ${stats.topicCount} Topics, ${stats.testCount} Exams, ${stats.scanCount} Scans"
+                        importStatusMessage = context.getString(R.string.restored_summary_format, stats.topicCount, stats.testCount, stats.scanCount)
                         isImportSuccess = true
                     }
                 )
             } catch (e: Exception) {
-                importStatusMessage = "Failed to open backup file: ${e.message}"
+                importStatusMessage = context.getString(R.string.failed_open_backup, e.message ?: "")
                 isImportSuccess = false
             }
         }
@@ -134,7 +134,7 @@ fun SettingsScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // 1. Appearance Theme (Existing)
-            Text("Appearance Theme", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = MaterialTheme.colorScheme.primary)
+            Text(stringResource(R.string.appearance_theme), fontWeight = FontWeight.Bold, fontSize = 14.sp, color = MaterialTheme.colorScheme.primary)
             MarklifyCard {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Row(
@@ -142,12 +142,12 @@ fun SettingsScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text("Theme Mode", fontSize = 15.sp)
+                        Text(stringResource(R.string.theme_mode), fontSize = 15.sp)
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             listOf(
-                                "SYSTEM" to "System",
-                                "LIGHT" to "Light",
-                                "DARK" to "Dark"
+                                "SYSTEM" to stringResource(R.string.theme_system),
+                                "LIGHT" to stringResource(R.string.theme_light),
+                                "DARK" to stringResource(R.string.theme_dark)
                             ).forEach { (mode, label) ->
                                 MarklifyChip(
                                     selected = editableSettings.themeMode == mode,
@@ -172,7 +172,7 @@ fun SettingsScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text("App Language", fontSize = 15.sp)
+                        Text(stringResource(R.string.app_language), fontSize = 15.sp)
                         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                             listOf(
                                 "en" to "🇬🇧 English",
@@ -194,13 +194,13 @@ fun SettingsScreen(
             }
 
             // 3. NEW: Scan Settings
-            Text("Scan settings", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = MaterialTheme.colorScheme.primary)
+            Text(stringResource(R.string.scan_settings), fontWeight = FontWeight.Bold, fontSize = 14.sp, color = MaterialTheme.colorScheme.primary)
             MarklifyCard {
                 Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                         Column {
-                            Text("Sound", fontSize = 15.sp)
-                            Text("Play a beep on successful scan", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(stringResource(R.string.sound), fontSize = 15.sp)
+                            Text(stringResource(R.string.sound_desc), fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                         MarklifySwitch(
                             checked = editableSettings.soundEnabled,
@@ -209,8 +209,8 @@ fun SettingsScreen(
                     }
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                         Column {
-                            Text("Save images", fontSize = 15.sp)
-                            Text("Keep scanned sheet image on device", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(stringResource(R.string.save_images), fontSize = 15.sp)
+                            Text(stringResource(R.string.save_images_desc), fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                         MarklifySwitch(
                             checked = editableSettings.saveImagesEnabled,
@@ -219,8 +219,8 @@ fun SettingsScreen(
                     }
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                         Column {
-                            Text("Auto save", fontSize = 15.sp)
-                            Text("Automatically save locked stable scans", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(stringResource(R.string.auto_save), fontSize = 15.sp)
+                            Text(stringResource(R.string.auto_save_desc), fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                         MarklifySwitch(
                             checked = editableSettings.autoSaveEnabled,
@@ -229,7 +229,7 @@ fun SettingsScreen(
                     }
                     if (editableSettings.autoSaveEnabled) {
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                            Text("Delay seconds", fontSize = 15.sp)
+                            Text(stringResource(R.string.delay_seconds), fontSize = 15.sp)
                             Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                                 listOf(1, 3, 5).forEach { sec ->
                                     MarklifyChip(
@@ -245,15 +245,15 @@ fun SettingsScreen(
                     HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
 
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Text("Scan resolution", fontSize = 15.sp, fontWeight = FontWeight.Medium)
+                        Text(stringResource(R.string.scan_resolution), fontSize = 15.sp, fontWeight = FontWeight.Medium)
                         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                             RadioButton(
                                 selected = editableSettings.scanResolution == "Default",
                                 onClick = { editableSettings = editableSettings.copy(scanResolution = "Default") }
                             )
                             Column {
-                                Text("Default", fontSize = 15.sp)
-                                Text("Suitable for questions less than 150 (Fast scan)", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text(stringResource(R.string.default_option), fontSize = 15.sp)
+                                Text(stringResource(R.string.scan_resolution_default_desc), fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                         }
                         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
@@ -261,7 +261,7 @@ fun SettingsScreen(
                                 selected = editableSettings.scanResolution == "High",
                                 onClick = { editableSettings = editableSettings.copy(scanResolution = "High") }
                             )
-                            Text("High", fontSize = 15.sp)
+                            Text(stringResource(R.string.highest_label), fontSize = 15.sp)
                         }
                     }
                 }
@@ -278,7 +278,7 @@ fun SettingsScreen(
                     ) {
                         Column(modifier = Modifier.weight(1f).padding(end = 12.dp)) {
                             Text(stringResource(R.string.haptics_toggle), fontSize = 15.sp)
-                            Text("Sound controls scan-success beep and Haptic Feedback controls vibration", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(stringResource(R.string.haptics_subtitle), fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                         MarklifySwitch(
                             checked = editableSettings.hapticsEnabled,
@@ -300,7 +300,7 @@ fun SettingsScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text("Paper Size", fontSize = 15.sp)
+                        Text(stringResource(R.string.paper_size), fontSize = 15.sp)
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             listOf("A4", "Letter").forEach { size ->
                                 MarklifyChip(
@@ -315,12 +315,14 @@ fun SettingsScreen(
             }
 
             // 6. NEW: Template Design
-            Text("Template Design", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = MaterialTheme.colorScheme.primary)
+            Text(stringResource(R.string.template_design), fontWeight = FontWeight.Bold, fontSize = 14.sp, color = MaterialTheme.colorScheme.primary)
             MarklifyCard {
                 Column {
-                    SettingsRowArrow(title = "Header") { Toast.makeText(context, "Header template editor stub", Toast.LENGTH_SHORT).show() }
+                    val headerStub = stringResource(R.string.header_template_stub)
+                    val labelsStub = stringResource(R.string.labels_template_stub)
+                    SettingsRowArrow(title = stringResource(R.string.header_template)) { Toast.makeText(context, headerStub, Toast.LENGTH_SHORT).show() }
                     HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
-                    SettingsRowArrow(title = "Labels") { Toast.makeText(context, "Labels template editor stub", Toast.LENGTH_SHORT).show() }
+                    SettingsRowArrow(title = stringResource(R.string.labels_template)) { Toast.makeText(context, labelsStub, Toast.LENGTH_SHORT).show() }
                 }
             }
 
@@ -384,14 +386,17 @@ fun SettingsScreen(
             }
 
             // 8. NEW: Account Setting
-            Text("Account Setting", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = MaterialTheme.colorScheme.primary)
+            Text(stringResource(R.string.account_setting), fontWeight = FontWeight.Bold, fontSize = 14.sp, color = MaterialTheme.colorScheme.primary)
             MarklifyCard {
                 Column {
-                    SettingsRowArrow(title = "Edit profile") { Toast.makeText(context, "Edit profile stub", Toast.LENGTH_SHORT).show() }
+                    val editStub = stringResource(R.string.edit_profile_stub)
+                    val cancelNote = stringResource(R.string.cancel_account_deletion_note)
+                    val termsStub = stringResource(R.string.terms_privacy_policy_stub)
+                    SettingsRowArrow(title = stringResource(R.string.edit_profile)) { Toast.makeText(context, editStub, Toast.LENGTH_SHORT).show() }
                     HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
-                    SettingsRowArrow(title = "Cancel Account Deletion") { Toast.makeText(context, "No-op in offline build", Toast.LENGTH_SHORT).show() }
+                    SettingsRowArrow(title = stringResource(R.string.cancel_account_deletion)) { Toast.makeText(context, cancelNote, Toast.LENGTH_SHORT).show() }
                     HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
-                    SettingsRowArrow(title = "Terms and Privacy Policy") { Toast.makeText(context, "Terms & Privacy Policy stub", Toast.LENGTH_SHORT).show() }
+                    SettingsRowArrow(title = stringResource(R.string.terms_privacy_policy)) { Toast.makeText(context, termsStub, Toast.LENGTH_SHORT).show() }
                 }
             }
 

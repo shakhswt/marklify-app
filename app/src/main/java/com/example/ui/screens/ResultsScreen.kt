@@ -58,7 +58,7 @@ fun ResultsScreen(
     Scaffold(
         topBar = {
             MarklifyTopAppBar(
-                title = { Text(test?.name ?: "Exam Reports", fontWeight = FontWeight.Bold, fontSize = 20.sp) },
+                title = { Text(test?.name ?: stringResource(R.string.results_title), fontWeight = FontWeight.Bold, fontSize = 20.sp) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
@@ -84,7 +84,7 @@ fun ResultsScreen(
                     ) {
                         Icon(imageVector = Icons.Default.CameraAlt, contentDescription = null, modifier = Modifier.size(16.dp))
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text(text = "Scan Sheet", fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                        Text(text = stringResource(R.string.scan_sheet), fontSize = 13.sp, fontWeight = FontWeight.Bold)
                     }
                 }
             )
@@ -120,7 +120,7 @@ fun ResultsScreen(
                         }
                         Spacer(modifier = Modifier.width(10.dp))
                         Column {
-                            Text("Marks", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(stringResource(R.string.marks_max_format, totalPossibleMarks), fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             Text("$totalPossibleMarks", fontSize = 16.sp, fontWeight = FontWeight.Bold)
                         }
                     }
@@ -142,7 +142,7 @@ fun ResultsScreen(
                         }
                         Spacer(modifier = Modifier.width(10.dp))
                         Column {
-                            Text("Reports", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(stringResource(R.string.reports_count_format, results.size), fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             Text("${results.size}", fontSize = 16.sp, fontWeight = FontWeight.Bold)
                         }
                     }
@@ -161,7 +161,7 @@ fun ResultsScreen(
                                         context = context,
                                         file = csvFile,
                                         mimeType = "text/csv",
-                                        chooserTitle = "Export CSV Report"
+                                        chooserTitle = context.getString(R.string.export_csv)
                                     )
                                 }
                             }
@@ -171,7 +171,7 @@ fun ResultsScreen(
                     border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f))
                 ) {
                     Box(contentAlignment = Alignment.Center) {
-                        Icon(Icons.Default.FileDownload, contentDescription = "Export", tint = MaterialTheme.colorScheme.primary)
+                        Icon(Icons.Default.FileDownload, contentDescription = stringResource(R.string.export), tint = MaterialTheme.colorScheme.primary)
                     }
                 }
             }
@@ -184,7 +184,7 @@ fun ResultsScreen(
                         .weight(1f),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("No reports generated yet. Tap 'Scan Sheet' to begin.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(stringResource(R.string.no_scans_hint), color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             } else {
                 LazyColumn(
@@ -211,9 +211,9 @@ fun ResultsScreen(
         MarklifyDialog(
             onDismissRequest = { resultToDelete = null }
         ) {
-            Text("Delete Report", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+            Text(stringResource(R.string.delete_result_title), fontWeight = FontWeight.Bold, fontSize = 18.sp)
             Spacer(modifier = Modifier.height(10.dp))
-            Text("Are you sure you want to delete the report for ${resultToDelete?.studentName}?")
+            Text(stringResource(R.string.delete_result_message, resultToDelete?.studentName ?: ""))
             Spacer(modifier = Modifier.height(18.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -274,13 +274,13 @@ private fun StudentReportCard(
 
                     Column {
                         Text(
-                            text = scan.studentName.ifBlank { "Student" },
+                            text = scan.studentName.ifBlank { stringResource(R.string.student_anonymous) },
                             fontWeight = FontWeight.Bold,
                             fontSize = 15.sp,
                             color = MaterialTheme.colorScheme.onSurface
                         )
                         Text(
-                            text = scan.studentId.ifBlank { "No Roll No" },
+                            text = scan.studentId.ifBlank { "—" },
                             fontSize = 12.sp,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )

@@ -247,4 +247,148 @@
     <string name="key_prefix">(To‘g‘ri javob: %1$s)</string>
     <string name="detected_answer_badge">Aniqlangan: %1$s</string>
     <string name="none_answer">Yo‘q</string>
+
+    <!-- Audit Additions -->
+    <string name="appearance_theme">Tashqi ko‘rinish mavzusi</string>
+    <string name="theme_mode">Mavzu rejimi</string>
+    <string name="theme_system">Tizim</string>
+    <string name="theme_light">Yorug‘</string>
+    <string name="theme_dark">To‘q</string>
+    <string name="app_language">Ilova tili</string>
+    <string name="scan_settings">Skanerlash sozlamalari</string>
+    <string name="sound">Ovoz</string>
+    <string name="sound_desc">Skanerlash muvaffaqiyatli bo‘lganda signal chalish</string>
+    <string name="save_images">Rasmlarni saqlash</string>
+    <string name="save_images_desc">Skanerlangan blanka tasvirini qurilmada saqlash</string>
+    <string name="auto_save">Avto saqlash</string>
+    <string name="auto_save_desc">Barqaror skanerlangan blankalarni avotmatik saqlash</string>
+    <string name="delay_seconds">Kutish soniyalari</string>
+    <string name="scan_resolution">Skanerlash aniqligi</string>
+    <string name="scan_resolution_default_desc">150 tadan kam savollar uchun mos (Tez skanerlash)</string>
+    <string name="haptics_subtitle">Ovoz skanerlash signalini va Vibratsiya tebranishni boshqaradi</string>
+    <string name="paper_size">Qog‘oz o‘lchami</string>
+    <string name="template_design">Andoza dizayni</string>
+    <string name="header_template">Sarlavha</string>
+    <string name="labels_template">Yorliqlar</string>
+    <string name="header_template_stub">Sarlavha andozasi tahrirchisi</string>
+    <string name="labels_template_stub">Yorliqlar andozasi tahrirchisi</string>
+    <string name="account_setting">Hisob sozlamalari</string>
+    <string name="edit_profile">Profilni tahrirlash</string>
+    <string name="edit_profile_stub">Profilni tahrirlash</string>
+    <string name="cancel_account_deletion">Hisobni o‘chirishni bekor qilish</string>
+    <string name="cancel_account_deletion_note">Oflayn rejimda mavjud emas</string>
+    <string name="terms_privacy_policy">Foydalanish shartlari va Maxfiylik siyosati</string>
+    <string name="terms_privacy_policy_stub">Foydalanish shartlari va Maxfiylik siyosati</string>
+    <string name="restored_summary_format">Tiklandi: %1$d ta mavzu, %2$d ta test, %3$d ta skanerlash</string>
+    <string name="failed_open_backup">Zaxira faylini ochishda xatolik: %1$s</string>
+
+    <string name="exam_setup">Test sozlamasi</string>
+    <string name="configure_sections">Bo‘limlarni sozlash</string>
+    <string name="setup_tab">Sozlama</string>
+    <string name="sections_tab">Bo‘limlar</string>
+    <string name="key_tab">Kalit</string>
+    <string name="exam_configuration">Test konfiguratsiyasi</string>
+    <string name="roll_no_digits">ID raqam xonalari</string>
+    <string name="exam_sets">Test variantlari</string>
+    <string name="subjects_label">Fanlar</string>
+    <string name="subject_summary">Fanlar xulosasi</string>
+    <string name="sr_no">T/r</string>
+    <string name="subject_col">Fan</string>
+    <string name="sections_col">Bo‘limlar</string>
+    <string name="subject_name_format">%1$d-fan</string>
+    <string name="select_set">Variantni tanlang</string>
+
+    <string name="roll_no_format">ID raqami : %1$s</string>
+    <string name="previous_report">‹ Oldingi</string>
+    <string name="next_report">Keyingi ›</string>
+    <string name="report_paging_format">%1$d / %2$d hisobot</string>
+    <string name="section_col">Bo‘lim</string>
+    <string name="score_col">Ball</string>
+    <string name="percentage_col">Foiz</string>
+    <string name="correct_col">To‘g‘ri</string>
+    <string name="section_name_format">%1$d-bo‘lim</string>
+    <string name="total_marks">Jami ballar</string>
+    <string name="visual_omr_overlay">Vizual OMR qatlami</string>
+    <string name="omr_sheet_scan_overlay">OMR varaqasi skan qatlami</string>
+    <string name="question_details">Savol tafsilotlari</string>
+    <string name="full_omr_overlay_view">To‘liq OMR qatlami ko‘rinishi</string>
+    <string name="question_number_short">%1$d-savol</string>
+    <string name="student_key_format">O‘quvchi: %1$s  •  Kalit: %2$s</string>
+    <string name="correct_badge">To‘g‘ri</string>
+    <string name="multiple_badge">Ko‘p</string>
+    <string name="ambiguous_badge">Noaniq</string>
+    <string name="blank_badge">Bo‘sh</string>
+    <string name="wrong_badge">Noto‘g‘ri</string>
+
+    <string name="marks_max_format">Ball: %1$.1f</string>
+    <string name="reports_count_format">Hisobotlar: %1$d</string>
+    <string name="rank_format">#%1$d</string>
+
+    <string name="layout_label">Joylashuv</string>
+    <string name="label_label">Yorliq</string>
+    <string name="header_label">Sarlavha</string>
+    <string name="custom_answer_sheet">Maxsus javoblar varaqasini yaratish</string>
+    <string name="custom_sheet_dialog_title">Maxsus javoblar varaqasi</string>
+    <string name="custom_title_label">Maxsus sarlavha matni</string>
+    <string name="placement_option">Joylashtirish varianti</string>
+    <string name="continuous_layout">Ketma-ket</string>
+    <string name="grid_layout">To‘r</string>
+    <string name="default_option">Standart</string>
+    <string name="custom_option">Maxsus</string>
+
+    <string name="archived_count_format">Arxivlangan (%1$d)</string>
+    <string name="public_chip">🌐 Ochiq</string>
+    <string name="private_chip">🔒 Shaxsiy</string>
+
+    <string name="review_scan_score">Skanerlash va natijani tekshirish</string>
+
+    <string name="cloud_sync">Bulutli sinxronizatsiya</string>
+    <string name="cloud_sync_unavailable">Bulutli sinxronizatsiya ushbu oflayn versiyada mavjud emas</string>
+    <string name="not_synced">Sinxronlanmagan</string>
+    <string name="exam_management">Imtihon boshqaruvi</string>
+    <string name="web_features">Veb imkoniyatlar</string>
+    <string name="web_features_unavailable">Veb-imkoniyatlar internet talab qiladi va ushbu oflayn versiyada mavjud emas.</string>
+    <string name="reporting_section">Hisobotlar</string>
+    <string name="other_section">Boshqa</string>
+    <string name="export_exm">.exm eksport</string>
+    <string name="import_exm">.exm import</string>
+    <string name="import_sheet_image">Blanka tasvirini import qilish</string>
+    <string name="exporting_exm_stub">.exm eksport qilish</string>
+    <string name="importing_exm_stub">.exm import qilish</string>
+    <string name="results_published">Natijalar e’lon qilindi</string>
+    <string name="absentees_list">Kelmaganlar ro‘yxati</string>
+    <string name="exporting_excel">Excel/CSV hisoboti eksport qilinmoqda...</string>
+
+    <string name="classes_title">Sinflar</string>
+    <string name="add_class">Sinf qo‘shish</string>
+    <string name="no_classes_yet">Hozircha sinflar yaratilmagan</string>
+    <string name="students_count_format">%1$d ta o‘quvchi</string>
+
+    <string name="attendance_title">Davomat</string>
+    <string name="select_class_attendance_hint">Davomatni belgilash uchun sinfni tanlang.</string>
+
+    <string name="save_exam_title">Testni saqlash</string>
+    <string name="exam_name_required">Test nomi *</string>
+    <string name="choose_exam_date_required">Test sanasini tanlang *</string>
+    <string name="class_name_label">Sinf nomi</string>
+    <string name="enter_exam_name_error">Test nomini kiriting</string>
+    <string name="select_class_title">Sinfni tanlang *</string>
+    <string name="add_new_action">YANGI QO‘SHISH</string>
+    <string name="new_class_placeholder">Yangi sinf</string>
+
+    <string name="more_title">Ko‘proq</string>
+    <string name="admin_badge">Admin</string>
+    <string name="teachers_menu">O‘qituvchilar</string>
+    <string name="subscriptions_menu">Obunalar</string>
+    <string name="no_subscription_note">Obuna talab qilinmaydi - bepul oflayn versiya</string>
+    <string name="help_video_menu">Yordam / Yo‘riqnoma videosi</string>
+    <string name="contact_us_menu">Biz bilan bog‘lanish</string>
+    <string name="student_app_menu">O‘quvchi ilovasi</string>
+    <string name="student_app_note">O‘quvchi ilovasi bu versiyada yo‘q</string>
+    <string name="share_app_text">Marklify - Oflayn OMR Skanerni sinab ko‘ring!</string>
+    <string name="sign_out_menu">Chiqish</string>
+    <string name="logged_out_toast">Lokal profildan chiqildi</string>
+    <string name="role_grade_label">Lavozim / Sinf</string>
+    <string name="name_label">Ism</string>
+    <string name="email_label">E-pochta</string>
 </resources>

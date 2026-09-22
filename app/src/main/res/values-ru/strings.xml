@@ -247,4 +247,148 @@
     <string name="key_prefix">(Ключ: %1$s)</string>
     <string name="detected_answer_badge">Распознано: %1$s</string>
     <string name="none_answer">Нет</string>
+
+    <!-- Audit Additions -->
+    <string name="appearance_theme">Тема оформления</string>
+    <string name="theme_mode">Режим темы</string>
+    <string name="theme_system">Системная</string>
+    <string name="theme_light">Светлая</string>
+    <string name="theme_dark">Тёмная</string>
+    <string name="app_language">Язык приложения</string>
+    <string name="scan_settings">Настройки сканирования</string>
+    <string name="sound">Звук</string>
+    <string name="sound_desc">Звуковой сигнал при успешном сканировании</string>
+    <string name="save_images">Сохранять изображения</string>
+    <string name="save_images_desc">Сохранять снимок бланка на устройстве</string>
+    <string name="auto_save">Автосохранение</string>
+    <string name="auto_save_desc">Автоматически сохранять результаты</string>
+    <string name="delay_seconds">Задержка в секундах</string>
+    <string name="scan_resolution">Разрешение сканирования</string>
+    <string name="scan_resolution_default_desc">Подходит для менее чем 150 вопросов (Быстро)</string>
+    <string name="haptics_subtitle">Звук управляет сигналом сканирования, а виброотклик — вибрацией</string>
+    <string name="paper_size">Размер бумаги</string>
+    <string name="template_design">Дизайн шаблона</string>
+    <string name="header_template">Заголовок</string>
+    <string name="labels_template">Метки</string>
+    <string name="header_template_stub">Шаблон заголовка</string>
+    <string name="labels_template_stub">Шаблон меток</string>
+    <string name="account_setting">Настройки аккаунта</string>
+    <string name="edit_profile">Редактировать профиль</string>
+    <string name="edit_profile_stub">Редактировать профиль</string>
+    <string name="cancel_account_deletion">Отмена удаления аккаунта</string>
+    <string name="cancel_account_deletion_note">Недоступно в офлайн-версии</string>
+    <string name="terms_privacy_policy">Условия и политика конфиденциальности</string>
+    <string name="terms_privacy_policy_stub">Условия и политика конфиденциальности</string>
+    <string name="restored_summary_format">Восстановлено: %1$d тем, %2$d тестов, %3$d сканирований</string>
+    <string name="failed_open_backup">Не удалось открыть файл резервной копии: %1$s</string>
+
+    <string name="exam_setup">Настройка теста</string>
+    <string name="configure_sections">Настройка разделов</string>
+    <string name="setup_tab">Настройка</string>
+    <string name="sections_tab">Разделы</string>
+    <string name="key_tab">Ключ</string>
+    <string name="exam_configuration">Конфигурация теста</string>
+    <string name="roll_no_digits">Цифр в ID</string>
+    <string name="exam_sets">Варианты теста</string>
+    <string name="subjects_label">Предметы</string>
+    <string name="subject_summary">Сводка предметов</string>
+    <string name="sr_no">№</string>
+    <string name="subject_col">Предмет</string>
+    <string name="sections_col">Разделы</string>
+    <string name="subject_name_format">Предмет %1$d</string>
+    <string name="select_set">Выберите вариант</string>
+
+    <string name="roll_no_format">ID номер : %1$s</string>
+    <string name="previous_report">‹ Пред.</string>
+    <string name="next_report">След. ›</string>
+    <string name="report_paging_format">Отчет %1$d / %2$d</string>
+    <string name="section_col">Раздел</string>
+    <string name="score_col">Балл</string>
+    <string name="percentage_col">Процент</string>
+    <string name="correct_col">Верно</string>
+    <string name="section_name_format">Раздел %1$d</string>
+    <string name="total_marks">Всего баллов</string>
+    <string name="visual_omr_overlay">Визуальное наложение OMR</string>
+    <string name="omr_sheet_scan_overlay">Наложение скана бланка OMR</string>
+    <string name="question_details">Детали вопросов</string>
+    <string name="full_omr_overlay_view">Полный вид наложения OMR</string>
+    <string name="question_number_short">В#%1$d</string>
+    <string name="student_key_format">Ученик: %1$s  •  Ключ: %2$s</string>
+    <string name="correct_badge">Верно</string>
+    <string name="multiple_badge">Несколько</string>
+    <string name="ambiguous_badge">Спорно</string>
+    <string name="blank_badge">Пропущено</string>
+    <string name="wrong_badge">Неверно</string>
+
+    <string name="marks_max_format">Баллы: %1$.1f</string>
+    <string name="reports_count_format">Отчеты: %1$d</string>
+    <string name="rank_format">#%1$d</string>
+
+    <string name="layout_label">Макет</string>
+    <string name="label_label">Метка</string>
+    <string name="header_label">Заголовок</string>
+    <string name="custom_answer_sheet">Создать свой бланк ответов</string>
+    <string name="custom_sheet_dialog_title">Пользовательский бланк</string>
+    <string name="custom_title_label">Текст заголовка</string>
+    <string name="placement_option">Вариант размещения</string>
+    <string name="continuous_layout">Сплошной</string>
+    <string name="grid_layout">Сетка</string>
+    <string name="default_option">По умолчанию</string>
+    <string name="custom_option">Пользовательский</string>
+
+    <string name="archived_count_format">Архивировано (%1$d)</string>
+    <string name="public_chip">🌐 Публичный</string>
+    <string name="private_chip">🔒 Приватный</string>
+
+    <string name="review_scan_score">Проверка и оценка бланка</string>
+
+    <string name="cloud_sync">Облачная синхронизация</string>
+    <string name="cloud_sync_unavailable">Облачная синхронизация недоступна в этой офлайн-версии</string>
+    <string name="not_synced">Не синхронизировано</string>
+    <string name="exam_management">Управление экзаменом</string>
+    <string name="web_features">Веб-функции</string>
+    <string name="web_features_unavailable">Веб-функции требуют интернет и недоступны в офлайн-версии.</string>
+    <string name="reporting_section">Отчетность</string>
+    <string name="other_section">Другое</string>
+    <string name="export_exm">Экспорт .exm</string>
+    <string name="import_exm">Импорт .exm</string>
+    <string name="import_sheet_image">Импорт снимка бланка</string>
+    <string name="exporting_exm_stub">Экспорт .exm</string>
+    <string name="importing_exm_stub">Импорт .exm</string>
+    <string name="results_published">Результаты опубликованы</string>
+    <string name="absentees_list">Список отсутствующих</string>
+    <string name="exporting_excel">Экспорт отчета Excel/CSV…</string>
+
+    <string name="classes_title">Классы</string>
+    <string name="add_class">Добавить класс</string>
+    <string name="no_classes_yet">Классы пока не созданы</string>
+    <string name="students_count_format">%1$d учеников</string>
+
+    <string name="attendance_title">Посещаемость</string>
+    <string name="select_class_attendance_hint">Выберите класс для отметки посещаемости.</string>
+
+    <string name="save_exam_title">Сохранить тест</string>
+    <string name="exam_name_required">Название теста *</string>
+    <string name="choose_exam_date_required">Выберите дату теста *</string>
+    <string name="class_name_label">Название класса</string>
+    <string name="enter_exam_name_error">Введите название теста</string>
+    <string name="select_class_title">Выберите класс *</string>
+    <string name="add_new_action">ДОБАВИТЬ</string>
+    <string name="new_class_placeholder">Новый класс</string>
+
+    <string name="more_title">Ещё</string>
+    <string name="admin_badge">Админ</string>
+    <string name="teachers_menu">Учителя</string>
+    <string name="subscriptions_menu">Подписки</string>
+    <string name="no_subscription_note">Подписка не требуется — бесплатная офлайн-версия</string>
+    <string name="help_video_menu">Помощь / Инструкция</string>
+    <string name="contact_us_menu">Связаться с нами</string>
+    <string name="student_app_menu">Приложение для ученика</string>
+    <string name="student_app_note">Приложение для ученика не включено</string>
+    <string name="share_app_text">Попробуйте Marklify - Офлайн OMR Сканер!</string>
+    <string name="sign_out_menu">Выйти</string>
+    <string name="logged_out_toast">Вышли из локального профиля</string>
+    <string name="role_grade_label">Роль / Класс</string>
+    <string name="name_label">Имя</string>
+    <string name="email_label">Email</string>
 </resources>

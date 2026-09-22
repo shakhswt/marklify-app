@@ -67,7 +67,7 @@ fun TestDetailScreen(
     Scaffold(
         topBar = {
             MarklifyTopAppBar(
-                title = { Text("Exam Details", fontWeight = FontWeight.Bold) },
+                title = { Text(stringResource(R.string.test_detail_title), fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
@@ -84,7 +84,7 @@ fun TestDetailScreen(
                     IconButton(onClick = {
                         Toast.makeText(context, "Exam Link Shared", Toast.LENGTH_SHORT).show()
                     }) {
-                        Icon(imageVector = Icons.Default.Share, contentDescription = "Share", tint = MaterialTheme.colorScheme.onSurface)
+                        Icon(imageVector = Icons.Default.Share, contentDescription = stringResource(R.string.share), tint = MaterialTheme.colorScheme.onSurface)
                     }
                 }
             )
@@ -107,13 +107,14 @@ fun TestDetailScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("Cloud sync", fontWeight = FontWeight.Medium, fontSize = 16.sp)
+                    Text(stringResource(R.string.cloud_sync), fontWeight = FontWeight.Medium, fontSize = 16.sp)
+                    val cloudUnavailableMsg = stringResource(R.string.cloud_sync_unavailable)
                     MarklifySwitch(
                         checked = isSyncEnabled,
                         onCheckedChange = { 
                             isSyncEnabled = it
                             if (it) {
-                                Toast.makeText(context, "Cloud sync isn't available in this offline build yet", Toast.LENGTH_LONG).show()
+                                Toast.makeText(context, cloudUnavailableMsg, Toast.LENGTH_LONG).show()
                                 isSyncEnabled = false
                             }
                         }
@@ -160,7 +161,7 @@ fun TestDetailScreen(
                                     overflow = TextOverflow.Ellipsis
                                 )
                                 MarklifyBadge(
-                                    text = if (test?.isPublic == true) "🌐 Public" else "🔒 Private",
+                                    text = if (test?.isPublic == true) stringResource(R.string.public_chip) else stringResource(R.string.private_chip),
                                     containerColor = if (test?.isPublic == true) SuccessGreenBg else WarningAmberBg,
                                     contentColor = if (test?.isPublic == true) SuccessGreen else WarningAmber
                                 )
@@ -168,14 +169,14 @@ fun TestDetailScreen(
                             Spacer(modifier = Modifier.height(2.dp))
                             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                                 MarklifyBadge(text = test?.examType ?: "Exam", containerColor = MaterialTheme.colorScheme.surfaceVariant, contentColor = MaterialTheme.colorScheme.onSurfaceVariant)
-                                MarklifyBadge(text = "Not synced", containerColor = MaterialTheme.colorScheme.errorContainer, contentColor = MaterialTheme.colorScheme.onErrorContainer)
+                                MarklifyBadge(text = stringResource(R.string.not_synced), containerColor = MaterialTheme.colorScheme.errorContainer, contentColor = MaterialTheme.colorScheme.onErrorContainer)
                             }
 
                             Spacer(modifier = Modifier.height(6.dp))
 
                             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                                 Text("? ${test?.questionCount ?: 50}", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                Text("🔑 Key Available", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text("🔑 Key", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 Text("👤 ${test?.examType ?: "NEET"}", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                         }
@@ -195,7 +196,7 @@ fun TestDetailScreen(
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         MarklifyButton(
-                            text = "Start scanning",
+                            text = stringResource(R.string.scan_sheet),
                             onClick = {
                                 viewModel.loadTestForScan(testId) {
                                     onNavigateToScanner(testId)
@@ -210,7 +211,7 @@ fun TestDetailScreen(
 
             // Exam Management Section
             Text(
-                text = "Exam Management",
+                text = stringResource(R.string.exam_management),
                 fontWeight = FontWeight.Bold,
                 fontSize = 16.sp,
                 color = MaterialTheme.colorScheme.onSurface
@@ -221,13 +222,13 @@ fun TestDetailScreen(
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 ActionIconButton(
-                    title = "Answer Key",
+                    title = stringResource(R.string.answer_key),
                     icon = Icons.Default.VpnKey,
                     modifier = Modifier.weight(1f),
                     onClick = { onNavigateToTestEditor(testId) }
                 )
                 ActionIconButton(
-                    title = "Scan Sheet",
+                    title = stringResource(R.string.scan_sheet),
                     icon = Icons.Default.CropFree,
                     modifier = Modifier.weight(1f),
                     onClick = {
@@ -237,7 +238,7 @@ fun TestDetailScreen(
                     }
                 )
                 ActionIconButton(
-                    title = "Exam Settings",
+                    title = stringResource(R.string.settings_title),
                     icon = Icons.Default.Settings,
                     modifier = Modifier.weight(1f),
                     onClick = { showRenameDialog = true }
@@ -249,23 +250,24 @@ fun TestDetailScreen(
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 ActionIconButton(
-                    title = "OMR/Bubble Sheet",
+                    title = stringResource(R.string.generate_sheet),
                     icon = Icons.Default.GridOn,
                     modifier = Modifier.weight(1f),
                     onClick = { onNavigateToSheetGenerator(testId) }
                 )
+                val webUnavailMsg = stringResource(R.string.web_features_unavailable)
                 ActionIconButton(
-                    title = "Web Features",
+                    title = stringResource(R.string.web_features),
                     icon = Icons.Default.Language,
                     modifier = Modifier.weight(1f),
-                    onClick = { Toast.makeText(context, "Web features require an internet connection and aren't available in this offline build.", Toast.LENGTH_LONG).show() }
+                    onClick = { Toast.makeText(context, webUnavailMsg, Toast.LENGTH_LONG).show() }
                 )
                 Spacer(modifier = Modifier.weight(1f))
             }
 
             // Reporting Section
             Text(
-                text = "Reporting",
+                text = stringResource(R.string.reporting_section),
                 fontWeight = FontWeight.Bold,
                 fontSize = 16.sp,
                 color = MaterialTheme.colorScheme.onSurface
@@ -276,13 +278,14 @@ fun TestDetailScreen(
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 ActionIconButton(
-                    title = "View Reports",
+                    title = stringResource(R.string.view_results),
                     icon = Icons.Default.InsertDriveFile,
                     modifier = Modifier.weight(1f),
                     onClick = { onNavigateToResults(testId) }
                 )
+                val exportingExcelMsg = stringResource(R.string.exporting_excel)
                 ActionIconButton(
-                    title = "Download Excel",
+                    title = stringResource(R.string.export_csv),
                     icon = Icons.Default.TableChart,
                     modifier = Modifier.weight(1f),
                     onClick = {
@@ -293,12 +296,12 @@ fun TestDetailScreen(
                                 putExtra(Intent.EXTRA_STREAM, uri)
                                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                             }
-                            context.startActivity(Intent.createChooser(shareIntent, "Share Results"))
+                            context.startActivity(Intent.createChooser(shareIntent, exportingExcelMsg))
                         }
                     }
                 )
                 ActionIconButton(
-                    title = "Analysis",
+                    title = stringResource(R.string.question_analysis),
                     icon = Icons.Default.PieChart,
                     modifier = Modifier.weight(1f),
                     onClick = { onNavigateToResults(testId) }
@@ -309,20 +312,22 @@ fun TestDetailScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
+                val resultsPublishedMsg = stringResource(R.string.results_published)
+                val absenteesListMsg = stringResource(R.string.absentees_list)
                 ActionIconButton(
-                    title = "Publish",
+                    title = stringResource(R.string.results_published),
                     icon = Icons.Default.Publish,
                     modifier = Modifier.weight(1f),
                     onClick = {
-                        Toast.makeText(context, "Results Published", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, resultsPublishedMsg, Toast.LENGTH_SHORT).show()
                     }
                 )
                 ActionIconButton(
-                    title = "Absentees",
+                    title = stringResource(R.string.absentees_list),
                     icon = Icons.Default.PersonOff,
                     modifier = Modifier.weight(1f),
                     onClick = {
-                        Toast.makeText(context, "Absentees List", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, absenteesListMsg, Toast.LENGTH_SHORT).show()
                     }
                 )
                 Spacer(modifier = Modifier.weight(1f))
@@ -330,7 +335,7 @@ fun TestDetailScreen(
 
             // Other Section
             Text(
-                text = "Other",
+                text = stringResource(R.string.other_section),
                 fontWeight = FontWeight.Bold,
                 fontSize = 16.sp,
                 color = MaterialTheme.colorScheme.onSurface
@@ -340,24 +345,26 @@ fun TestDetailScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
+                val exportExmStub = stringResource(R.string.exporting_exm_stub)
+                val importExmStub = stringResource(R.string.importing_exm_stub)
                 ActionIconButton(
-                    title = "Export .exm",
+                    title = stringResource(R.string.export_exm),
                     icon = Icons.Default.FileDownload,
                     modifier = Modifier.weight(1f),
                     onClick = {
-                        Toast.makeText(context, "Exporting .exm stub", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, exportExmStub, Toast.LENGTH_SHORT).show()
                     }
                 )
                 ActionIconButton(
-                    title = "Import .exm",
+                    title = stringResource(R.string.import_exm),
                     icon = Icons.Default.FileUpload,
                     modifier = Modifier.weight(1f),
                     onClick = {
-                        Toast.makeText(context, "Importing .exm stub", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, importExmStub, Toast.LENGTH_SHORT).show()
                     }
                 )
                 ActionIconButton(
-                    title = "Import Sheet Image",
+                    title = stringResource(R.string.import_sheet_image),
                     icon = Icons.Default.Image,
                     modifier = Modifier.weight(1f),
                     onClick = {

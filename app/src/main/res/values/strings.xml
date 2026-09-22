@@ -247,4 +247,148 @@
     <string name="key_prefix">(Key: %1$s)</string>
     <string name="detected_answer_badge">Detected %1$s</string>
     <string name="none_answer">None</string>
+
+    <!-- Audit Additions -->
+    <string name="appearance_theme">Appearance Theme</string>
+    <string name="theme_mode">Theme Mode</string>
+    <string name="theme_system">System</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+    <string name="app_language">App Language</string>
+    <string name="scan_settings">Scan settings</string>
+    <string name="sound">Sound</string>
+    <string name="sound_desc">Play a beep on successful scan</string>
+    <string name="save_images">Save images</string>
+    <string name="save_images_desc">Keep scanned sheet image on device</string>
+    <string name="auto_save">Auto save</string>
+    <string name="auto_save_desc">Automatically save locked stable scans</string>
+    <string name="delay_seconds">Delay seconds</string>
+    <string name="scan_resolution">Scan resolution</string>
+    <string name="scan_resolution_default_desc">Suitable for questions less than 150 (Fast scan)</string>
+    <string name="haptics_subtitle">Sound controls scan-success beep and Haptic Feedback controls vibration</string>
+    <string name="paper_size">Paper Size</string>
+    <string name="template_design">Template Design</string>
+    <string name="header_template">Header</string>
+    <string name="labels_template">Labels</string>
+    <string name="header_template_stub">Header template editor stub</string>
+    <string name="labels_template_stub">Labels template editor stub</string>
+    <string name="account_setting">Account Setting</string>
+    <string name="edit_profile">Edit profile</string>
+    <string name="edit_profile_stub">Edit profile stub</string>
+    <string name="cancel_account_deletion">Cancel Account Deletion</string>
+    <string name="cancel_account_deletion_note">No-op in offline build</string>
+    <string name="terms_privacy_policy">Terms and Privacy Policy</string>
+    <string name="terms_privacy_policy_stub">Terms &amp; Privacy Policy stub</string>
+    <string name="restored_summary_format">Restored: %1$d Topics, %2$d Exams, %3$d Scans</string>
+    <string name="failed_open_backup">Failed to open backup file: %1$s</string>
+
+    <string name="exam_setup">Exam Setup</string>
+    <string name="configure_sections">Configure Sections</string>
+    <string name="setup_tab">Setup</string>
+    <string name="sections_tab">Sections</string>
+    <string name="key_tab">Key</string>
+    <string name="exam_configuration">Exam Configuration</string>
+    <string name="roll_no_digits">Roll no. Digits</string>
+    <string name="exam_sets">Exam Sets</string>
+    <string name="subjects_label">Subjects</string>
+    <string name="subject_summary">Subject Summary</string>
+    <string name="sr_no">Sr No.</string>
+    <string name="subject_col">Subject</string>
+    <string name="sections_col">Sections</string>
+    <string name="subject_name_format">Subject %1$d</string>
+    <string name="select_set">Select Set</string>
+
+    <string name="roll_no_format">Roll No : %1$s</string>
+    <string name="previous_report">‹ Previous</string>
+    <string name="next_report">Next ›</string>
+    <string name="report_paging_format">Report %1$d / %2$d</string>
+    <string name="section_col">Section</string>
+    <string name="score_col">Score</string>
+    <string name="percentage_col">Percentage</string>
+    <string name="correct_col">Correct</string>
+    <string name="section_name_format">Section %1$d</string>
+    <string name="total_marks">Total Marks</string>
+    <string name="visual_omr_overlay">Visual OMR Overlay</string>
+    <string name="omr_sheet_scan_overlay">OMR Sheet Scan Overlay</string>
+    <string name="question_details">Question Details</string>
+    <string name="full_omr_overlay_view">Full OMR Overlay View</string>
+    <string name="question_number_short">Q#%1$d</string>
+    <string name="student_key_format">Student: %1$s  •  Key: %2$s</string>
+    <string name="correct_badge">Correct</string>
+    <string name="multiple_badge">Multiple</string>
+    <string name="ambiguous_badge">Ambiguous</string>
+    <string name="blank_badge">Blank</string>
+    <string name="wrong_badge">Wrong</string>
+
+    <string name="marks_max_format">Marks: %1$.1f</string>
+    <string name="reports_count_format">Reports: %1$d</string>
+    <string name="rank_format">#%1$d</string>
+
+    <string name="layout_label">Layout</string>
+    <string name="label_label">Label</string>
+    <string name="header_label">Header</string>
+    <string name="custom_answer_sheet">Create custom answer sheet</string>
+    <string name="custom_sheet_dialog_title">Custom Answer Sheet</string>
+    <string name="custom_title_label">Custom Title / Header Text</string>
+    <string name="placement_option">Placement Option</string>
+    <string name="continuous_layout">Continuous</string>
+    <string name="grid_layout">Grid</string>
+    <string name="default_option">Default</string>
+    <string name="custom_option">Custom</string>
+
+    <string name="archived_count_format">Archived (%1$d)</string>
+    <string name="public_chip">🌐 Public</string>
+    <string name="private_chip">🔒 Private</string>
+
+    <string name="review_scan_score">Review Scan &amp; Score</string>
+
+    <string name="cloud_sync">Cloud sync</string>
+    <string name="cloud_sync_unavailable">Cloud sync isn\'t available in this offline build yet</string>
+    <string name="not_synced">Not synced</string>
+    <string name="exam_management">Exam Management</string>
+    <string name="web_features">Web Features</string>
+    <string name="web_features_unavailable">Web features require an internet connection and aren\'t available in this offline build.</string>
+    <string name="reporting_section">Reporting</string>
+    <string name="other_section">Other</string>
+    <string name="export_exm">Export .exm</string>
+    <string name="import_exm">Import .exm</string>
+    <string name="import_sheet_image">Import Sheet Image</string>
+    <string name="exporting_exm_stub">Exporting .exm stub</string>
+    <string name="importing_exm_stub">Importing .exm stub</string>
+    <string name="results_published">Results Published</string>
+    <string name="absentees_list">Absentees List</string>
+    <string name="exporting_excel">Exporting Excel/CSV report...</string>
+
+    <string name="classes_title">Classes</string>
+    <string name="add_class">Add Class</string>
+    <string name="no_classes_yet">No classes created yet</string>
+    <string name="students_count_format">%1$d Students</string>
+
+    <string name="attendance_title">Attendance</string>
+    <string name="select_class_attendance_hint">Select a class to mark attendance.</string>
+
+    <string name="save_exam_title">Save Exam</string>
+    <string name="exam_name_required">Exam Name *</string>
+    <string name="choose_exam_date_required">Choose exam date *</string>
+    <string name="class_name_label">Class Name</string>
+    <string name="enter_exam_name_error">Enter exam name</string>
+    <string name="select_class_title">Select Class *</string>
+    <string name="add_new_action">ADD NEW</string>
+    <string name="new_class_placeholder">New Class</string>
+
+    <string name="more_title">More</string>
+    <string name="admin_badge">Admin</string>
+    <string name="teachers_menu">Teachers</string>
+    <string name="subscriptions_menu">Subscriptions</string>
+    <string name="no_subscription_note">No subscription required - free offline build</string>
+    <string name="help_video_menu">Help / Instruction Video</string>
+    <string name="contact_us_menu">Contact us</string>
+    <string name="student_app_menu">Student application</string>
+    <string name="student_app_note">Student companion app not included</string>
+    <string name="share_app_text">Check out Marklify - Offline OMR Scanner!</string>
+    <string name="sign_out_menu">Sign out</string>
+    <string name="logged_out_toast">Logged out of local profile</string>
+    <string name="role_grade_label">Role / Grade</string>
+    <string name="name_label">Name</string>
+    <string name="email_label">Email</string>
 </resources>

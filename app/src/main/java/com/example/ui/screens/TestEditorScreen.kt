@@ -68,9 +68,9 @@ fun TestEditorScreen(
                 title = {
                     Column {
                         val titleText = when (selectedTab) {
-                            0 -> "Exam Setup"
-                            1 -> "Configure Sections"
-                            else -> "Answer Key"
+                            0 -> stringResource(R.string.exam_setup)
+                            1 -> stringResource(R.string.configure_sections)
+                            else -> stringResource(R.string.answer_key)
                         }
                         Text(titleText, fontWeight = FontWeight.Bold, fontSize = 18.sp)
                         Text(test?.name ?: "", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -94,17 +94,17 @@ fun TestEditorScreen(
                         Tab(
                             selected = selectedTab == 0,
                             onClick = { selectedTab = 0 },
-                            text = { Text("Setup", fontSize = 11.sp, fontWeight = FontWeight.Bold) }
+                            text = { Text(stringResource(R.string.setup_tab), fontSize = 11.sp, fontWeight = FontWeight.Bold) }
                         )
                         Tab(
                             selected = selectedTab == 1,
                             onClick = { selectedTab = 1 },
-                            text = { Text("Sections", fontSize = 11.sp, fontWeight = FontWeight.Bold) }
+                            text = { Text(stringResource(R.string.sections_tab), fontSize = 11.sp, fontWeight = FontWeight.Bold) }
                         )
                         Tab(
                             selected = selectedTab == 2,
                             onClick = { selectedTab = 2 },
-                            text = { Text("Key", fontSize = 11.sp, fontWeight = FontWeight.Bold) }
+                            text = { Text(stringResource(R.string.key_tab), fontSize = 11.sp, fontWeight = FontWeight.Bold) }
                         )
                     }
                 }
@@ -123,7 +123,7 @@ fun TestEditorScreen(
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     MarklifyButton(
-                        text = "Clear",
+                        text = stringResource(R.string.none_answer),
                         onClick = {
                             editableQuestions = editableQuestions.map { it.copy(correctAnswer = "") }
                         },
@@ -132,7 +132,7 @@ fun TestEditorScreen(
                     )
 
                     MarklifyButton(
-                        text = "Save",
+                        text = stringResource(R.string.save),
                         onClick = {
                             viewModel.updateQuestionsBatch(editableQuestions)
                             HapticManager.performSubmissionSuccess(context, appSettings.hapticsEnabled)
@@ -161,12 +161,12 @@ fun TestEditorScreen(
                 var subjectsCount by remember { mutableIntStateOf(1) }
 
                 Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                    Text("Exam Configuration", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    Text(stringResource(R.string.exam_configuration), fontWeight = FontWeight.Bold, fontSize = 16.sp)
                     
                     MarklifyCard(modifier = Modifier.fillMaxWidth()) {
                         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                                Text("Roll no. Digits", fontSize = 15.sp)
+                                Text(stringResource(R.string.roll_no_digits), fontSize = 15.sp)
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     IconButton(onClick = { if (rollDigits > 1) rollDigits-- }) { Text("-", fontWeight = FontWeight.Bold, fontSize = 20.sp) }
                                     Text("$rollDigits", fontSize = 16.sp, modifier = Modifier.width(20.dp), textAlign = TextAlign.Center)
@@ -174,7 +174,7 @@ fun TestEditorScreen(
                                 }
                             }
                             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                                Text("Exam Sets", fontSize = 15.sp)
+                                Text(stringResource(R.string.exam_sets), fontSize = 15.sp)
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     IconButton(onClick = { if (examSets > 1) examSets-- }) { Text("-", fontWeight = FontWeight.Bold, fontSize = 20.sp) }
                                     Text("$examSets", fontSize = 16.sp, modifier = Modifier.width(20.dp), textAlign = TextAlign.Center)
@@ -182,7 +182,7 @@ fun TestEditorScreen(
                                 }
                             }
                             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                                Text("Subjects", fontSize = 15.sp)
+                                Text(stringResource(R.string.subjects_label), fontSize = 15.sp)
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     IconButton(onClick = { if (subjectsCount > 1) subjectsCount-- }) { Text("-", fontWeight = FontWeight.Bold, fontSize = 20.sp) }
                                     Text("$subjectsCount", fontSize = 16.sp, modifier = Modifier.width(20.dp), textAlign = TextAlign.Center)
@@ -193,21 +193,21 @@ fun TestEditorScreen(
                     }
 
                     Spacer(modifier = Modifier.height(16.dp))
-                    Text("Subject Summary", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    Text(stringResource(R.string.subject_summary), fontWeight = FontWeight.Bold, fontSize = 16.sp)
 
                     MarklifyCard(modifier = Modifier.fillMaxWidth()) {
                         Column(modifier = Modifier.padding(16.dp)) {
                             Row(modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)) {
-                                Text("Sr No.", modifier = Modifier.weight(1f), fontWeight = FontWeight.Bold, fontSize = 13.sp)
-                                Text("Subject", modifier = Modifier.weight(3f), fontWeight = FontWeight.Bold, fontSize = 13.sp)
-                                Text("Sections", modifier = Modifier.weight(2f), fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                                Text(stringResource(R.string.sr_no), modifier = Modifier.weight(1f), fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                                Text(stringResource(R.string.subject_col), modifier = Modifier.weight(3f), fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                                Text(stringResource(R.string.sections_col), modifier = Modifier.weight(2f), fontWeight = FontWeight.Bold, fontSize = 13.sp)
                             }
                             HorizontalDivider()
                             for (i in 1..subjectsCount) {
                                 Row(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
                                     Text("$i", modifier = Modifier.weight(1f), fontSize = 14.sp)
                                     OutlinedTextField(
-                                        value = "Subject $i",
+                                        value = stringResource(R.string.subject_name_format, i),
                                         onValueChange = {},
                                         modifier = Modifier.weight(3f).height(48.dp).padding(end = 8.dp),
                                         singleLine = true,
@@ -236,7 +236,7 @@ fun TestEditorScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "Select Set",
+                            text = stringResource(R.string.select_set),
                             fontWeight = FontWeight.Bold,
                             fontSize = 15.sp,
                             color = MaterialTheme.colorScheme.onSurface
@@ -252,6 +252,7 @@ fun TestEditorScreen(
                             }
                         }
                     }
+
                     HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
 
                     // Answer Key Questions List (Screenshot #7 Style)
@@ -285,7 +286,7 @@ fun AnswerKeyItemRow(
 ) {
     MarklifyCard(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(8.dp)
+        containerColor = MaterialTheme.colorScheme.surface
     ) {
         Row(
             modifier = Modifier
@@ -294,58 +295,44 @@ fun AnswerKeyItemRow(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            // Question Number on Left
-            Text(
-                text = "${question.questionNumber}",
-                fontWeight = FontWeight.Bold,
-                fontSize = 15.sp,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.width(36.dp)
-            )
-
-            // Key Selection Bubbles (Screenshot #7 Style)
-            when (question.questionType) {
-                "MCQ5" -> {
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        listOf("A", "B", "C", "D", "E").forEach { letter ->
-                            val isSelected = question.correctAnswer.equals(letter, ignoreCase = true)
-                            KeyOptionCircle(
-                                label = letter,
-                                selected = isSelected,
-                                onClick = { onKeySelected(letter) }
-                            )
-                        }
-                    }
-                }
-                "TRUE_FALSE" -> {
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        listOf("True", "False").forEach { tf ->
-                            val isSelected = question.correctAnswer.equals(tf, ignoreCase = true)
-                            KeyOptionPill(
-                                label = tf,
-                                selected = isSelected,
-                                onClick = { onKeySelected(tf) }
-                            )
-                        }
-                    }
-                }
-                "NUMERICAL" -> {
-                    OutlinedTextField(
-                        value = question.correctAnswer,
-                        onValueChange = onKeySelected,
-                        modifier = Modifier.width(120.dp),
-                        singleLine = true,
-                        placeholder = { Text("42") }
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .size(28.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primaryContainer),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "${question.questionNumber}",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 13.sp,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                 }
-                else -> { // MCQ4
+            }
+
+            // Option selection (A/B/C/D or True/False depending on type)
+            when (question.questionType) {
+                "TRUE_FALSE" -> {
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        listOf("True", "False").forEach { option ->
+                            KeyOptionPill(
+                                label = option,
+                                selected = question.correctAnswer.equals(option, ignoreCase = true),
+                                onClick = { onKeySelected(option) }
+                            )
+                        }
+                    }
+                }
+                else -> {
+                    val options = if (question.questionType == "MCQ5") listOf("A", "B", "C", "D", "E") else listOf("A", "B", "C", "D")
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        listOf("A", "B", "C", "D").forEach { letter ->
-                            val isSelected = question.correctAnswer.equals(letter, ignoreCase = true)
+                        options.forEach { option ->
                             KeyOptionCircle(
-                                label = letter,
-                                selected = isSelected,
-                                onClick = { onKeySelected(letter) }
+                                label = option,
+                                selected = question.correctAnswer.equals(option, ignoreCase = true),
+                                onClick = { onKeySelected(option) }
                             )
                         }
                     }

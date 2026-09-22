@@ -79,7 +79,7 @@ fun ResultDetailScreen(
     Scaffold(
         topBar = {
             MarklifyTopAppBar(
-                title = { Text("Roll No : ${scanResult?.studentId ?: "N/A"}", fontWeight = FontWeight.Bold) },
+                title = { Text(stringResource(R.string.roll_no_format, scanResult?.studentId ?: "N/A"), fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
@@ -95,14 +95,14 @@ fun ResultDetailScreen(
                             viewModel.deleteScanResult(res)
                             onNavigateBack()
                         }) {
-                            Icon(imageVector = Icons.Default.Delete, contentDescription = "Delete", tint = ErrorRed)
+                            Icon(imageVector = Icons.Default.Delete, contentDescription = stringResource(R.string.delete), tint = ErrorRed)
                         }
                     }
                     IconButton(onClick = {}) {
-                        Icon(imageVector = Icons.Default.Edit, contentDescription = "Edit", tint = MaterialTheme.colorScheme.onSurface)
+                        Icon(imageVector = Icons.Default.Edit, contentDescription = stringResource(R.string.edit), tint = MaterialTheme.colorScheme.onSurface)
                     }
                     IconButton(onClick = {}) {
-                        Icon(imageVector = Icons.Default.Share, contentDescription = "Share", tint = MaterialTheme.colorScheme.onSurface)
+                        Icon(imageVector = Icons.Default.Share, contentDescription = stringResource(R.string.share), tint = MaterialTheme.colorScheme.onSurface)
                     }
                 }
             )
@@ -124,7 +124,7 @@ fun ResultDetailScreen(
                     val nextResult = allResultsForTest.getOrNull(currentIndex + 1)
 
                     Text(
-                        text = "‹ Previous",
+                        text = stringResource(R.string.previous_report),
                         fontWeight = FontWeight.Bold,
                         fontSize = 14.sp,
                         color = if (prevResult != null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
@@ -134,14 +134,14 @@ fun ResultDetailScreen(
                     )
 
                     Text(
-                        text = "Report ${if (allResultsForTest.isNotEmpty()) currentIndex + 1 else 0} / ${allResultsForTest.size}",
+                        text = stringResource(R.string.report_paging_format, if (allResultsForTest.isNotEmpty()) currentIndex + 1 else 0, allResultsForTest.size),
                         fontWeight = FontWeight.Bold,
                         fontSize = 14.sp,
                         color = MaterialTheme.colorScheme.onSurface
                     )
 
                     Text(
-                        text = "Next ›",
+                        text = stringResource(R.string.next_report),
                         fontWeight = FontWeight.Bold,
                         fontSize = 14.sp,
                         color = if (nextResult != null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
@@ -179,10 +179,10 @@ fun ResultDetailScreen(
                                     .padding(bottom = 8.dp),
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
-                                Text("Section", fontWeight = FontWeight.Bold, fontSize = 13.sp, modifier = Modifier.weight(1.5f))
-                                Text("Score", fontWeight = FontWeight.Bold, fontSize = 13.sp, modifier = Modifier.weight(1f))
-                                Text("Percentage", fontWeight = FontWeight.Bold, fontSize = 13.sp, modifier = Modifier.weight(1.2f))
-                                Text("Correct", fontWeight = FontWeight.Bold, fontSize = 13.sp, modifier = Modifier.weight(1f))
+                                Text(stringResource(R.string.section_col), fontWeight = FontWeight.Bold, fontSize = 13.sp, modifier = Modifier.weight(1.5f))
+                                Text(stringResource(R.string.score_col), fontWeight = FontWeight.Bold, fontSize = 13.sp, modifier = Modifier.weight(1f))
+                                Text(stringResource(R.string.percentage_col), fontWeight = FontWeight.Bold, fontSize = 13.sp, modifier = Modifier.weight(1.2f))
+                                Text(stringResource(R.string.correct_col), fontWeight = FontWeight.Bold, fontSize = 13.sp, modifier = Modifier.weight(1f))
                             }
 
                             HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
@@ -194,7 +194,7 @@ fun ResultDetailScreen(
                                     .padding(vertical = 4.dp),
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
-                                Text("Section 1", fontSize = 13.sp, modifier = Modifier.weight(1.5f))
+                                Text(stringResource(R.string.section_name_format, 1), fontSize = 13.sp, modifier = Modifier.weight(1.5f))
                                 Text("${result.finalScore}", fontSize = 13.sp, modifier = Modifier.weight(1f))
                                 Text(String.format(Locale.US, "%.1f%%", result.percentage), fontSize = 13.sp, modifier = Modifier.weight(1.2f))
                                 Text("${result.correct}", fontSize = 13.sp, modifier = Modifier.weight(1f))
@@ -209,7 +209,7 @@ fun ResultDetailScreen(
                                     .padding(vertical = 4.dp),
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
-                                Text("Total Marks", fontWeight = FontWeight.Bold, fontSize = 13.sp, modifier = Modifier.weight(1.5f))
+                                Text(stringResource(R.string.total_marks), fontWeight = FontWeight.Bold, fontSize = 13.sp, modifier = Modifier.weight(1.5f))
                                 Text("${result.finalScore}", fontWeight = FontWeight.Bold, fontSize = 13.sp, modifier = Modifier.weight(1f))
                                 Text(String.format(Locale.US, "%.1f%%", result.percentage), fontWeight = FontWeight.Bold, fontSize = 13.sp, modifier = Modifier.weight(1.2f))
                                 Text("${result.correct}", fontWeight = FontWeight.Bold, fontSize = 13.sp, modifier = Modifier.weight(1f))
@@ -220,7 +220,7 @@ fun ResultDetailScreen(
 
                 // OMR Visual Overlay Sheet View (Screenshot #4 Style)
                 item {
-                    Text("Visual OMR Overlay", fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                    Text(stringResource(R.string.visual_omr_overlay), fontWeight = FontWeight.Bold, fontSize = 15.sp)
                 }
 
                 item {
@@ -240,18 +240,18 @@ fun ResultDetailScreen(
                             if (sheetBitmap != null) {
                                 Image(
                                     bitmap = sheetBitmap.asImageBitmap(),
-                                    contentDescription = "OMR Visual Overlay Sheet",
+                                    contentDescription = stringResource(R.string.omr_sheet_scan_overlay),
                                     modifier = Modifier.fillMaxSize()
                                 )
                             } else {
-                                Text("OMR Sheet Scan Overlay", color = Color.Gray, fontSize = 13.sp)
+                                Text(stringResource(R.string.omr_sheet_scan_overlay), color = Color.Gray, fontSize = 13.sp)
                             }
                         }
                     }
                 }
 
                 item {
-                    Text("Question Details", fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                    Text(stringResource(R.string.question_details), fontWeight = FontWeight.Bold, fontSize = 15.sp)
                 }
 
                 items(detectedAnswers, key = { it.id }) { item ->
@@ -271,7 +271,7 @@ fun ResultDetailScreen(
         MarklifyDialog(
             onDismissRequest = { showFullImageDialog = false }
         ) {
-            Text("Full OMR Overlay View", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+            Text(stringResource(R.string.full_omr_overlay_view), fontWeight = FontWeight.Bold, fontSize = 18.sp)
             Spacer(modifier = Modifier.height(14.dp))
             Box(
                 modifier = Modifier
@@ -284,7 +284,7 @@ fun ResultDetailScreen(
             ) {
                 Image(
                     bitmap = sheetBitmap.asImageBitmap(),
-                    contentDescription = "Full Scanned Sheet",
+                    contentDescription = stringResource(R.string.captured_sheet_image),
                     modifier = Modifier.fillMaxSize()
                 )
             }
@@ -339,13 +339,13 @@ private fun ResultQuestionRow(detected: DetectedAnswer, correctKey: String) {
                 Spacer(modifier = Modifier.width(12.dp))
                 Column {
                     Text(
-                        text = "Q#${detected.questionNumber}",
+                        text = stringResource(R.string.question_number_short, detected.questionNumber),
                         fontWeight = FontWeight.Bold,
                         fontSize = 14.sp,
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
-                        text = "Student: ${detected.detectedAnswer.ifBlank { "—" }}  •  Key: $correctKey",
+                        text = stringResource(R.string.student_key_format, detected.detectedAnswer.ifBlank { "—" }, correctKey),
                         fontSize = 12.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -354,11 +354,11 @@ private fun ResultQuestionRow(detected: DetectedAnswer, correctKey: String) {
 
             MarklifyBadge(
                 text = when {
-                    isCorrect -> "Correct"
-                    isMultiple -> "Multiple"
-                    isAmbiguous -> "Ambiguous"
-                    isUnanswered -> "Blank"
-                    else -> "Wrong"
+                    isCorrect -> stringResource(R.string.correct_badge)
+                    isMultiple -> stringResource(R.string.multiple_badge)
+                    isAmbiguous -> stringResource(R.string.ambiguous_badge)
+                    isUnanswered -> stringResource(R.string.blank_badge)
+                    else -> stringResource(R.string.wrong_badge)
                 },
                 containerColor = statusColor.copy(alpha = 0.15f),
                 contentColor = statusColor
