@@ -14,5 +14,10 @@ data class AppSettings(
     val defaultPageSize: String = "A4",
     val appLanguage: String = "en",
     val hapticsEnabled: Boolean = true,
+    val soundEnabled: Boolean = true,
+    val saveImagesEnabled: Boolean = true,
+    val autoSaveEnabled: Boolean = false,
+    val autoSaveDelaySeconds: Int = 3,
+    val scanResolution: String = "Default", // "Default", "High"
     val themeMode: String = "SYSTEM" // "SYSTEM", "LIGHT", "DARK"
 )

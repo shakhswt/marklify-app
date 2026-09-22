@@ -46,7 +46,8 @@ fun DashboardScreen(
     onNavigateToScanner: (Long) -> Unit,
     onNavigateToResultDetail: (Long) -> Unit,
     onNavigateToSettings: () -> Unit,
-    onNavigateToHistory: () -> Unit
+    onNavigateToHistory: () -> Unit,
+    onNavigateToSaveExam: () -> Unit
 ) {
     val context = LocalContext.current
     val allTests by viewModel.allTests.collectAsState()

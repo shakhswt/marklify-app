@@ -28,5 +28,7 @@ data class TestEntity(
     val isPublic: Boolean = false,
     val isArchived: Boolean = false,
     val examDate: Long = System.currentTimeMillis(),
-    val description: String = ""
+    val description: String = "",
+    val numRollDigits: Int = 5,
+    val numExamSets: Int = 1
 )

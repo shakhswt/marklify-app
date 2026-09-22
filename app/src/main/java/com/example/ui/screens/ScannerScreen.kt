@@ -151,7 +151,9 @@ fun ScannerScreen(
                             val result = viewModel.omrEngine.processFullSheet(
                                 sourceBitmap = bitmap,
                                 questionCount = currentTest.questionCount,
-                                questions = currentQuestions
+                                questions = currentQuestions,
+                                numRollDigits = currentTest.numRollDigits,
+                                numExamSets = currentTest.numExamSets
                             )
 
                             withContext(Dispatchers.Main) {
@@ -374,7 +376,12 @@ fun ScannerScreen(
                                                                     }
                                                                 }
 
-                                                                val spec = SheetSpec(questionCount = currentTest.questionCount)
+                                                                val spec = SheetSpec(
+                                                                    questionCount = currentTest.questionCount,
+                                                                    questions = currentQuestions,
+                                                                    numRollDigits = currentTest.numRollDigits,
+                                                                    numExamSets = currentTest.numExamSets
+                                                                )
                                                                 val warped = if (targetCorners != null) {
                                                                     viewModel.omrEngine.perspectiveCorrector.correctPerspective(
                                                                         sourceBitmap = highResBitmap,
@@ -386,7 +393,7 @@ fun ScannerScreen(
                                                                 if (warped != null) {
                                                                     val bubbleMap = viewModel.omrEngine.bubbleReader.readBubbles(warped, spec)
                                                                     val detectedAnswers = viewModel.omrEngine.answerDetector.detectAnswers(bubbleMap)
-                                                                    val rollNumber = viewModel.omrEngine.extractRollNumber(detectedAnswers)
+                                                                    val rollNumber = viewModel.omrEngine.extractRollNumber(detectedAnswers, currentTest.numRollDigits)
                                                                     val questionAnswers = detectedAnswers.filter { it.questionNumber > 0 }
 
                                                                     withContext(Dispatchers.Main) {
@@ -629,7 +636,9 @@ fun ScannerScreen(
                                                             val result = viewModel.omrEngine.processFullSheet(
                                                                 sourceBitmap = hrBitmap,
                                                                 questionCount = currentTest.questionCount,
-                                                                questions = currentQuestions
+                                                                questions = currentQuestions,
+                                                                numRollDigits = currentTest.numRollDigits,
+                                                                numExamSets = currentTest.numExamSets
                                                             )
                                                             withContext(Dispatchers.Main) {
                                                                 isProcessingAutoCapture = false
@@ -700,7 +709,12 @@ fun ScannerScreen(
                                 val currentQuestions = questions
                                 coroutineScope.launch(Dispatchers.Default) {
                                     isProcessingAutoCapture = true
-                                    val spec = SheetSpec(questionCount = currentTest.questionCount, questions = currentQuestions)
+                                    val spec = SheetSpec(
+                                        questionCount = currentTest.questionCount,
+                                        questions = currentQuestions,
+                                        numRollDigits = currentTest.numRollDigits,
+                                        numExamSets = currentTest.numExamSets
+                                    )
                                     val bmp = OmrSheetGenerator.generateBitmap(
                                         spec = spec,
                                         testName = currentTest.name,
@@ -709,7 +723,9 @@ fun ScannerScreen(
                                     val result = viewModel.omrEngine.processFullSheet(
                                         sourceBitmap = bmp,
                                         questionCount = currentTest.questionCount,
-                                        questions = currentQuestions
+                                        questions = currentQuestions,
+                                        numRollDigits = currentTest.numRollDigits,
+                                        numExamSets = currentTest.numExamSets
                                     )
                                     withContext(Dispatchers.Main) {
                                         isProcessingAutoCapture = false

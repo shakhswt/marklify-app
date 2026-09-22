@@ -13,6 +13,11 @@ object NavRoutes {
     const val RESULT_DETAIL = "result_detail/{resultId}"
     const val SETTINGS = "settings"
     const val HISTORY = "history"
+    const val CLASSES = "classes"
+    const val CLASS_DETAIL = "class_detail/{classId}"
+    const val ATTENDANCE = "attendance"
+    const val MORE = "more"
+    const val SAVE_EXAM = "save_exam"
 
     fun topicDetail(topicId: Long) = "topic_detail/$topicId"
     fun testDetail(testId: Long) = "test_detail/$testId"
@@ -21,4 +26,5 @@ object NavRoutes {
     fun scanner(testId: Long) = "scanner/$testId"
     fun results(testId: Long) = "results/$testId"
     fun resultDetail(resultId: Long) = "result_detail/$resultId"
+    fun classDetail(classId: Long) = "class_detail/$classId"
 }

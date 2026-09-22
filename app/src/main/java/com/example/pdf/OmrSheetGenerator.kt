@@ -126,7 +126,7 @@ object OmrSheetGenerator {
         // 4. Roll Number Grid
         if (spec.hasRollNoGrid) {
             canvas.drawText("Roll No", spec.rollNoStartX + 65f, spec.rollNoStartY - 10f, fieldPaint)
-            val rollGridWidth = SheetSpec.ROLL_NO_COLS * spec.rollNoColWidth
+            val rollGridWidth = spec.numRollDigits * spec.rollNoColWidth
             canvas.drawRect(
                 spec.rollNoStartX,
                 spec.rollNoStartY,
@@ -134,7 +134,7 @@ object OmrSheetGenerator {
                 spec.rollNoStartY + 30f,
                 thinStrokePaint
             )
-            for (col in 1 until SheetSpec.ROLL_NO_COLS) {
+            for (col in 1 until spec.numRollDigits) {
                 val gx = spec.rollNoStartX + col * spec.rollNoColWidth
                 canvas.drawLine(gx, spec.rollNoStartY, gx, spec.rollNoStartY + 30f, thinStrokePaint)
             }

@@ -19,9 +19,12 @@ import com.example.data.entity.*
         AppSettings::class,
         AnswerKeySet::class,
         Subject::class,
-        SectionConfigEntity::class
+        SectionConfigEntity::class,
+        ClassEntity::class,
+        StudentEntity::class,
+        AttendanceRecord::class
     ],
-    version = 6,
+    version = 8,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -34,40 +37,66 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun answerKeySetDao(): AnswerKeySetDao
     abstract fun subjectDao(): SubjectDao
     abstract fun sectionConfigDao(): SectionConfigDao
+    abstract fun classDao(): ClassDao
+    abstract fun studentDao(): StudentDao
+    abstract fun attendanceDao(): AttendanceDao
 
     companion object {
         @Volatile
         private var INSTANCE: AppDatabase? = null
 
+        private fun SupportSQLiteDatabase.addColumnIfMissing(table: String, columnDef: String, columnName: String) {
+            var exists = false
+            try {
+                val cursor = query("PRAGMA table_info($table)")
+                cursor?.use {
+                    val nameIndex = it.getColumnIndex("name")
+                    if (nameIndex >= 0) {
+                        while (it.moveToNext()) {
+                            if (it.getString(nameIndex) == columnName) {
+                                exists = true
+                                break
+                            }
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                exists = false
+            }
+            if (!exists) {
+                execSQL("ALTER TABLE $table ADD COLUMN $columnDef")
+            }
+        }
+
         val MIGRATION_3_4 = object : Migration(3, 4) {
             override fun migrate(db: SupportSQLiteDatabase) {
-                db.execSQL("ALTER TABLE app_settings ADD COLUMN appLanguage TEXT NOT NULL DEFAULT 'en'")
-                db.execSQL("ALTER TABLE app_settings ADD COLUMN hapticsEnabled INTEGER NOT NULL DEFAULT 1")
+                db.addColumnIfMissing("app_settings", "appLanguage TEXT NOT NULL DEFAULT 'en'", "appLanguage")
+                db.addColumnIfMissing("app_settings", "hapticsEnabled INTEGER NOT NULL DEFAULT 1", "hapticsEnabled")
             }
         }
 
         val MIGRATION_4_5 = object : Migration(4, 5) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 // TestEntity additions
-                db.execSQL("ALTER TABLE tests ADD COLUMN examType TEXT NOT NULL DEFAULT 'NEET'")
-                db.execSQL("ALTER TABLE tests ADD COLUMN isPublic INTEGER NOT NULL DEFAULT 0")
-                db.execSQL("ALTER TABLE tests ADD COLUMN isArchived INTEGER NOT NULL DEFAULT 0")
-                db.execSQL("ALTER TABLE tests ADD COLUMN examDate INTEGER NOT NULL DEFAULT 0")
-                db.execSQL("ALTER TABLE tests ADD COLUMN description TEXT NOT NULL DEFAULT ''")
+                db.addColumnIfMissing("tests", "examType TEXT NOT NULL DEFAULT 'NEET'", "examType")
+                db.addColumnIfMissing("tests", "isPublic INTEGER NOT NULL DEFAULT 0", "isPublic")
+                db.addColumnIfMissing("tests", "isArchived INTEGER NOT NULL DEFAULT 0", "isArchived")
+                db.addColumnIfMissing("tests", "examDate INTEGER NOT NULL DEFAULT 0", "examDate")
+                db.addColumnIfMissing("tests", "description TEXT NOT NULL DEFAULT ''", "description")
 
                 // Question additions
-                db.execSQL("ALTER TABLE questions ADD COLUMN sectionName TEXT NOT NULL DEFAULT 'Section1'")
-                db.execSQL("ALTER TABLE questions ADD COLUMN questionType TEXT NOT NULL DEFAULT 'MCQ4'")
-                db.execSQL("ALTER TABLE questions ADD COLUMN correctMarks REAL NOT NULL DEFAULT 1.0")
-                db.execSQL("ALTER TABLE questions ADD COLUMN negativeMarks REAL NOT NULL DEFAULT 0.0")
-                db.execSQL("ALTER TABLE questions ADD COLUMN allowPartial INTEGER NOT NULL DEFAULT 0")
-                db.execSQL("ALTER TABLE questions ADD COLUMN allowOptional INTEGER NOT NULL DEFAULT 0")
-                db.execSQL("ALTER TABLE questions ADD COLUMN numDigits INTEGER NOT NULL DEFAULT 1")
-                db.execSQL("ALTER TABLE questions ADD COLUMN hasNegativeSign INTEGER NOT NULL DEFAULT 0")
-                db.execSQL("ALTER TABLE questions ADD COLUMN hasDecimal INTEGER NOT NULL DEFAULT 0")
+                db.addColumnIfMissing("questions", "sectionName TEXT NOT NULL DEFAULT 'Section1'", "sectionName")
+                db.addColumnIfMissing("questions", "questionType TEXT NOT NULL DEFAULT 'MCQ4'", "questionType")
+                db.addColumnIfMissing("questions", "correctMarks REAL NOT NULL DEFAULT 1.0", "correctMarks")
+                db.addColumnIfMissing("questions", "negativeMarks REAL NOT NULL DEFAULT 0.0", "negativeMarks")
+                db.addColumnIfMissing("questions", "allowPartial INTEGER NOT NULL DEFAULT 0", "allowPartial")
+                db.addColumnIfMissing("questions", "allowOptional INTEGER NOT NULL DEFAULT 0", "allowOptional")
+                db.addColumnIfMissing("questions", "numDigits INTEGER NOT NULL DEFAULT 1", "numDigits")
+                db.addColumnIfMissing("questions", "hasNegativeSign INTEGER NOT NULL DEFAULT 0", "hasNegativeSign")
+                db.addColumnIfMissing("questions", "hasDecimal INTEGER NOT NULL DEFAULT 0", "hasDecimal")
 
                 // AppSettings additions
-                db.execSQL("ALTER TABLE app_settings ADD COLUMN themeMode TEXT NOT NULL DEFAULT 'SYSTEM'")
+                db.addColumnIfMissing("app_settings", "themeMode TEXT NOT NULL DEFAULT 'SYSTEM'", "themeMode")
             }
         }
 
@@ -90,7 +119,7 @@ abstract class AppDatabase : RoomDatabase() {
                 db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_answer_key_sets_testId_setLetter_questionNumber ON answer_key_sets(testId, setLetter, questionNumber)")
 
                 // 2. ScanResult examSet column
-                db.execSQL("ALTER TABLE scan_results ADD COLUMN examSet TEXT NOT NULL DEFAULT 'A'")
+                db.addColumnIfMissing("scan_results", "examSet TEXT NOT NULL DEFAULT 'A'", "examSet")
 
                 // 3. Subjects table
                 db.execSQL(
@@ -130,6 +159,68 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        val MIGRATION_6_7 = object : Migration(6, 7) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                // 1. Classes table
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS classes (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        name TEXT NOT NULL,
+                        createdAt INTEGER NOT NULL
+                    )
+                    """.trimIndent()
+                )
+
+                // 2. Students table
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS students (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        classId INTEGER NOT NULL,
+                        name TEXT NOT NULL,
+                        rollId TEXT,
+                        FOREIGN KEY(classId) REFERENCES classes(id) ON DELETE CASCADE
+                    )
+                    """.trimIndent()
+                )
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_students_classId ON students(classId)")
+
+                // 3. Attendance Records table
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS attendance_records (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        classId INTEGER NOT NULL,
+                        studentId INTEGER NOT NULL,
+                        date INTEGER NOT NULL,
+                        present INTEGER NOT NULL,
+                        FOREIGN KEY(classId) REFERENCES classes(id) ON DELETE CASCADE,
+                        FOREIGN KEY(studentId) REFERENCES students(id) ON DELETE CASCADE
+                    )
+                    """.trimIndent()
+                )
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_attendance_records_classId ON attendance_records(classId)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_attendance_records_studentId ON attendance_records(studentId)")
+                db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_attendance_records_classId_studentId_date ON attendance_records(classId, studentId, date)")
+            }
+        }
+
+        val MIGRATION_7_8 = object : Migration(7, 8) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                // 1. AppSettings additions
+                db.addColumnIfMissing("app_settings", "soundEnabled INTEGER NOT NULL DEFAULT 1", "soundEnabled")
+                db.addColumnIfMissing("app_settings", "saveImagesEnabled INTEGER NOT NULL DEFAULT 1", "saveImagesEnabled")
+                db.addColumnIfMissing("app_settings", "autoSaveEnabled INTEGER NOT NULL DEFAULT 0", "autoSaveEnabled")
+                db.addColumnIfMissing("app_settings", "autoSaveDelaySeconds INTEGER NOT NULL DEFAULT 3", "autoSaveDelaySeconds")
+                db.addColumnIfMissing("app_settings", "scanResolution TEXT NOT NULL DEFAULT 'Default'", "scanResolution")
+
+                // 2. TestEntity additions
+                db.addColumnIfMissing("tests", "numRollDigits INTEGER NOT NULL DEFAULT 5", "numRollDigits")
+                db.addColumnIfMissing("tests", "numExamSets INTEGER NOT NULL DEFAULT 1", "numExamSets")
+            }
+        }
+
         fun getDatabase(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
@@ -137,7 +228,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "marklify_database"
                 )
-                    .addMigrations(MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
+                    .addMigrations(MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8)
                     .build()
                 INSTANCE = instance
                 instance

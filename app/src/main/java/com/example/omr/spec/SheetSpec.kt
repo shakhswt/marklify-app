@@ -40,7 +40,9 @@ class SheetSpec(
     val targetWidth: Float = TARGET_WIDTH,
     val targetHeight: Float = TARGET_HEIGHT,
     val hasRollNoGrid: Boolean = true,
-    val hasExamSet: Boolean = true
+    val hasExamSet: Boolean = true,
+    val numRollDigits: Int = 5,
+    val numExamSets: Int = 1
 ) {
     companion object {
         const val TARGET_WIDTH = 1200f
@@ -50,8 +52,7 @@ class SheetSpec(
         const val MARKER_SIZE = 70f
         const val MARKER_MARGIN = 45f
 
-        val EXAM_SETS = listOf("A", "B", "C", "D")
-        val ROLL_NO_COLS = 5
+        val EXAM_SETS = listOf("A", "B", "C", "D", "E", "F")
         val DIGITS = listOf("0", "1", "2", "3", "4", "5", "6", "7", "8", "9")
     }
 
@@ -83,7 +84,7 @@ class SheetSpec(
     fun getRollNoBubbles(): List<BubbleLocation> {
         val list = mutableListOf<BubbleLocation>()
         if (!hasRollNoGrid) return list
-        for (col in 0 until ROLL_NO_COLS) {
+        for (col in 0 until numRollDigits) {
             for (row in 0 until 10) {
                 val cx = rollNoStartX + col * rollNoColWidth + rollNoColWidth / 2f
                 val cy = rollNoStartY + 35f + row * rollNoRowHeight
@@ -106,8 +107,8 @@ class SheetSpec(
     // Exam Set Bubbles
     fun getExamSetBubbles(): List<BubbleLocation> {
         val list = mutableListOf<BubbleLocation>()
-        if (!hasExamSet) return list
-        for (idx in EXAM_SETS.indices) {
+        if (!hasExamSet || numExamSets < 1) return list
+        for (idx in 0 until numExamSets) {
             val cx = examSetStartX + idx * examSetSpacing + examSetSpacing / 2f
             val cy = examSetStartY + 35f
             list.add(

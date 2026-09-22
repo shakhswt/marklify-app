@@ -37,10 +37,10 @@ class OmrEngine(
         markerDetector.resetStability()
     }
 
-    fun extractRollNumber(detectedAnswers: List<DetectedQuestionAnswer>): String? {
+    fun extractRollNumber(detectedAnswers: List<DetectedQuestionAnswer>, numRollDigits: Int): String? {
         val digits = mutableListOf<String>()
         var anyFound = false
-        for (col in 0 until 5) {
+        for (col in 0 until numRollDigits) {
             val qNum = -100 - col
             val ans = detectedAnswers.firstOrNull { it.questionNumber == qNum }?.detectedAnswer
             if (ans != null && ans.length == 1 && ans[0].isDigit()) {
@@ -53,9 +53,11 @@ class OmrEngine(
         return if (anyFound) digits.joinToString("") else null
     }
 
-    fun extractExamSet(detectedAnswers: List<DetectedQuestionAnswer>): String? {
+    fun extractExamSet(detectedAnswers: List<DetectedQuestionAnswer>, numExamSets: Int): String? {
+        if (numExamSets <= 1) return null
         val ans = detectedAnswers.firstOrNull { it.questionNumber == -2 }?.detectedAnswer
-        return if (ans != null && ans in listOf("A", "B", "C", "D")) ans else null
+        val validSets = listOf("A", "B", "C", "D", "E", "F").take(numExamSets)
+        return if (ans != null && ans in validSets) ans else null
     }
 
     /**
@@ -70,9 +72,16 @@ class OmrEngine(
     fun processFullSheet(
         sourceBitmap: Bitmap,
         questionCount: Int,
-        questions: List<Question>
+        questions: List<Question>,
+        numRollDigits: Int = 5,
+        numExamSets: Int = 1
     ): OmrProcessResult {
-        val spec = SheetSpec(questionCount = questionCount, questions = questions)
+        val spec = SheetSpec(
+            questionCount = questionCount,
+            questions = questions,
+            numRollDigits = numRollDigits,
+            numExamSets = numExamSets
+        )
 
         // 1. Detect markers
         val markerResult = markerDetector.detectMarkers(sourceBitmap)
@@ -100,8 +109,8 @@ class OmrEngine(
         val detectedAnswers = answerDetector.detectAnswers(bubbleMap)
 
         // 5. Extract metadata
-        val rollNumber = extractRollNumber(detectedAnswers)
-        val examSet = extractExamSet(detectedAnswers)
+        val rollNumber = extractRollNumber(detectedAnswers, numRollDigits)
+        val examSet = extractExamSet(detectedAnswers, numExamSets)
 
         // 6. Score question answers (questionNumber > 0)
         val questionAnswers = detectedAnswers.filter { it.questionNumber > 0 }

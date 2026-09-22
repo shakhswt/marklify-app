@@ -1,42 +1,34 @@
 package com.example.ui.screens
 
-import android.net.Uri
+import android.content.Intent
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.FileProvider
 import com.example.R
-import com.example.data.backup.DataBackupManager
-import com.example.omr.processing.AnswerDetector
-import com.example.omr.processing.BubbleReading
+import com.example.data.entity.AppSettings
 import com.example.ui.components.*
 import com.example.ui.theme.*
 import com.example.ui.viewmodel.MarklifyViewModel
 import com.example.util.HapticManager
-import java.io.BufferedReader
-import java.io.InputStreamReader
-import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -47,46 +39,35 @@ fun SettingsScreen(
     val context = LocalContext.current
     val currentSettings by viewModel.appSettings.collectAsState()
 
-    var fillThreshold by remember(currentSettings) { mutableFloatStateOf(currentSettings.fillThreshold) }
-    var unansweredThreshold by remember(currentSettings) { mutableFloatStateOf(currentSettings.unansweredThreshold) }
-    var multipleDiffMargin by remember(currentSettings) { mutableFloatStateOf(currentSettings.multipleDiffMargin) }
-    var ambiguousDiffMargin by remember(currentSettings) { mutableFloatStateOf(currentSettings.ambiguousDiffMargin) }
-    var defaultPageSize by remember(currentSettings) { mutableStateOf(currentSettings.defaultPageSize) }
+    var editableSettings by remember(currentSettings) { mutableStateOf(currentSettings) }
+    var hasChanges by remember(currentSettings, editableSettings) { mutableStateOf(currentSettings != editableSettings) }
 
-    var importMessage by remember { mutableStateOf<String?>(null) }
-    var isExporting by remember { mutableStateOf(false) }
+    var importStatusMessage by remember { mutableStateOf<String?>(null) }
+    var isImportSuccess by remember { mutableStateOf(true) }
 
-    // Backup restore file picker
-    val filePickerLauncher = rememberLauncherForActivityResult(
+    // File launcher for Json Restore
+    val importLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
-    ) { uri: Uri? ->
+    ) { uri ->
         if (uri != null) {
             try {
                 val jsonString = context.contentResolver.openInputStream(uri)?.use { stream ->
-                    BufferedReader(InputStreamReader(stream)).readText()
-                }
-                if (!jsonString.isNullOrBlank()) {
-                    viewModel.importDatabaseBackup(
-                        jsonString = jsonString,
-                        onError = { errorMsg ->
-                            Toast.makeText(context, context.getString(R.string.backup_read_failed, errorMsg), Toast.LENGTH_LONG).show()
-                        },
-                        onComplete = { stats ->
-                            HapticManager.performSubmissionSuccess(context, currentSettings.hapticsEnabled)
-                            importMessage = context.getString(
-                                R.string.backup_restored_summary,
-                                stats.topicCount,
-                                stats.testCount,
-                                stats.questionCount,
-                                stats.scanCount
-                            )
-                        }
-                    )
-                } else {
-                    Toast.makeText(context, context.getString(R.string.backup_empty), Toast.LENGTH_SHORT).show()
-                }
+                    stream.bufferedReader().readText()
+                } ?: ""
+                viewModel.importDatabaseBackup(
+                    jsonString = jsonString,
+                    onError = { err ->
+                        importStatusMessage = err
+                        isImportSuccess = false
+                    },
+                    onComplete = { stats ->
+                        importStatusMessage = "Restored: ${stats.topicCount} Topics, ${stats.testCount} Exams, ${stats.scanCount} Scans"
+                        isImportSuccess = true
+                    }
+                )
             } catch (e: Exception) {
-                Toast.makeText(context, context.getString(R.string.backup_read_failed, e.message ?: ""), Toast.LENGTH_LONG).show()
+                importStatusMessage = "Failed to open backup file: ${e.message}"
+                isImportSuccess = false
             }
         }
     }
@@ -97,32 +78,50 @@ fun SettingsScreen(
                 title = { Text(stringResource(R.string.settings_title), fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.back),
-                            tint = MaterialTheme.colorScheme.onSurface
-                        )
+                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back), tint = MaterialTheme.colorScheme.onSurface)
                     }
                 },
                 actions = {
-                    IconButton(
-                        onClick = {
-                            viewModel.resetThresholdsToDefault()
-                            fillThreshold = AnswerDetector.DEFAULT_FILL_THRESHOLD
-                            unansweredThreshold = AnswerDetector.DEFAULT_UNANSWERED_THRESHOLD
-                            multipleDiffMargin = AnswerDetector.DEFAULT_MULTIPLE_DIFF_MARGIN
-                            ambiguousDiffMargin = AnswerDetector.DEFAULT_AMBIGUOUS_DIFF_MARGIN
-                            Toast.makeText(context, context.getString(R.string.reset_thresholds_toast), Toast.LENGTH_SHORT).show()
-                        }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.RestartAlt,
-                            contentDescription = stringResource(R.string.reset_thresholds),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                    TextButton(onClick = {
+                        viewModel.resetThresholdsToDefault()
+                        Toast.makeText(context, context.getString(R.string.reset_thresholds_toast), Toast.LENGTH_SHORT).show()
+                    }) {
+                        Text(stringResource(R.string.reset_thresholds), fontSize = 13.sp, color = MaterialTheme.colorScheme.primary)
                     }
                 }
             )
+        },
+        bottomBar = {
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                color = MaterialTheme.colorScheme.surface,
+                shadowElevation = 8.dp
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    MarklifyButton(
+                        text = stringResource(R.string.cancel),
+                        onClick = { editableSettings = currentSettings },
+                        modifier = Modifier.weight(1f),
+                        variant = MarklifyButtonVariant.Neutral,
+                        enabled = hasChanges
+                    )
+                    MarklifyButton(
+                        text = stringResource(R.string.save_settings),
+                        onClick = {
+                            viewModel.saveSettings(editableSettings)
+                            HapticManager.performSubmissionSuccess(context, editableSettings.hapticsEnabled)
+                            Toast.makeText(context, context.getString(R.string.settings_saved_toast), Toast.LENGTH_SHORT).show()
+                            hasChanges = false
+                        },
+                        modifier = Modifier.weight(1f),
+                        variant = MarklifyButtonVariant.Primary,
+                        enabled = hasChanges
+                    )
+                }
+            }
         },
         containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
@@ -134,264 +133,284 @@ fun SettingsScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // 1. Theme Selector Card (Classic Light / Dark / System)
-            MarklifyCard(modifier = Modifier.fillMaxWidth()) {
-                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(imageVector = Icons.Default.Palette, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-                        Spacer(modifier = Modifier.width(10.dp))
-                        Text(
-                            text = "Appearance Theme",
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 15.sp,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                    }
-
+            // 1. Appearance Theme (Existing)
+            Text("Appearance Theme", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = MaterialTheme.colorScheme.primary)
+            MarklifyCard {
+                Column(modifier = Modifier.padding(16.dp)) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        val themes = listOf(
-                            Triple("SYSTEM", "System", "⚙️"),
-                            Triple("LIGHT", "Light", "☀️"),
-                            Triple("DARK", "Dark", "🌙")
-                        )
-                        themes.forEach { (code, label, icon) ->
-                            val isSelected = currentSettings.themeMode == code
-                            MarklifyChip(
-                                selected = isSelected,
-                                onClick = {
-                                    viewModel.setThemeMode(code)
-                                    HapticManager.performBubbleDetectedTick(context, currentSettings.hapticsEnabled)
-                                },
-                                label = "$icon $label",
-                                modifier = Modifier.weight(1f)
-                            )
-                        }
-                    }
-                }
-            }
-
-            // 2. Language Picker Card
-            MarklifyCard(modifier = Modifier.fillMaxWidth()) {
-                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(imageVector = Icons.Default.Language, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-                        Spacer(modifier = Modifier.width(10.dp))
-                        Text(
-                            text = stringResource(R.string.language_section),
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 15.sp,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                    }
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        val languages = listOf(
-                            Triple("en", stringResource(R.string.language_en), "🇺🇸"),
-                            Triple("uz", stringResource(R.string.language_uz), "🇺🇿"),
-                            Triple("ru", stringResource(R.string.language_ru), "🇷🇺")
-                        )
-                        languages.forEach { (code, label, flag) ->
-                            val isSelected = currentSettings.appLanguage == code
-                            MarklifyChip(
-                                selected = isSelected,
-                                onClick = {
-                                    viewModel.setAppLanguage(code)
-                                    HapticManager.performBubbleDetectedTick(context, currentSettings.hapticsEnabled)
-                                },
-                                label = "$flag $label",
-                                modifier = Modifier.weight(1f)
-                            )
-                        }
-                    }
-                }
-            }
-
-            // 3. Tactile Haptic Feedback Switch Card
-            MarklifyCard(modifier = Modifier.fillMaxWidth()) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Row(
-                        modifier = Modifier.weight(1f),
+                        horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Vibration,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(24.dp)
-                        )
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Column {
-                            Text(
-                                text = stringResource(R.string.haptics_section),
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 15.sp,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                            Text(
-                                text = stringResource(R.string.haptics_desc),
-                                fontSize = 12.sp,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
+                        Text("Theme Mode", fontSize = 15.sp)
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            listOf(
+                                "SYSTEM" to "System",
+                                "LIGHT" to "Light",
+                                "DARK" to "Dark"
+                            ).forEach { (mode, label) ->
+                                MarklifyChip(
+                                    selected = editableSettings.themeMode == mode,
+                                    onClick = {
+                                        editableSettings = editableSettings.copy(themeMode = mode)
+                                        viewModel.setThemeMode(mode)
+                                    },
+                                    label = label
+                                )
+                            }
                         }
                     }
-
-                    MarklifySwitch(
-                        checked = currentSettings.hapticsEnabled,
-                        onCheckedChange = {
-                            viewModel.setHapticsEnabled(it)
-                            if (it) HapticManager.performSubmissionSuccess(context, true)
-                        }
-                    )
                 }
             }
 
-            // 4. Default Page Size Card
-            MarklifyCard(modifier = Modifier.fillMaxWidth()) {
-                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Text(
-                        text = stringResource(R.string.default_page_size),
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 15.sp,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
+            // 2. Language (Existing)
+            Text(stringResource(R.string.language_section), fontWeight = FontWeight.Bold, fontSize = 14.sp, color = MaterialTheme.colorScheme.primary)
+            MarklifyCard {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text("App Language", fontSize = 15.sp)
+                        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                            listOf(
+                                "en" to "🇬🇧 English",
+                                "uz" to "🇺🇿 O'zbek",
+                                "ru" to "🇷🇺 Русский"
+                            ).forEach { (code, label) ->
+                                MarklifyChip(
+                                    selected = editableSettings.appLanguage == code,
+                                    onClick = {
+                                        editableSettings = editableSettings.copy(appLanguage = code)
+                                        viewModel.setAppLanguage(code)
+                                    },
+                                    label = label
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            // 3. NEW: Scan Settings
+            Text("Scan settings", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = MaterialTheme.colorScheme.primary)
+            MarklifyCard {
+                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                        Column {
+                            Text("Sound", fontSize = 15.sp)
+                            Text("Play a beep on successful scan", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                        MarklifySwitch(
+                            checked = editableSettings.soundEnabled,
+                            onCheckedChange = { editableSettings = editableSettings.copy(soundEnabled = it) }
+                        )
+                    }
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                        Column {
+                            Text("Save images", fontSize = 15.sp)
+                            Text("Keep scanned sheet image on device", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                        MarklifySwitch(
+                            checked = editableSettings.saveImagesEnabled,
+                            onCheckedChange = { editableSettings = editableSettings.copy(saveImagesEnabled = it) }
+                        )
+                    }
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                        Column {
+                            Text("Auto save", fontSize = 15.sp)
+                            Text("Automatically save locked stable scans", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                        MarklifySwitch(
+                            checked = editableSettings.autoSaveEnabled,
+                            onCheckedChange = { editableSettings = editableSettings.copy(autoSaveEnabled = it) }
+                        )
+                    }
+                    if (editableSettings.autoSaveEnabled) {
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                            Text("Delay seconds", fontSize = 15.sp)
+                            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                listOf(1, 3, 5).forEach { sec ->
+                                    MarklifyChip(
+                                        selected = editableSettings.autoSaveDelaySeconds == sec,
+                                        onClick = { editableSettings = editableSettings.copy(autoSaveDelaySeconds = sec) },
+                                        label = "${sec}s"
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
+
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text("Scan resolution", fontSize = 15.sp, fontWeight = FontWeight.Medium)
+                        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                            RadioButton(
+                                selected = editableSettings.scanResolution == "Default",
+                                onClick = { editableSettings = editableSettings.copy(scanResolution = "Default") }
+                            )
+                            Column {
+                                Text("Default", fontSize = 15.sp)
+                                Text("Suitable for questions less than 150 (Fast scan)", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                        }
+                        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                            RadioButton(
+                                selected = editableSettings.scanResolution == "High",
+                                onClick = { editableSettings = editableSettings.copy(scanResolution = "High") }
+                            )
+                            Text("High", fontSize = 15.sp)
+                        }
+                    }
+                }
+            }
+
+            // 4. Haptic Feedback Switch (Existing)
+            Text(stringResource(R.string.haptics_section), fontWeight = FontWeight.Bold, fontSize = 14.sp, color = MaterialTheme.colorScheme.primary)
+            MarklifyCard {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f).padding(end = 12.dp)) {
+                            Text(stringResource(R.string.haptics_toggle), fontSize = 15.sp)
+                            Text("Sound controls scan-success beep and Haptic Feedback controls vibration", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                        MarklifySwitch(
+                            checked = editableSettings.hapticsEnabled,
+                            onCheckedChange = {
+                                editableSettings = editableSettings.copy(hapticsEnabled = it)
+                                viewModel.setHapticsEnabled(it)
+                            }
+                        )
+                    }
+                }
+            }
+
+            // 5. Default Page Size (Existing)
+            Text(stringResource(R.string.default_page_size), fontWeight = FontWeight.Bold, fontSize = 14.sp, color = MaterialTheme.colorScheme.primary)
+            MarklifyCard {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text("Paper Size", fontSize = 15.sp)
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            listOf("A4", "Letter").forEach { size ->
+                                MarklifyChip(
+                                    selected = editableSettings.defaultPageSize == size,
+                                    onClick = { editableSettings = editableSettings.copy(defaultPageSize = size) },
+                                    label = size
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            // 6. NEW: Template Design
+            Text("Template Design", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = MaterialTheme.colorScheme.primary)
+            MarklifyCard {
+                Column {
+                    SettingsRowArrow(title = "Header") { Toast.makeText(context, "Header template editor stub", Toast.LENGTH_SHORT).show() }
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
+                    SettingsRowArrow(title = "Labels") { Toast.makeText(context, "Labels template editor stub", Toast.LENGTH_SHORT).show() }
+                }
+            }
+
+            // 7. Database Backup & Restore (Existing)
+            Text(stringResource(R.string.backup_section), fontWeight = FontWeight.Bold, fontSize = 14.sp, color = MaterialTheme.colorScheme.primary)
+            MarklifyCard {
+                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                    Text(stringResource(R.string.backup_desc), fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        val a4Selected = defaultPageSize == "A4"
-                        MarklifyChip(
-                            selected = a4Selected,
-                            onClick = { defaultPageSize = "A4" },
-                            label = stringResource(R.string.format_a4),
-                            modifier = Modifier.weight(1f)
-                        )
-
-                        val letterSelected = defaultPageSize == "LETTER"
-                        MarklifyChip(
-                            selected = letterSelected,
-                            onClick = { defaultPageSize = "LETTER" },
-                            label = stringResource(R.string.format_letter),
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
-                }
-            }
-
-            // 5. Database Backup & Restore Card
-            MarklifyCard(modifier = Modifier.fillMaxWidth()) {
-                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(imageVector = Icons.Default.Backup, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-                        Spacer(modifier = Modifier.width(10.dp))
-                        Text(
-                            text = stringResource(R.string.backup_section),
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 15.sp,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                    }
-                    Text(
-                        text = stringResource(R.string.backup_desc),
-                        fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
                         MarklifyButton(
+                            text = stringResource(R.string.export_json),
                             onClick = {
-                                isExporting = true
                                 viewModel.exportDatabaseBackup(context) { file ->
-                                    isExporting = false
-                                    DataBackupManager.shareFile(
-                                        context = context,
-                                        file = file,
-                                        mimeType = "application/json",
-                                        chooserTitle = context.getString(R.string.export_backup_chooser)
+                                    val uri = FileProvider.getUriForFile(
+                                        context,
+                                        "${context.packageName}.provider",
+                                        file
                                     )
+                                    val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                                        type = "application/json"
+                                        putExtra(Intent.EXTRA_STREAM, uri)
+                                        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                    }
+                                    context.startActivity(Intent.createChooser(shareIntent, context.getString(R.string.export_backup_chooser)))
                                 }
                             },
                             modifier = Modifier.weight(1f),
-                            variant = MarklifyButtonVariant.Neutral,
-                            icon = Icons.Default.Download,
-                            text = stringResource(R.string.export_json)
+                            variant = MarklifyButtonVariant.Outlined,
+                            icon = Icons.Default.FileDownload
                         )
 
                         MarklifyButton(
-                            onClick = { filePickerLauncher.launch("application/json") },
+                            text = stringResource(R.string.restore_json),
+                            onClick = { importLauncher.launch("application/json") },
                             modifier = Modifier.weight(1f),
-                            variant = MarklifyButtonVariant.Neutral,
-                            icon = Icons.Default.Upload,
-                            text = stringResource(R.string.restore_json)
+                            variant = MarklifyButtonVariant.Outlined,
+                            icon = Icons.Default.FileUpload
                         )
+                    }
+
+                    importStatusMessage?.let { msg ->
+                        Surface(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(8.dp),
+                            color = if (isImportSuccess) SuccessGreenBg else ErrorRedBg
+                        ) {
+                            Text(
+                                text = msg,
+                                modifier = Modifier.padding(12.dp),
+                                color = if (isImportSuccess) SuccessGreen else ErrorRed,
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
                     }
                 }
             }
 
-            // Save Settings Button
-            MarklifyButton(
-                onClick = {
-                    viewModel.saveThresholdSettings(
-                        fillThreshold = fillThreshold,
-                        unansweredThreshold = unansweredThreshold,
-                        multipleDiffMargin = multipleDiffMargin,
-                        ambiguousDiffMargin = ambiguousDiffMargin,
-                        defaultPageSize = defaultPageSize
-                    )
-                    HapticManager.performSubmissionSuccess(context, currentSettings.hapticsEnabled)
-                    Toast.makeText(context, context.getString(R.string.settings_saved_toast), Toast.LENGTH_SHORT).show()
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .testTag("save_settings_button"),
-                variant = MarklifyButtonVariant.Primary,
-                icon = Icons.Default.Save,
-                text = stringResource(R.string.save_settings)
-            )
-
-            // Restore Dialog
-            importMessage?.let { msg ->
-                MarklifyDialog(
-                    onDismissRequest = { importMessage = null }
-                ) {
-                    Text(
-                        text = stringResource(R.string.backup_restored_title),
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-                    Text(
-                        text = msg,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        fontSize = 14.sp,
-                        lineHeight = 20.sp
-                    )
-                    Spacer(modifier = Modifier.height(20.dp))
-                    MarklifyButton(
-                        text = stringResource(R.string.done),
-                        onClick = { importMessage = null },
-                        modifier = Modifier.fillMaxWidth(),
-                        variant = MarklifyButtonVariant.Primary
-                    )
+            // 8. NEW: Account Setting
+            Text("Account Setting", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = MaterialTheme.colorScheme.primary)
+            MarklifyCard {
+                Column {
+                    SettingsRowArrow(title = "Edit profile") { Toast.makeText(context, "Edit profile stub", Toast.LENGTH_SHORT).show() }
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
+                    SettingsRowArrow(title = "Cancel Account Deletion") { Toast.makeText(context, "No-op in offline build", Toast.LENGTH_SHORT).show() }
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
+                    SettingsRowArrow(title = "Terms and Privacy Policy") { Toast.makeText(context, "Terms & Privacy Policy stub", Toast.LENGTH_SHORT).show() }
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(30.dp))
         }
+    }
+}
+
+@Composable
+private fun SettingsRowArrow(title: String, onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(16.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(title, fontSize = 15.sp)
+        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }

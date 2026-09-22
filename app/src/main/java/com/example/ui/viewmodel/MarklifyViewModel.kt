@@ -21,6 +21,7 @@ import com.example.omr.processing.AnswerDetector
 import com.example.omr.processing.DetectedQuestionAnswer
 import com.example.omr.processing.ScoringEngine
 import androidx.room.withTransaction
+import com.example.data.entity.ClassEntity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -43,6 +44,9 @@ class MarklifyViewModel(application: Application) : AndroidViewModel(application
     private val scanResultDao = db.scanResultDao()
     private val detectedAnswerDao = db.detectedAnswerDao()
     private val settingsDao = db.settingsDao()
+    private val classDao = db.classDao()
+    private val studentDao = db.studentDao()
+    private val attendanceDao = db.attendanceDao()
 
     val gradedTestRepository = GradedTestRepository(scanResultDao, detectedAnswerDao)
 
@@ -79,6 +83,16 @@ class MarklifyViewModel(application: Application) : AndroidViewModel(application
 
     val recentScanResults: StateFlow<List<ScanResult>> = gradedTestRepository.getRecentGradedTests(10)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    // Classes
+    fun getAllClassesFlow(): Flow<List<ClassEntity>> = db.classDao().getAllClassesFlow()
+
+    fun createClass(name: String, onCreated: (Long) -> Unit) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val id = db.classDao().insertClass(ClassEntity(name = name.trim()))
+            withContext(Dispatchers.Main) { onCreated(id) }
+        }
+    }
 
     // Active session for Scanning & Review
     private val _selectedTest = MutableStateFlow<TestEntity?>(null)
@@ -151,6 +165,18 @@ class MarklifyViewModel(application: Application) : AndroidViewModel(application
     }
 
     // Settings actions
+    fun saveSettings(newSettings: AppSettings) {
+        viewModelScope.launch(Dispatchers.IO) {
+            settingsDao.saveSettings(newSettings)
+            omrEngine.answerDetector.updateThresholds(
+                fill = newSettings.fillThreshold,
+                unanswered = newSettings.unansweredThreshold,
+                multipleDiff = newSettings.multipleDiffMargin,
+                ambiguousDiff = newSettings.ambiguousDiffMargin
+            )
+        }
+    }
+
     fun saveThresholdSettings(
         fillThreshold: Float,
         unansweredThreshold: Float,
@@ -247,6 +273,16 @@ class MarklifyViewModel(application: Application) : AndroidViewModel(application
         questionCount: Int,
         onCreated: (Long) -> Unit
     ) {
+        createTestWithDate(topicId, name, System.currentTimeMillis(), questionCount, onCreated)
+    }
+
+    fun createTestWithDate(
+        topicId: Long,
+        name: String,
+        examDate: Long,
+        questionCount: Int = 10,
+        onCreated: (Long) -> Unit
+    ) {
         viewModelScope.launch(Dispatchers.IO) {
             val count = questionCount.coerceIn(1, 300)
             val testId = testDao.insertTest(
@@ -254,7 +290,8 @@ class MarklifyViewModel(application: Application) : AndroidViewModel(application
                     topicId = topicId,
                     name = name.trim(),
                     questionCount = count,
-                    createdAt = System.currentTimeMillis()
+                    createdAt = System.currentTimeMillis(),
+                    examDate = examDate
                 )
             )
             val defaultLetters = listOf("A", "B", "C", "D")

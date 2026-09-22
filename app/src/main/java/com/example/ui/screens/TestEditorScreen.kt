@@ -22,7 +22,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.R
@@ -46,7 +48,7 @@ fun TestEditorScreen(
     val initialQuestions by viewModel.getQuestionsForTest(testId).collectAsState(initial = emptyList())
     var editableQuestions by remember { mutableStateOf<List<Question>>(emptyList()) }
 
-    var selectedTab by remember { mutableIntStateOf(1) } // 0: Sections, 1: Answer Key (Screenshot #7)
+    var selectedTab by remember { mutableIntStateOf(0) } // 0: Setup, 1: Sections, 2: Answer Key
     var selectedExamSet by remember { mutableStateOf("A") }
     var showSavedSnackbar by remember { mutableStateOf(false) }
 
@@ -65,7 +67,12 @@ fun TestEditorScreen(
             MarklifyTopAppBar(
                 title = {
                     Column {
-                        Text(if (selectedTab == 1) "Answer Key" else "Configure Sections", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                        val titleText = when (selectedTab) {
+                            0 -> "Exam Setup"
+                            1 -> "Configure Sections"
+                            else -> "Answer Key"
+                        }
+                        Text(titleText, fontWeight = FontWeight.Bold, fontSize = 18.sp)
                         Text(test?.name ?: "", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 },
@@ -81,17 +88,22 @@ fun TestEditorScreen(
                 actions = {
                     TabRow(
                         selectedTabIndex = selectedTab,
-                        modifier = Modifier.width(180.dp),
+                        modifier = Modifier.width(220.dp),
                         containerColor = Color.Transparent
                     ) {
                         Tab(
                             selected = selectedTab == 0,
                             onClick = { selectedTab = 0 },
-                            text = { Text("Sections", fontSize = 11.sp, fontWeight = FontWeight.Bold) }
+                            text = { Text("Setup", fontSize = 11.sp, fontWeight = FontWeight.Bold) }
                         )
                         Tab(
                             selected = selectedTab == 1,
                             onClick = { selectedTab = 1 },
+                            text = { Text("Sections", fontSize = 11.sp, fontWeight = FontWeight.Bold) }
+                        )
+                        Tab(
+                            selected = selectedTab == 2,
+                            onClick = { selectedTab = 2 },
                             text = { Text("Key", fontSize = 11.sp, fontWeight = FontWeight.Bold) }
                         )
                     }
@@ -141,53 +153,125 @@ fun TestEditorScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // Select Set Header (EvalBee Screenshot #7 Style)
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 4.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Select Set",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 15.sp,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
+            if (selectedTab == 0) {
+                // EXAM SETUP WIZARD
+                var rollDigits by remember { mutableIntStateOf(test?.numRollDigits ?: 5) }
+                var examSets by remember { mutableIntStateOf(test?.numExamSets ?: 1) }
+                var subjectsCount by remember { mutableIntStateOf(1) }
 
-                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    listOf("A", "B", "C", "D").forEach { setLetter ->
-                        MarklifyChip(
-                            selected = selectedExamSet == setLetter,
-                            onClick = { selectedExamSet = setLetter },
-                            label = setLetter
-                        )
+                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                    Text("Exam Configuration", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    
+                    MarklifyCard(modifier = Modifier.fillMaxWidth()) {
+                        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                                Text("Roll no. Digits", fontSize = 15.sp)
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    IconButton(onClick = { if (rollDigits > 1) rollDigits-- }) { Text("-", fontWeight = FontWeight.Bold, fontSize = 20.sp) }
+                                    Text("$rollDigits", fontSize = 16.sp, modifier = Modifier.width(20.dp), textAlign = TextAlign.Center)
+                                    IconButton(onClick = { if (rollDigits < 8) rollDigits++ }) { Text("+", fontWeight = FontWeight.Bold, fontSize = 20.sp) }
+                                }
+                            }
+                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                                Text("Exam Sets", fontSize = 15.sp)
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    IconButton(onClick = { if (examSets > 1) examSets-- }) { Text("-", fontWeight = FontWeight.Bold, fontSize = 20.sp) }
+                                    Text("$examSets", fontSize = 16.sp, modifier = Modifier.width(20.dp), textAlign = TextAlign.Center)
+                                    IconButton(onClick = { if (examSets < 6) examSets++ }) { Text("+", fontWeight = FontWeight.Bold, fontSize = 20.sp) }
+                                }
+                            }
+                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                                Text("Subjects", fontSize = 15.sp)
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    IconButton(onClick = { if (subjectsCount > 1) subjectsCount-- }) { Text("-", fontWeight = FontWeight.Bold, fontSize = 20.sp) }
+                                    Text("$subjectsCount", fontSize = 16.sp, modifier = Modifier.width(20.dp), textAlign = TextAlign.Center)
+                                    IconButton(onClick = { if (subjectsCount < 10) subjectsCount++ }) { Text("+", fontWeight = FontWeight.Bold, fontSize = 20.sp) }
+                                }
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text("Subject Summary", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+
+                    MarklifyCard(modifier = Modifier.fillMaxWidth()) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Row(modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)) {
+                                Text("Sr No.", modifier = Modifier.weight(1f), fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                                Text("Subject", modifier = Modifier.weight(3f), fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                                Text("Sections", modifier = Modifier.weight(2f), fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                            }
+                            HorizontalDivider()
+                            for (i in 1..subjectsCount) {
+                                Row(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+                                    Text("$i", modifier = Modifier.weight(1f), fontSize = 14.sp)
+                                    OutlinedTextField(
+                                        value = "Subject $i",
+                                        onValueChange = {},
+                                        modifier = Modifier.weight(3f).height(48.dp).padding(end = 8.dp),
+                                        singleLine = true,
+                                        textStyle = TextStyle(fontSize = 14.sp)
+                                    )
+                                    OutlinedTextField(
+                                        value = "1",
+                                        onValueChange = {},
+                                        modifier = Modifier.weight(2f).height(48.dp),
+                                        singleLine = true,
+                                        textStyle = TextStyle(fontSize = 14.sp)
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
-            }
+            } else {
+                Column(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
+                    // Select Set Header (EvalBee Screenshot #7 Style)
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 12.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Select Set",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 15.sp,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
 
-            Divider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
-
-            // Answer Key Questions List (Screenshot #7 Style)
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                itemsIndexed(editableQuestions, key = { _, q -> q.id }) { index, q ->
-                    AnswerKeyItemRow(
-                        question = q,
-                        onKeySelected = { newKey ->
-                            val list = editableQuestions.toMutableList()
-                            list[index] = q.copy(correctAnswer = newKey)
-                            editableQuestions = list
+                        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                            listOf("A", "B", "C", "D").forEach { setLetter ->
+                                MarklifyChip(
+                                    selected = selectedExamSet == setLetter,
+                                    onClick = { selectedExamSet = setLetter },
+                                    label = setLetter
+                                )
+                            }
                         }
-                    )
+                    }
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
+
+                    // Answer Key Questions List (Screenshot #7 Style)
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        itemsIndexed(editableQuestions, key = { _, q -> q.id }) { index, q ->
+                            AnswerKeyItemRow(
+                                question = q,
+                                onKeySelected = { newKey ->
+                                    val list = editableQuestions.toMutableList()
+                                    list[index] = q.copy(correctAnswer = newKey)
+                                    editableQuestions = list
+                                }
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -195,7 +279,7 @@ fun TestEditorScreen(
 }
 
 @Composable
-private fun AnswerKeyItemRow(
+fun AnswerKeyItemRow(
     question: Question,
     onKeySelected: (String) -> Unit
 ) {
@@ -272,7 +356,7 @@ private fun AnswerKeyItemRow(
 }
 
 @Composable
-private fun KeyOptionCircle(
+fun KeyOptionCircle(
     label: String,
     selected: Boolean,
     onClick: () -> Unit
@@ -298,7 +382,7 @@ private fun KeyOptionCircle(
 }
 
 @Composable
-private fun KeyOptionPill(
+fun KeyOptionPill(
     label: String,
     selected: Boolean,
     onClick: () -> Unit

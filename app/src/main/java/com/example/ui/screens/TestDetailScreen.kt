@@ -1,5 +1,6 @@
 package com.example.ui.screens
 
+import android.content.Intent
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -23,8 +24,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.FileProvider
 import com.example.R
 import com.example.data.entity.TestEntity
 import com.example.ui.components.*
@@ -96,6 +99,28 @@ fun TestDetailScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            // Cloud Sync Row
+            var isSyncEnabled by remember { mutableStateOf(false) }
+            MarklifyCard(modifier = Modifier.fillMaxWidth()) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text("Cloud sync", fontWeight = FontWeight.Medium, fontSize = 16.sp)
+                    MarklifySwitch(
+                        checked = isSyncEnabled,
+                        onCheckedChange = { 
+                            isSyncEnabled = it
+                            if (it) {
+                                Toast.makeText(context, "Cloud sync isn't available in this offline build yet", Toast.LENGTH_LONG).show()
+                                isSyncEnabled = false
+                            }
+                        }
+                    )
+                }
+            }
+
             // Top Summary Card (EvalBee Screenshot #5 Style)
             MarklifyCard(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.padding(16.dp)) {
@@ -117,7 +142,7 @@ fun TestDetailScreen(
                                 Text(dayStr, fontSize = 15.sp, fontWeight = FontWeight.Bold, color = MarklifyBlue)
                             }
                         }
-
+                        
                         Spacer(modifier = Modifier.width(12.dp))
 
                         Column(modifier = Modifier.weight(1f)) {
@@ -127,16 +152,23 @@ fun TestDetailScreen(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
-                                    text = test?.name ?: "Neet weekly 43",
+                                    text = test?.name ?: "Exam",
                                     fontWeight = FontWeight.Bold,
-                                    fontSize = 16.sp,
-                                    color = MaterialTheme.colorScheme.onSurface
+                                    fontSize = 18.sp,
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
                                 )
                                 MarklifyBadge(
                                     text = if (test?.isPublic == true) "🌐 Public" else "🔒 Private",
                                     containerColor = if (test?.isPublic == true) SuccessGreenBg else WarningAmberBg,
                                     contentColor = if (test?.isPublic == true) SuccessGreen else WarningAmber
                                 )
+                            }
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                MarklifyBadge(text = test?.examType ?: "Exam", containerColor = MaterialTheme.colorScheme.surfaceVariant, contentColor = MaterialTheme.colorScheme.onSurfaceVariant)
+                                MarklifyBadge(text = "Not synced", containerColor = MaterialTheme.colorScheme.errorContainer, contentColor = MaterialTheme.colorScheme.onErrorContainer)
                             }
 
                             Spacer(modifier = Modifier.height(6.dp))
@@ -222,7 +254,13 @@ fun TestDetailScreen(
                     modifier = Modifier.weight(1f),
                     onClick = { onNavigateToSheetGenerator(testId) }
                 )
-                Spacer(modifier = Modifier.weight(2f))
+                ActionIconButton(
+                    title = "Web Features",
+                    icon = Icons.Default.Language,
+                    modifier = Modifier.weight(1f),
+                    onClick = { Toast.makeText(context, "Web features require an internet connection and aren't available in this offline build.", Toast.LENGTH_LONG).show() }
+                )
+                Spacer(modifier = Modifier.weight(1f))
             }
 
             // Reporting Section
@@ -248,7 +286,15 @@ fun TestDetailScreen(
                     icon = Icons.Default.TableChart,
                     modifier = Modifier.weight(1f),
                     onClick = {
-                        Toast.makeText(context, "Exporting Excel/CSV report...", Toast.LENGTH_SHORT).show()
+                        viewModel.exportTestResultsCsv(context, testId) { file ->
+                            val uri = FileProvider.getUriForFile(context, "${context.packageName}.provider", file)
+                            val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                                type = "text/csv"
+                                putExtra(Intent.EXTRA_STREAM, uri)
+                                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                            }
+                            context.startActivity(Intent.createChooser(shareIntent, "Share Results"))
+                        }
                     }
                 )
                 ActionIconButton(
@@ -280,6 +326,44 @@ fun TestDetailScreen(
                     }
                 )
                 Spacer(modifier = Modifier.weight(1f))
+            }
+
+            // Other Section
+            Text(
+                text = "Other",
+                fontWeight = FontWeight.Bold,
+                fontSize = 16.sp,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                ActionIconButton(
+                    title = "Export .exm",
+                    icon = Icons.Default.FileDownload,
+                    modifier = Modifier.weight(1f),
+                    onClick = {
+                        Toast.makeText(context, "Exporting .exm stub", Toast.LENGTH_SHORT).show()
+                    }
+                )
+                ActionIconButton(
+                    title = "Import .exm",
+                    icon = Icons.Default.FileUpload,
+                    modifier = Modifier.weight(1f),
+                    onClick = {
+                        Toast.makeText(context, "Importing .exm stub", Toast.LENGTH_SHORT).show()
+                    }
+                )
+                ActionIconButton(
+                    title = "Import Sheet Image",
+                    icon = Icons.Default.Image,
+                    modifier = Modifier.weight(1f),
+                    onClick = {
+                        onNavigateToScanner(testId)
+                    }
+                )
             }
 
             Spacer(modifier = Modifier.height(24.dp))
