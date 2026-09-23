@@ -45,6 +45,9 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+// Extracted to avoid expensive allocations during LazyColumn scrolling
+private val topicDetailDateFormatter = SimpleDateFormat("MMM d, yyyy", Locale.getDefault())
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TopicDetailScreen(
@@ -128,7 +131,7 @@ fun TopicDetailScreen(
                     ) {
                         items(tests, key = { it.id }) { test ->
                             val dateStr = remember(test.createdAt) {
-                                SimpleDateFormat("MMM d, yyyy", Locale.getDefault()).format(Date(test.createdAt))
+                                topicDetailDateFormatter.format(Date(test.createdAt))
                             }
 
                             LiquidGlassCard(

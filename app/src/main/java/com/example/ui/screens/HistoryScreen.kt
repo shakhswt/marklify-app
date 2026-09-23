@@ -45,6 +45,9 @@ import com.example.ui.viewmodel.MarklifyViewModel
 import java.text.SimpleDateFormat
 import java.util.*
 
+// Extracted to avoid expensive allocations during LazyColumn scrolling
+private val historyDateFormatter = SimpleDateFormat("MMM d, yyyy • HH:mm", Locale.getDefault())
+
 enum class HistorySortOrder(val label: String) {
     NEWEST("Newest First"),
     OLDEST("Oldest First"),
@@ -83,12 +86,13 @@ fun HistoryScreen(
         var list = allRecords
 
         // Search query
+        // Using contains(ignoreCase=true) instead of lowercase() to avoid string allocations during search
         if (searchQuery.isNotBlank()) {
-            val q = searchQuery.trim().lowercase()
+            val q = searchQuery.trim()
             list = list.filter {
-                it.studentName.lowercase().contains(q) ||
-                it.studentId.lowercase().contains(q) ||
-                it.testName.lowercase().contains(q)
+                it.studentName.contains(q, ignoreCase = true) ||
+                it.studentId.contains(q, ignoreCase = true) ||
+                it.testName.contains(q, ignoreCase = true)
             }
         }
 
@@ -406,7 +410,7 @@ private fun GradedTestHistoryCard(
     onDelete: () -> Unit
 ) {
     val dateStr = remember(record.scanTime) {
-        SimpleDateFormat("MMM d, yyyy • HH:mm", Locale.getDefault()).format(Date(record.scanTime))
+        historyDateFormatter.format(Date(record.scanTime))
     }
 
     val scoreColor = when {
