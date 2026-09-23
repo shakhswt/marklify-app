@@ -112,4 +112,14 @@ class DataBackupValidationTest {
         """.trimIndent()
         DataBackupManager.parseBackupJson(json)
     }
+
+    @Test
+    fun testEscapeCsvFormulaInjection() {
+        assertEquals("'=1+2", DataBackupManager.escapeCsv("=1+2"))
+        assertEquals("'+123", DataBackupManager.escapeCsv("+123"))
+        assertEquals("'-123", DataBackupManager.escapeCsv("-123"))
+        assertEquals("'@SUM(A1:A10)", DataBackupManager.escapeCsv("@SUM(A1:A10)"))
+        assertEquals("Normal Text", DataBackupManager.escapeCsv("Normal Text"))
+        assertEquals("\"'=CMD|' /C calc'!A1,test\"", DataBackupManager.escapeCsv("=CMD|' /C calc'!A1,test"))
+    }
 }
