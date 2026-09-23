@@ -324,11 +324,22 @@ object DataBackupManager {
         return file
     }
 
-    private fun escapeCsv(value: String): String {
-        return if (value.contains(",") || value.contains("\"") || value.contains("\n")) {
-            "\"" + value.replace("\"", "\"\"") + "\""
+    /**
+     * Escapes CSV fields and neutralizes formula injection triggers (=, +, -, @, \t, \r).
+     */
+    internal fun escapeCsv(value: String): String {
+        var sanitized = value
+        if (sanitized.startsWith("=") || sanitized.startsWith("+") ||
+            sanitized.startsWith("-") || sanitized.startsWith("@") ||
+            sanitized.startsWith("\t") || sanitized.startsWith("\r")
+        ) {
+            // Prepend single quote to neutralize formula execution in spreadsheet applications
+            sanitized = "'$sanitized"
+        }
+        return if (sanitized.contains(",") || sanitized.contains("\"") || sanitized.contains("\n")) {
+            "\"" + sanitized.replace("\"", "\"\"") + "\""
         } else {
-            value
+            sanitized
         }
     }
 
