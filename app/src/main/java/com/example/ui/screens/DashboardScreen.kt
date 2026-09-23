@@ -35,6 +35,10 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+// Extracted to avoid expensive allocations during LazyColumn scrolling
+private val dashboardMonthFormatter = SimpleDateFormat("MMM", Locale.US)
+private val dashboardDayFormatter = SimpleDateFormat("dd", Locale.US)
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardScreen(
@@ -369,10 +373,10 @@ private fun ExamCardItem(
     onClick: () -> Unit
 ) {
     val monthStr = remember(exam.createdAt) {
-        SimpleDateFormat("MMM", Locale.US).format(Date(exam.createdAt))
+        dashboardMonthFormatter.format(Date(exam.createdAt))
     }
     val dayStr = remember(exam.createdAt) {
-        SimpleDateFormat("dd", Locale.US).format(Date(exam.createdAt))
+        dashboardDayFormatter.format(Date(exam.createdAt))
     }
 
     MarklifyCard(

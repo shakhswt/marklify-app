@@ -37,6 +37,10 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+// Extracted to avoid expensive allocations during recompisitions
+private val testDetailMonthFormatter = SimpleDateFormat("MMM", Locale.US)
+private val testDetailDayFormatter = SimpleDateFormat("dd", Locale.US)
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TestDetailScreen(
@@ -58,10 +62,10 @@ fun TestDetailScreen(
     }
 
     val monthStr = remember(test?.createdAt) {
-        test?.createdAt?.let { SimpleDateFormat("MMM", Locale.US).format(Date(it)) } ?: "Jan"
+        test?.createdAt?.let { testDetailMonthFormatter.format(Date(it)) } ?: "Jan"
     }
     val dayStr = remember(test?.createdAt) {
-        test?.createdAt?.let { SimpleDateFormat("dd", Locale.US).format(Date(it)) } ?: "20"
+        test?.createdAt?.let { testDetailDayFormatter.format(Date(it)) } ?: "20"
     }
 
     Scaffold(
