@@ -112,4 +112,30 @@ class DataBackupValidationTest {
         """.trimIndent()
         DataBackupManager.parseBackupJson(json)
     }
+
+    @Test
+    fun testCsvFormulaInjectionEscaping() {
+        val context = org.robolectric.RuntimeEnvironment.getApplication()
+        val results = listOf(
+            com.example.data.entity.ScanResult(
+                id = 1,
+                testId = 10,
+                studentName = "=CMD('calc')",
+                studentId = "+12345",
+                scanTime = 1700000000000,
+                totalQuestions = 10,
+                correct = 10,
+                wrong = 0,
+                unanswered = 0,
+                multipleMarked = 0,
+                ambiguous = 0,
+                percentage = 100.0f,
+                imagePath = null
+            )
+        )
+        val csvFile = DataBackupManager.createCsvResultsFile(context, "Test1", results)
+        val content = csvFile.readText()
+        assertTrue("Student name should be escaped", content.contains("'=CMD('calc')"))
+        assertTrue("Student ID should be escaped", content.contains("'+12345"))
+    }
 }
