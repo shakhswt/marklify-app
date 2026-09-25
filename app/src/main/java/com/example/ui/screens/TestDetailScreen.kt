@@ -292,7 +292,8 @@ fun TestDetailScreen(
                     modifier = Modifier.weight(1f),
                     onClick = {
                         viewModel.exportTestResultsCsv(context, testId) { file ->
-                            val uri = FileProvider.getUriForFile(context, "${context.packageName}.provider", file)
+                            // Use .fileprovider authority matching AndroidManifest.xml
+                            val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
                             val shareIntent = Intent(Intent.ACTION_SEND).apply {
                                 type = "text/csv"
                                 putExtra(Intent.EXTRA_STREAM, uri)
