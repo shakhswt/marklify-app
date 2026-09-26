@@ -3,9 +3,9 @@ package com.example.ui.navigation
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Assignment
-import androidx.compose.material.icons.filled.Group
-import androidx.compose.material.icons.filled.MoreHoriz
-import androidx.compose.material.icons.filled.PlaylistAddCheck
+import androidx.compose.material.icons.filled.Category
+import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -32,9 +32,9 @@ fun AppNavigation(
 
     val bottomNavItems = listOf(
         BottomNavItem(NavRoutes.DASHBOARD, "Exams", Icons.Default.Assignment),
-        BottomNavItem(NavRoutes.ATTENDANCE, "Attendance", Icons.Default.PlaylistAddCheck),
-        BottomNavItem(NavRoutes.CLASSES, "Classes", Icons.Default.Group),
-        BottomNavItem(NavRoutes.MORE, "More", Icons.Default.MoreHoriz)
+        BottomNavItem(NavRoutes.TOPICS, "Topics", Icons.Default.Category),
+        BottomNavItem(NavRoutes.HISTORY, "History", Icons.Default.History),
+        BottomNavItem(NavRoutes.SETTINGS, "Settings", Icons.Default.Settings)
     )
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -79,35 +79,38 @@ fun AppNavigation(
                     onNavigateToResultDetail = { resultId -> navController.navigate(NavRoutes.resultDetail(resultId)) },
                     onNavigateToSettings = { navController.navigate(NavRoutes.SETTINGS) },
                     onNavigateToHistory = { navController.navigate(NavRoutes.HISTORY) },
-                    onNavigateToSaveExam = { navController.navigate(NavRoutes.SAVE_EXAM) }
-                )
-            }
-            composable(NavRoutes.ATTENDANCE) {
-                AttendanceScreen(viewModel = viewModel)
-            }
-            composable(NavRoutes.CLASSES) {
-                ClassesScreen(
-                    viewModel = viewModel,
-                    onNavigateToClassDetail = { classId -> navController.navigate(NavRoutes.classDetail(classId)) }
-                )
-            }
-            composable(NavRoutes.MORE) {
-                ProfileScreen(
-                    viewModel = viewModel,
-                    onNavigateToSettings = { navController.navigate(NavRoutes.SETTINGS) }
+                    onNavigateToSaveExam = {}
                 )
             }
 
-            // Other Screens
-            composable(NavRoutes.SAVE_EXAM) {
-                SaveExamScreen(
+            composable(NavRoutes.TOPICS) {
+                TopicsScreen(
                     viewModel = viewModel,
                     onNavigateBack = { navController.popBackStack() },
-                    onSaveSuccess = { newId ->
-                        navController.navigate(NavRoutes.testDetail(newId)) {
-                            popUpTo(NavRoutes.DASHBOARD)
-                        }
-                    }
+                    onNavigateToTopicDetail = { topicId -> navController.navigate(NavRoutes.topicDetail(topicId)) }
+                )
+            }
+
+            composable(
+                route = NavRoutes.TOPIC_DETAIL,
+                arguments = listOf(navArgument("topicId") { type = NavType.LongType })
+            ) { backStackEntry ->
+                val topicId = backStackEntry.arguments?.getLong("topicId") ?: 0L
+                TopicDetailScreen(
+                    topicId = topicId,
+                    viewModel = viewModel,
+                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateToTestDetail = { testId -> navController.navigate(NavRoutes.testDetail(testId)) },
+                    onNavigateToSheetGenerator = { testId -> navController.navigate(NavRoutes.sheetGenerator(testId)) },
+                    onNavigateToScanner = { testId -> navController.navigate(NavRoutes.scanner(testId)) }
+                )
+            }
+
+            composable(NavRoutes.HISTORY) {
+                HistoryScreen(
+                    viewModel = viewModel,
+                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateToResultDetail = { resultId -> navController.navigate(NavRoutes.resultDetail(resultId)) }
                 )
             }
 

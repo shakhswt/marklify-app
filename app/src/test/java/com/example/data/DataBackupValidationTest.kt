@@ -112,4 +112,27 @@ class DataBackupValidationTest {
         """.trimIndent()
         DataBackupManager.parseBackupJson(json)
     }
+
+    @Test
+    fun testCsvFormulaInjectionSanitized() {
+        val context = org.robolectric.RuntimeEnvironment.getApplication()
+        val scan = com.example.data.entity.ScanResult(
+            id = 1,
+            testId = 10,
+            studentName = "=1+1",
+            studentId = "@SUM(A1:A10)",
+            scanTime = 1700000000000,
+            totalQuestions = 10,
+            correct = 8,
+            wrong = 2,
+            unanswered = 0,
+            percentage = 80.0f
+        )
+
+        val csvFile = DataBackupManager.createCsvResultsFile(context, "TestExam", listOf(scan))
+        val content = csvFile.readText()
+
+        assertTrue("Formula trigger '=' should be prefixed with single quote", content.contains("'=1+1"))
+        assertTrue("Formula trigger '@' should be prefixed with single quote", content.contains("'@SUM(A1:A10)"))
+    }
 }
