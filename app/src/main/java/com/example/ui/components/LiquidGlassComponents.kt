@@ -36,6 +36,8 @@ enum class GlassButtonVariant {
     Success
 }
 
+typealias MarklifyButtonVariant = GlassButtonVariant
+
 @Composable
 fun LiquidGlassBackdrop(
     modifier: Modifier = Modifier,
@@ -55,6 +57,7 @@ fun LiquidGlassCard(
     modifier: Modifier = Modifier,
     shape: Shape = RoundedCornerShape(12.dp),
     fillColor: Color = MaterialTheme.colorScheme.surface,
+    containerColor: Color = fillColor,
     borderColor: Color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
     borderWidth: Dp = 1.dp,
     showSpecular: Boolean = true,
@@ -65,7 +68,7 @@ fun LiquidGlassCard(
     Surface(
         modifier = if (onClick != null) modifier.clickable(onClick = onClick) else modifier,
         shape = shape,
-        color = fillColor,
+        color = containerColor,
         border = BorderStroke(borderWidth, borderColor),
         shadowElevation = elevation
     ) {
@@ -74,6 +77,31 @@ fun LiquidGlassCard(
             content = content
         )
     }
+}
+
+@Composable
+fun MarklifyCard(
+    modifier: Modifier = Modifier,
+    shape: Shape = RoundedCornerShape(12.dp),
+    fillColor: Color = MaterialTheme.colorScheme.surface,
+    containerColor: Color = fillColor,
+    borderColor: Color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
+    borderWidth: Dp = 1.dp,
+    elevation: Dp = 1.dp,
+    onClick: (() -> Unit)? = null,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    LiquidGlassCard(
+        modifier = modifier,
+        shape = shape,
+        fillColor = fillColor,
+        containerColor = containerColor,
+        borderColor = borderColor,
+        borderWidth = borderWidth,
+        elevation = elevation,
+        onClick = onClick,
+        content = content
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -95,6 +123,22 @@ fun LiquidGlassTopAppBar(
             navigationIconContentColor = MaterialTheme.colorScheme.onSurface,
             actionIconContentColor = MaterialTheme.colorScheme.onSurface
         )
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun MarklifyTopAppBar(
+    title: @Composable () -> Unit,
+    modifier: Modifier = Modifier,
+    navigationIcon: @Composable () -> Unit = {},
+    actions: @Composable RowScope.() -> Unit = {}
+) {
+    LiquidGlassTopAppBar(
+        title = title,
+        modifier = modifier,
+        navigationIcon = navigationIcon,
+        actions = actions
     )
 }
 
@@ -121,6 +165,54 @@ fun LiquidGlassBottomBar(
 }
 
 @Composable
+fun MarklifyButton(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    variant: MarklifyButtonVariant = MarklifyButtonVariant.Primary,
+    icon: ImageVector? = null,
+    enabled: Boolean = true
+) {
+    val containerColor = when (variant) {
+        MarklifyButtonVariant.Primary -> MaterialTheme.colorScheme.primary
+        MarklifyButtonVariant.Outlined -> Color.Transparent
+        MarklifyButtonVariant.Neutral -> MaterialTheme.colorScheme.surfaceVariant
+        MarklifyButtonVariant.Danger -> MaterialTheme.colorScheme.error
+        MarklifyButtonVariant.Success -> MaterialTheme.colorScheme.primary
+    }
+    val contentColor = when (variant) {
+        MarklifyButtonVariant.Primary -> MaterialTheme.colorScheme.onPrimary
+        MarklifyButtonVariant.Outlined -> MaterialTheme.colorScheme.primary
+        MarklifyButtonVariant.Neutral -> MaterialTheme.colorScheme.onSurfaceVariant
+        MarklifyButtonVariant.Danger -> MaterialTheme.colorScheme.onError
+        MarklifyButtonVariant.Success -> MaterialTheme.colorScheme.onPrimary
+    }
+    val border = if (variant == MarklifyButtonVariant.Outlined) {
+        BorderStroke(1.dp, MaterialTheme.colorScheme.primary)
+    } else null
+
+    Button(
+        onClick = onClick,
+        modifier = modifier,
+        enabled = enabled,
+        shape = RoundedCornerShape(8.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = containerColor,
+            contentColor = contentColor,
+            disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+            disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f)
+        ),
+        border = border
+    ) {
+        if (icon != null) {
+            Icon(imageVector = icon, contentDescription = null, modifier = Modifier.size(18.dp))
+            Spacer(modifier = Modifier.width(8.dp))
+        }
+        Text(text = text, fontWeight = FontWeight.SemiBold)
+    }
+}
+
+@Composable
 fun LiquidGlassButton(
     text: String,
     onClick: () -> Unit,
@@ -129,21 +221,36 @@ fun LiquidGlassButton(
     icon: ImageVector? = null,
     enabled: Boolean = true
 ) {
-    val mVariant = when (variant) {
-        GlassButtonVariant.Primary -> MarklifyButtonVariant.Primary
-        GlassButtonVariant.Outlined -> MarklifyButtonVariant.Outlined
-        GlassButtonVariant.Neutral -> MarklifyButtonVariant.Neutral
-        GlassButtonVariant.Danger -> MarklifyButtonVariant.Danger
-        GlassButtonVariant.Success -> MarklifyButtonVariant.Primary
-    }
     MarklifyButton(
         text = text,
         onClick = onClick,
         modifier = modifier,
-        variant = mVariant,
+        variant = variant,
         icon = icon,
         enabled = enabled
     )
+}
+
+@Composable
+fun MarklifyBadge(
+    text: String,
+    modifier: Modifier = Modifier,
+    containerColor: Color = MaterialTheme.colorScheme.primaryContainer,
+    contentColor: Color = MaterialTheme.colorScheme.onPrimaryContainer
+) {
+    Surface(
+        modifier = modifier,
+        shape = RoundedCornerShape(16.dp),
+        color = containerColor,
+        contentColor = contentColor
+    ) {
+        Text(
+            text = text,
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Medium
+        )
+    }
 }
 
 @Composable
@@ -161,6 +268,25 @@ fun LiquidGlassBadge(
         containerColor = backgroundColor,
         contentColor = textColor
     )
+}
+
+@Composable
+fun MarklifyDialog(
+    onDismissRequest: () -> Unit,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    androidx.compose.ui.window.Dialog(onDismissRequest = onDismissRequest) {
+        Surface(
+            shape = RoundedCornerShape(16.dp),
+            color = MaterialTheme.colorScheme.surface,
+            tonalElevation = 6.dp
+        ) {
+            Column(
+                modifier = Modifier.padding(24.dp),
+                content = content
+            )
+        }
+    }
 }
 
 @Composable
@@ -203,6 +329,29 @@ fun LiquidGlassTextField(
 }
 
 @Composable
+fun MarklifyTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    label: String = "",
+    placeholder: String = "",
+    singleLine: Boolean = true,
+    leadingIcon: ImageVector? = null,
+    trailingIcon: @Composable (() -> Unit)? = null
+) {
+    LiquidGlassTextField(
+        value = value,
+        onValueChange = onValueChange,
+        modifier = modifier,
+        label = label,
+        placeholder = placeholder,
+        singleLine = singleLine,
+        leadingIcon = leadingIcon,
+        trailingIcon = trailingIcon
+    )
+}
+
+@Composable
 fun LiquidGlassSearchField(
     value: String,
     onValueChange: (String) -> Unit,
@@ -218,6 +367,36 @@ fun LiquidGlassSearchField(
 }
 
 @Composable
+fun MarklifySearchField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    placeholder: String = "Search..."
+) {
+    LiquidGlassSearchField(
+        value = value,
+        onValueChange = onValueChange,
+        modifier = modifier,
+        placeholder = placeholder
+    )
+}
+
+@Composable
+fun MarklifyChip(
+    selected: Boolean,
+    onClick: () -> Unit,
+    label: String,
+    modifier: Modifier = Modifier
+) {
+    FilterChip(
+        selected = selected,
+        onClick = onClick,
+        label = { Text(label) },
+        modifier = modifier
+    )
+}
+
+@Composable
 fun LiquidGlassChip(
     selected: Boolean,
     onClick: () -> Unit,
@@ -228,6 +407,19 @@ fun LiquidGlassChip(
         selected = selected,
         onClick = onClick,
         label = label,
+        modifier = modifier
+    )
+}
+
+@Composable
+fun MarklifySwitch(
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Switch(
+        checked = checked,
+        onCheckedChange = onCheckedChange,
         modifier = modifier
     )
 }
@@ -261,6 +453,21 @@ fun LiquidGlassFAB(
     ) {
         Icon(imageVector = icon, contentDescription = contentDescription)
     }
+}
+
+@Composable
+fun MarklifyFAB(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    icon: ImageVector,
+    contentDescription: String? = null
+) {
+    LiquidGlassFAB(
+        onClick = onClick,
+        modifier = modifier,
+        icon = icon,
+        contentDescription = contentDescription
+    )
 }
 
 @Composable
@@ -308,6 +515,27 @@ fun LiquidGlassEmptyState(
 }
 
 @Composable
+fun MarklifyEmptyState(
+    icon: ImageVector,
+    title: String,
+    subtitle: String = "",
+    description: String = subtitle,
+    modifier: Modifier = Modifier,
+    actionText: String? = null,
+    onActionClick: (() -> Unit)? = null
+) {
+    LiquidGlassEmptyState(
+        icon = icon,
+        title = title,
+        subtitle = subtitle,
+        description = description,
+        modifier = modifier,
+        actionText = actionText,
+        onActionClick = onActionClick
+    )
+}
+
+@Composable
 fun LiquidGlassErrorCard(
     message: String = "",
     onRetry: () -> Unit = {},
@@ -336,4 +564,21 @@ fun LiquidGlassErrorCard(
             }
         }
     }
+}
+
+@Composable
+fun MarklifyErrorCard(
+    message: String = "",
+    onRetry: () -> Unit = {},
+    title: String = "Error",
+    retryText: String = "Retry",
+    modifier: Modifier = Modifier
+) {
+    LiquidGlassErrorCard(
+        message = message,
+        onRetry = onRetry,
+        title = title,
+        retryText = retryText,
+        modifier = modifier
+    )
 }

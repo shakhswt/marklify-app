@@ -16,13 +16,7 @@ import com.example.data.entity.*
         Question::class,
         ScanResult::class,
         DetectedAnswer::class,
-        AppSettings::class,
-        AnswerKeySet::class,
-        Subject::class,
-        SectionConfigEntity::class,
-        ClassEntity::class,
-        StudentEntity::class,
-        AttendanceRecord::class
+        AppSettings::class
     ],
     version = 8,
     exportSchema = false
@@ -34,12 +28,6 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun scanResultDao(): ScanResultDao
     abstract fun detectedAnswerDao(): DetectedAnswerDao
     abstract fun settingsDao(): SettingsDao
-    abstract fun answerKeySetDao(): AnswerKeySetDao
-    abstract fun subjectDao(): SubjectDao
-    abstract fun sectionConfigDao(): SectionConfigDao
-    abstract fun classDao(): ClassDao
-    abstract fun studentDao(): StudentDao
-    abstract fun attendanceDao(): AttendanceDao
 
     companion object {
         @Volatile
