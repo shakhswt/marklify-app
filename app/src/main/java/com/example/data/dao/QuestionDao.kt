@@ -29,8 +29,14 @@ interface QuestionDao {
     @Update
     suspend fun updateQuestion(question: Question)
 
+    @Update
+    suspend fun updateQuestions(questions: List<Question>)
+
     @Delete
     suspend fun deleteQuestion(question: Question)
+
+    @Delete
+    suspend fun deleteQuestions(questions: List<Question>)
 
     @Query("DELETE FROM questions WHERE testId = :testId")
     suspend fun deleteQuestionsByTest(testId: Long)

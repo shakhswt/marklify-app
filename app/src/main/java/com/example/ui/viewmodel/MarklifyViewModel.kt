@@ -346,9 +346,8 @@ class MarklifyViewModel(application: Application) : AndroidViewModel(application
 
     fun updateQuestionsBatch(questions: List<Question>) {
         viewModelScope.launch(Dispatchers.IO) {
-            for (q in questions) {
-                questionDao.updateQuestion(q)
-            }
+            // ⚡ Bolt: Batch update questions in a single transaction to reduce SQLite lock overhead
+            questionDao.updateQuestions(questions)
         }
     }
 
@@ -375,10 +374,10 @@ class MarklifyViewModel(application: Application) : AndroidViewModel(application
                 }
                 questionDao.insertQuestions(toAdd)
             } else if (existing.size > validCount) {
-                for (q in existing) {
-                    if (q.questionNumber > validCount) {
-                        questionDao.deleteQuestion(q)
-                    }
+                // ⚡ Bolt: Batch delete questions to reduce SQLite transaction overhead
+                val toDelete = existing.filter { it.questionNumber > validCount }
+                if (toDelete.isNotEmpty()) {
+                    questionDao.deleteQuestions(toDelete)
                 }
             }
         }
